@@ -40,7 +40,7 @@
     const g = CATALOG && CATALOG.byId[i.id];
     if (!g) return null;
     const o = g.o.find((x) => x[0] === i.opt) || g.o[0];
-    return { title: g.t, opt: o[0], price: o[1], cover: `/static/covers/${g.id}.webp`, href: `/game/${g.id}/` };
+    return { title: g.t, opt: o[0], price: o[1], cover: `/static/covers/sm/${g.id}.webp`, href: `/game/${g.id}/` };
   }
   function save() {
     if (CATALOG) cart = cart.filter((i) => info(i));
@@ -87,7 +87,7 @@
     const me = store.get('ps.me', {});
     const lines = cart.map((i) => {
       const x = info(i);
-      return `<div class="line"><a href="${x.href}"><img src="${x.cover}" alt="" width="56" height="74" loading="lazy"></a>
+      return `<div class="line"><a href="${x.href}"><img src="${x.cover}" alt="" width="60" height="60" loading="lazy"></a>
         <div><b>${esc(x.title)}</b><span>${esc(x.opt)}</span><br><button class="line-rm" data-rm="${esc(keyOf(i))}">Убрать</button></div>
         <div class="line-price">${money(x.price)} uzs</div></div>`;
     }).join('');
@@ -219,13 +219,15 @@
     return d[a.length][b.length];
   }
   const typo = (t, w) => { const max = w.length >= 7 ? 2 : w.length >= 4 ? 1 : 0; return max > 0 && (dist(t.slice(0, w.length), w, max) <= max || dist(t, w, max) <= max); };
-  function matcher(q) {
+  function matcher(q, fuzzy) {
     const words = norm(q).split(' ').filter(Boolean);
     return (g) => {
       if (!g._tok) g._tok = norm(g.s).split(' ');
-      return words.every((w) => g._tok.some((t) => t.startsWith(w) || typo(t, w)));
+      return words.every((w) => g._tok.some((t) => t.startsWith(w) || (fuzzy && typo(t, w))));
     };
   }
+  // Сначала точные совпадения; исправление опечаток — только если точных нет
+  const searchList = (list, q) => { const exact = list.filter(matcher(q, false)); return exact.length ? exact : list.filter(matcher(q, true)); };
 
   /* ---------- страница каталога ---------- */
   if (document.body.dataset.page === 'catalog') {
@@ -239,7 +241,7 @@
       const tags = [g.f.includes('pre') && '<span class="tag tag-pre">Предзаказ</span>', g.f.includes('hit') && '<span class="tag tag-hit">Хит</span>',
         g.f.includes('new') && !g.f.includes('pre') && '<span class="tag tag-new">Новинка</span>'].filter(Boolean).slice(0, 2).join('');
       const from = new Set(g.o.map((x) => x[1])).size > 1 ? '<span class="from">от</span>' : '';
-      return `<article class="card"><div class="card-media"><a class="card-img" href="/game/${g.id}/"><img src="/static/covers/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
+      return `<article class="card"><div class="card-media"><a class="card-img" href="/game/${g.id}/"><img src="/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="400" height="400" loading="lazy" decoding="async"></a>
         <div class="card-tags">${tags}</div><button class="card-add" data-add="${g.id}" data-opt="${esc(o[0])}" aria-label="В корзину: ${esc(g.t)}"></button></div>
         <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="/game/${g.id}/">${esc(g.t)}</a>
         <div class="price">${from}${money(g.m)}<small>uzs</small></div></div></article>`;
@@ -247,7 +249,7 @@
     const FILTER = { '': () => true, ps5: (g) => g.pl.includes('PS5'), ps4: (g) => g.pl.includes('PS4') };
     function render() {
       let list = CATALOG.filter(FILTER[f] || ((g) => g.f.includes(f)));
-      if (q) list = list.filter(matcher(q));
+      if (q) list = searchList(list, q);
       if (sort === 'price') list = [...list].sort((a, b) => a.m - b.m);
       else if (sort === 'price-desc') list = [...list].sort((a, b) => b.m - a.m);
       else if (sort === 'az') list = [...list].sort((a, b) => a.t.localeCompare(b.t, 'ru'));

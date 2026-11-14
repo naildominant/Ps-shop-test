@@ -228,7 +228,7 @@ def card(g, lazy=True):
     o = best_opt(g)
     return f'''<article class="card">
   <div class="card-media">
-    <a class="card-img" href="/game/{g['id']}/"><img src="/static/covers/{g['id']}.webp" alt="{E(g['title'])}" width="300" height="400"{' loading="lazy"' if lazy else ''} decoding="async"></a>
+    <a class="card-img" href="/game/{g['id']}/"><img src="/static/covers/sm/{g['id']}.webp" alt="{E(g['title'])}" width="400" height="400"{' loading="lazy"' if lazy else ''} decoding="async"></a>
     <div class="card-tags">{tags(g)}</div>
     <button class="card-add" data-add="{g['id']}" data-opt="{E(o['key'])}" aria-label="В корзину: {E(g['title'])}">{icon('plus')}</button>
   </div>
@@ -281,7 +281,7 @@ def page_home(games):
         </div>
         <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>
       </div>
-      <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="320" height="427" fetchpriority="high"></a>
+      <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="380" height="380" fetchpriority="high"></a>
     </div>
   </div>
 </section>'''
@@ -354,7 +354,7 @@ def page_game(g, games):
     body = f'''<div class="game">
   <div class="game-bg" style="background-image:url('/static/covers/{g['id']}.webp')"></div>
   <div class="wrap game-in">
-    <div class="game-cover"><img src="/static/covers/{g['id']}.webp" alt="{E(g['title'])}" width="380" height="507" fetchpriority="high"></div>
+    <div class="game-cover"><img src="/static/covers/{g['id']}.webp" alt="{E(g['title'])}" width="380" height="380" fetchpriority="high"></div>
     <div>
       <nav class="crumbs" aria-label="Навигация"><a href="/">Главная</a><span>/</span><a href="/catalog/">Каталог</a></nav>
       <div class="hero-tags">{tags(g, 3)}<span class="tag">{' / '.join(g['plats'])}</span></div>
@@ -434,6 +434,17 @@ def catalog_json(games):
 VERSION = dt.datetime.now(TZ).strftime('%Y%m%d%H%M')
 
 
+def make_thumbs():
+    """Лёгкие обложки 400x400 для карточек (полные 800x800 — для страницы игры)."""
+    from PIL import Image
+    src = os.path.join(ROOT, 'src', 'static', 'covers')
+    dst = os.path.join(DIST, 'static', 'covers', 'sm')
+    os.makedirs(dst, exist_ok=True)
+    for f in os.listdir(src):
+        if f.endswith('.webp'):
+            Image.open(os.path.join(src, f)).resize((400, 400), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=74, method=6)
+
+
 def write(rel, text):
     path = os.path.join(DIST, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -446,6 +457,7 @@ def main():
         shutil.rmtree(DIST)
     shutil.copytree(os.path.join(ROOT, 'src', 'static'), os.path.join(DIST, 'static'))
     shutil.copy(os.path.join(ROOT, 'src', 'static', 'favicon.ico'), os.path.join(DIST, 'favicon.ico'))
+    make_thumbs()
     write('index.html', page_home(games))
     write('catalog/index.html', page_catalog(games))
     for g in games:

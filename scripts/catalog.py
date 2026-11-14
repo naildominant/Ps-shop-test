@@ -11,6 +11,7 @@
   3. Если игра выкладывалась несколько раз, берёт самый свежий пост.
      Пост удалён -> игры нет в канале -> игры нет на сайте.
   4. Скачивает обложки (WebP, до 640 px) в src/static/covers/.
+     Если в data/covers-manual/ лежит обложка с тем же именем, берётся она (чистая обложка вместо картинки из поста).
   5. Пишет data/games.json. Посты, которые не удалось разобрать, пишет в data/skipped.json.
 """
 import concurrent.futures as cf
@@ -20,6 +21,7 @@ import io
 import json
 import os
 import re
+import shutil
 import sys
 import time
 import urllib.request
@@ -247,22 +249,57 @@ def build(posts):
 
 
 # ---------- обложки ----------
+def normalize_cover(path):
+    """Приводит обложку к квадрату 800x800, как плитки в PlayStation Store.
+    Почти квадратные картинки аккуратно подрезаются по краям. Вертикальные и горизонтальные
+    встают целиком, а пустое место заполняется их же размытым фоном — ничего важного не обрезается."""
+    from PIL import Image, ImageFilter
+    im = Image.open(path).convert('RGB')
+    w, h = im.size
+    S = 800
+    if (w, h) == (S, S):
+        return
+    r = w / h
+    if 0.88 <= r <= 1.14:
+        k = S / min(w, h)
+        im = im.resize((max(S, round(w * k)), max(S, round(h * k))), Image.LANCZOS)
+        l, t = (im.width - S) // 2, (im.height - S) // 2
+        out = im.crop((l, t, l + S, t + S))
+    else:
+        bg = im.resize((S, S), Image.LANCZOS).filter(ImageFilter.GaussianBlur(30))
+        bg = Image.blend(bg, Image.new('RGB', (S, S), (10, 8, 30)), 0.45)
+        k = min(S / w, S / h)
+        fit = im.resize((round(w * k), round(h * k)), Image.LANCZOS)
+        bg.paste(fit, ((S - fit.width) // 2, (S - fit.height) // 2))
+        out = bg
+    out.save(path, 'WEBP', quality=80, method=6)
+
+
 def fetch_covers(games):
     from PIL import Image
     os.makedirs(COVERS, exist_ok=True)
     stamp_file = os.path.join(DATA, 'covers.json')
     stamps = json.load(open(stamp_file)) if os.path.exists(stamp_file) else {}
 
+    manual_dir = os.path.join(DATA, 'covers-manual')
+
     def one(g):
         path = os.path.join(COVERS, g['id'] + '.webp')
+        manual = os.path.join(manual_dir, g['id'] + '.webp')
+        if os.path.exists(manual):  # обложка, заменённая вручную, важнее картинки из поста
+            shutil.copyfile(manual, path)
+            normalize_cover(path)
+            return g['id'], g['post']
         if os.path.exists(path) and stamps.get(g['id']) == g['post']:
+            normalize_cover(path)
             return g['id'], g['post']
         if not g.get('cover_url'):
             return g['id'], None
         data = get(g['cover_url'])
         im = Image.open(io.BytesIO(data)).convert('RGB')
-        im.thumbnail((640, 640))
+        im.thumbnail((900, 900))
         im.save(path, 'WEBP', quality=78, method=6)
+        normalize_cover(path)
         return g['id'], g['post']
 
     with cf.ThreadPoolExecutor(8) as ex:
