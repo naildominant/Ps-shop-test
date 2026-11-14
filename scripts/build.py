@@ -680,6 +680,8 @@ def main():
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
+    if SITE_URL.startswith('https://psshop.uz'):
+        open(os.path.join(DIST, 'CNAME'), 'w').write('psshop.uz\n')
     print(f'Собрано: {len(games)} игр, {len(urls)} страниц -> dist/')
 
 

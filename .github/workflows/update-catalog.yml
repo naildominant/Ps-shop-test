@@ -54,8 +54,8 @@ jobs:
 
       - name: Build site
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://naildominant.github.io/Ps-shop-test' }}
-          BASE_PATH: ${{ vars.BASE_PATH || '/Ps-shop-test' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://psshop.uz' }}
+          BASE_PATH: ${{ vars.BASE_PATH || '' }}
           ORDER_API: ${{ vars.ORDER_API }}
           HITS_URL: ${{ vars.HITS_URL || 'https://psshop.psshop.workers.dev/hits' }}
           METRIKA_ID: ${{ vars.METRIKA_ID }}
