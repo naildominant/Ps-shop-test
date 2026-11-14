@@ -21,6 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 SITE_URL = os.environ.get('SITE_URL', 'https://psshop.uz').rstrip('/')
 ORDER_API = os.environ.get('ORDER_API') or 'https://psshop.psshop.workers.dev'
+BASE = os.environ.get('BASE_PATH', '').rstrip('/')  # '' для psshop.uz, '/Ps-shop-test' для naildominant.github.io
 TZ = dt.timezone(dt.timedelta(hours=5))  # Ташкент
 TODAY = dt.datetime.now(TZ).date()
 GTA_RELEASE = '2026-11-19T00:00:00+05:00'
@@ -180,7 +181,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 {footer()}
 {cart_drawer()}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>window.PS={{api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])}}};</script>
+<script>window.PS={{base:{json.dumps(BASE)},api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])}}};</script>
 <script src="/static/app.js?v={VERSION}" defer></script>
 </body>
 </html>
@@ -578,7 +579,17 @@ def make_thumbs():
             Image.open(os.path.join(src, f)).resize((330, 440), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=74, method=6)
 
 
+def with_base(text):
+    """Добавляет путь сайта к ссылкам вида /catalog/, /static/… (нужно, пока сайт живёт не в корне домена)."""
+    if not BASE:
+        return text
+    text = re.sub(r'(href|src|action)="/(?!/)', lambda m: f'{m.group(1)}="{BASE}/', text)
+    return text.replace("url('/static/", f"url('{BASE}/static/")
+
+
 def write(rel, text):
+    if rel.endswith('.html'):
+        text = with_base(text)
     path = os.path.join(DIST, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, 'w', encoding='utf-8').write(text)

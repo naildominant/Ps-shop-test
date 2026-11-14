@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const PS = window.PS || {};
+  const B = PS.base || ''; // путь сайта: '' на psshop.uz, '/Ps-shop-test' на github.io
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -25,7 +26,7 @@
   let catalogP = null;
   function loadCatalog() {
     if (!catalogP) {
-      catalogP = fetch('/static/catalog.json').then((r) => r.json()).then((rows) => {
+      catalogP = fetch(`${B}/static/catalog.json`).then((r) => r.json()).then((rows) => {
         CATALOG = rows; CATALOG.byId = Object.fromEntries(rows.map((r) => [r.id, r])); return CATALOG;
       });
     }
@@ -40,7 +41,7 @@
     const g = CATALOG && CATALOG.byId[i.id];
     if (!g) return null;
     const o = g.o.find((x) => x[0] === i.opt) || g.o[0];
-    return { title: g.t, opt: o[0], price: o[1], cover: g.k === 'sub' ? null : `/static/covers/sm/${g.id}.webp`, href: g.k === 'sub' ? '/subscriptions/' : `/game/${g.id}/` };
+    return { title: g.t, opt: o[0], price: o[1], cover: g.k === 'sub' ? null : `${B}/static/covers/sm/${g.id}.webp`, href: g.k === 'sub' ? `${B}/subscriptions/` : `${B}/game/${g.id}/` };
   }
   function save() {
     if (CATALOG) cart = cart.filter((i) => info(i));
@@ -82,7 +83,7 @@
   function renderCart() {
     const body = $('#cart-body');
     if (!cart.length) {
-      body.innerHTML = `<div class="cart-empty"><p>В корзине пока пусто</p><a class="btn btn-main" href="/catalog/">Открыть каталог</a></div>`;
+      body.innerHTML = `<div class="cart-empty"><p>В корзине пока пусто</p><a class="btn btn-main" href="${B}/catalog/">Открыть каталог</a></div>`;
       return;
     }
     const me = store.get('ps.me', {});
@@ -243,9 +244,9 @@
       const tags = [g.f.includes('pre') && '<span class="tag tag-pre">Предзаказ</span>', g.f.includes('hit') && '<span class="tag tag-hit">Хит</span>',
         g.f.includes('new') && !g.f.includes('pre') && '<span class="tag tag-new">Новинка</span>'].filter(Boolean).slice(0, 2).join('');
       const from = new Set(g.o.map((x) => x[1])).size > 1 ? '<span class="from">от</span>' : '';
-      return `<article class="card"><div class="card-media"><a class="card-img" href="/game/${g.id}/"><img src="/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
+      return `<article class="card"><div class="card-media"><a class="card-img" href="${B}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
         <div class="card-tags">${tags}</div><button class="card-add" data-add="${g.id}" data-opt="${esc(o[0])}" aria-label="В корзину: ${esc(g.t)}"></button></div>
-        <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="/game/${g.id}/">${esc(g.t)}</a>
+        <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="${B}/game/${g.id}/">${esc(g.t)}</a>
         <div class="price">${from}${money(g.m)}<small>uzs</small></div></div></article>`;
     };
     const FILTER = { '': () => true, ps5: (g) => g.pl.includes('PS5'), ps4: (g) => g.pl.includes('PS4') };
@@ -266,7 +267,7 @@
       $$('[data-f]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.f === f)));
       $$('[data-add]', grid).forEach(syncBtn);
       const p = new URLSearchParams(); if (q) p.set('q', q); if (f) p.set('f', f); if (sort !== 'new') p.set('sort', sort);
-      history.replaceState(null, '', `/catalog/${p.toString() ? `?${p}` : ''}`);
+      history.replaceState(null, '', `${B}/catalog/${p.toString() ? `?${p}` : ''}`);
     }
     loadCatalog().then(render);
     $('#chips').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (!c) return; f = c.dataset.f; limit = 48; render(); });
