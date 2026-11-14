@@ -56,7 +56,7 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL || 'https://psshop.uz' }}
           ORDER_API: ${{ vars.ORDER_API }}
-          HITS_URL: ${{ vars.HITS_URL }}
+          HITS_URL: ${{ vars.HITS_URL || 'https://psshop.psshop.workers.dev/hits' }}
           METRIKA_ID: ${{ vars.METRIKA_ID }}
         run: python3 scripts/build.py
 

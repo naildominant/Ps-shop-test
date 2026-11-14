@@ -20,7 +20,7 @@ import urllib.parse
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 SITE_URL = os.environ.get('SITE_URL', 'https://psshop.uz').rstrip('/')
-ORDER_API = os.environ.get('ORDER_API', '')
+ORDER_API = os.environ.get('ORDER_API') or 'https://psshop.psshop.workers.dev'
 TZ = dt.timezone(dt.timedelta(hours=5))  # Ташкент
 TODAY = dt.datetime.now(TZ).date()
 GTA_RELEASE = '2026-11-19T00:00:00+05:00'
