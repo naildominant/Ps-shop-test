@@ -60,6 +60,7 @@
     if (has(id, opt)) return false;
     cart.push({ id, opt }); save();
     track('add_to_cart', { game: id, option: opt });
+    if (PS.api) { try { fetch(`${PS.api}/event`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ type: 'add', id }) }).catch(() => {}); } catch { /* */ } }
     if (!quiet) loadCatalog().then(() => { const x = info({ id, opt }); toast(x ? `${x.title} в корзине` : 'Добавлено в корзину'); });
     return true;
   }
@@ -140,9 +141,9 @@
     const text = orderText(d);
     const items = cart.map((i) => { const x = info(i); return { id: i.id, title: x.title, option: x.opt, price: x.price }; });
     track('order_submit', { total: total(), items: items.length });
-    if (PS.orderApi) {
+    if (PS.api) {
       try {
-        fetch(PS.orderApi, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
+        fetch(`${PS.api}/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
           body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, website: d.website }) })
           .catch(() => {});
       } catch { /* заявка всё равно уйдёт текстом в Telegram */ }

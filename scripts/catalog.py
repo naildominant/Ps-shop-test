@@ -333,6 +333,10 @@ def main():
     if len(games) < 50:
         sys.exit(f'Слишком мало игр ({len(games)}), похоже канал не загрузился. Каталог не трогаю.')
     os.makedirs(DATA, exist_ok=True)
+    if '--cache' not in sys.argv:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import covers_official
+        covers_official.lookup_new(games)  # официальные обложки для новых игр (Steam / Википедия)
     fetch_covers(games)
     for g in games:
         g.pop('cover_url', None)

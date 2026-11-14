@@ -6,7 +6,8 @@
 Берёт data/games.json (его обновляет scripts/catalog.py) и src/static/*.
 Настройки через переменные окружения:
     SITE_URL   адрес сайта для ссылок и превью (по умолчанию https://psshop.uz)
-    ORDER_API  адрес Cloudflare Worker, принимающего заявки (пусто — заявка только через Telegram)
+    ORDER_API  адрес Cloudflare Worker (заявки в бота и счётчики корзины); пусто — заявка только через Telegram
+    HITS_URL   адрес счётчиков корзины (ORDER_API + /hits) для полки «Хиты»
 """
 import datetime as dt
 import html
@@ -55,8 +56,24 @@ def parse_date(s):
 
 
 # ---------- данные ----------
+def cart_hits():
+    """Какие игры чаще кладут в корзину (счётчики Cloudflare Worker, адрес в HITS_URL)."""
+    url = os.environ.get('HITS_URL')
+    if not url:
+        return set()
+    try:
+        import urllib.request
+        counts = json.loads(urllib.request.urlopen(url, timeout=20).read())
+    except Exception as e:
+        print('Счётчики корзины недоступны:', e)
+        return set()
+    top = sorted(((n, gid) for gid, n in counts.items() if n >= 3), reverse=True)[:20]
+    return {gid for _, gid in top}
+
+
 def load():
     games = json.load(open(os.path.join(ROOT, 'data', 'games.json'), encoding='utf-8'))
+    popular = cart_hits()
     rel_file = os.path.join(ROOT, 'data', 'releases.json')
     releases = json.load(open(rel_file, encoding='utf-8')) if os.path.exists(rel_file) else {}
     out = []
@@ -75,6 +92,7 @@ def load():
         g['pre'] = bool(g.get('preorder')) and (rel is None or rel > TODAY)
         g['new'] = bool(rel and TODAY - dt.timedelta(days=365) <= rel <= TODAY)
         g['vr'] = 'vr' in g.get('notes', [])
+        g['hit'] = bool(g.get('hit')) or g['id'] in popular  # топ-50 из канала + чаще всего кладут в корзину
         g['coop'] = bool(g.get('players') and re.search(r'[–-]\s*\d', g['players']))
         out.append(g)
     return out
@@ -162,7 +180,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 {footer()}
 {cart_drawer()}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>window.PS={{orderApi:{json.dumps(ORDER_API)},manager:{json.dumps(CONTACTS["manager"])}}};</script>
+<script>window.PS={{api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])}}};</script>
 <script src="/static/app.js?v={VERSION}" defer></script>
 </body>
 </html>

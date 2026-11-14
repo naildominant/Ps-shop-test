@@ -194,6 +194,33 @@ def valid_image(data):
         return False
 
 
+def lookup_new(games):
+    """Ищет официальные обложки только для новых игр (которых ещё нет в covers-sources.json).
+    Вызывается из scripts/catalog.py при каждом обновлении каталога."""
+    os.makedirs(OUT, exist_ok=True)
+    sources = json.load(open(SRC_FILE, encoding='utf-8')) if os.path.exists(SRC_FILE) else {}
+    new = [g for g in games if g['id'] not in sources]
+    for g in new:
+        gid = g['id']
+        if gid in SKIP:
+            sources[gid] = {'source': 'channel', 'why': 'оставлена картинка из канала'}
+            continue
+        try:
+            r = None if gid in WIKI_ONLY else steam(gid, g['title'])
+            r = r or wiki(gid, g['title'])
+        except Exception as e:  # сеть недоступна — оставим картинку из канала, попробуем в следующий раз
+            print(f'обложка {gid}: {e}')
+            continue
+        if r and valid_image(r['image']):
+            open(os.path.join(OUT, gid + '.jpg'), 'wb').write(r.pop('image'))
+            sources[gid] = r
+            print(f'+ обложка {gid}: {r["source"]} {r["match"]}')
+        else:
+            sources[gid] = {'source': 'channel', 'why': 'не найдено'}
+    if new:
+        json.dump(sources, open(SRC_FILE, 'w', encoding='utf-8'), ensure_ascii=False, indent=1, sort_keys=True)
+
+
 def main():
     games = json.load(open(os.path.join(DATA, 'games.json'), encoding='utf-8'))
     os.makedirs(OUT, exist_ok=True)
