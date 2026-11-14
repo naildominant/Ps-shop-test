@@ -1,0 +1,1506 @@
+{
+ "007-first-light": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "a-way-out": {
+  "appid": 1222700,
+  "match": "A Way Out",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ace-combat-8-wings-of-theve": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "aces-of-thunder": {
+  "appid": 2754090,
+  "match": "Aces of Thunder",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "aces-of-thunder-vr2": {
+  "appid": 2754090,
+  "match": "Aces of Thunder",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "adorable-adventures": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "age-of-empires-2-definitive-edition": {
+  "appid": 813780,
+  "match": "Age of Empires II: Definitive Edition",
+  "score": 0.91,
+  "source": "steam"
+ },
+ "alan-wake-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "among-us-vr": {
+  "appid": 1849900,
+  "match": "Among Us 3D: VR",
+  "score": 0.84,
+  "source": "steam"
+ },
+ "anno-117-pax-romana": {
+  "appid": 3274580,
+  "match": "Anno 117: Pax Romana",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "aphelion": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "arc-raiders": {
+  "appid": 1808500,
+  "match": "ARC Raiders",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ark-survival-ascended": {
+  "appid": 2399830,
+  "match": "ARK: Survival Ascended",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-black-flag-resynced": {
+  "appid": 242050,
+  "match": "Assassin’s Creed® IV Black Flag™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-bundle-black-flag-unity-syndicate": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "assassin-s-creed-iv-black-flag": {
+  "appid": 242050,
+  "match": "Assassin’s Creed® IV Black Flag™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-mirage": {
+  "appid": 3035570,
+  "match": "Assassin's Creed Mirage",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-odyssey": {
+  "appid": 812140,
+  "match": "Assassin's Creed® Odyssey",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-shadows": {
+  "appid": 3159330,
+  "match": "Assassin’s Creed Shadows",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assassin-s-creed-valhalla": {
+  "appid": 2208920,
+  "match": "Assassin's Creed Valhalla",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "assetto-corsa-competizione": {
+  "appid": 805550,
+  "match": "Assetto Corsa Competizione",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "astro-bot": {
+  "match": "Astro Bot (series)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Astro_Bot_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=original"
+ },
+ "astro-bot-rescue-mission-vr": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "astroneer": {
+  "appid": 361420,
+  "match": "ASTRONEER",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "atomic-heart": {
+  "appid": 668580,
+  "match": "Atomic Heart",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "atomic-heart-enchantment-under-the-sea": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "avatar-frontiers-of-pandora": {
+  "appid": 2840770,
+  "match": "Avatar: Frontiers of Pandora™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "batman-arkham-collection": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "batman-the-telltale-series": {
+  "appid": 498240,
+  "match": "Batman - The Telltale Series",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "battlefield-2042": {
+  "appid": 1517290,
+  "match": "Battlefield™ 2042",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "battlefield-6": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "battlefield-v": {
+  "appid": 1238810,
+  "match": "Battlefield™ V",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "beast-of-reincarnation": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "beat-the-beats-vr2": {
+  "appid": 2677480,
+  "match": "Beat the Beats VR",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "black-desert-standard-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "black-myth-wukong": {
+  "appid": 2358720,
+  "match": "Black Myth: Wukong",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "bloodborne-game-of-the-year": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "bloodlines-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "borderlands-4": {
+  "appid": 1285190,
+  "match": "Borderlands 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "brothers": {
+  "appid": 336760,
+  "match": "Pilot Brothers",
+  "score": 0.73,
+  "source": "steam"
+ },
+ "call-of-duty-black-ops-6": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-black-ops-7": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-black-ops-cold-war": {
+  "appid": 1985810,
+  "match": "Call of Duty®: Black Ops Cold War",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "call-of-duty-black-ops-iii": {
+  "appid": 311210,
+  "match": "Call of Duty®: Black Ops III",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "call-of-duty-modern-warfare-1": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-modern-warfare-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-modern-warfare-2-campaign-remastered": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-modern-warfare-3": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-modern-warfare-4": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "call-of-duty-vanguard": {
+  "appid": 1985820,
+  "match": "Call of Duty®: Vanguard",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "call-of-duty-wwii": {
+  "appid": 476600,
+  "match": "Call of Duty®: WWII",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "carx-street": {
+  "appid": 1114150,
+  "match": "CarX Street",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "cherepashki-nindzya-the-cowabunga-collection": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "crash-bandicoot-n-sane-trilogy-ctr-nitro-fueled": {
+  "appid": 731490,
+  "match": "Crash Bandicoot™ N. Sane Trilogy",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "creed-rise-to-glory-championship-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "crimson-desert": {
+  "appid": 3321460,
+  "match": "Crimson Desert Enhanced",
+  "score": 0.76,
+  "source": "steam"
+ },
+ "crysis-remastered-trilogy": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "cuphead": {
+  "appid": 268910,
+  "match": "Cuphead",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "cyberpunk-2077": {
+  "appid": 1091500,
+  "match": "Cyberpunk 2077",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "cyubevr": {
+  "appid": 619500,
+  "match": "cyubeVR",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dark-souls-iii": {
+  "appid": 374320,
+  "match": "DARK SOULS™ III",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "day-z": {
+  "appid": 221100,
+  "match": "DayZ",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "days-gone": {
+  "appid": 1259420,
+  "match": "Days Gone",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dead-space-remake": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "death-stranding": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "death-stranding-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "demon-s-souls": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "detroit-become-human": {
+  "appid": 1222140,
+  "match": "Detroit: Become Human",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "diablo-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "diablo-3": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "diablo-4": {
+  "appid": 2344520,
+  "match": "Diablo® IV",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "directive-8020": {
+  "appid": 2255370,
+  "match": "Directive 8020",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dirt-5": {
+  "appid": 1038250,
+  "match": "DIRT 5",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "disney-pixar-wall-e": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "docked-deluxe-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "don-t-starve-together-constant-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "doom-eternal": {
+  "appid": 782330,
+  "match": "DOOM Eternal",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "doom-the-dark-ages": {
+  "appid": 3017860,
+  "match": "DOOM: The Dark Ages",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dragon-age-the-veilguard": {
+  "appid": 1845910,
+  "match": "Dragon Age™: The Veilguard",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dragon-s-dogma-2": {
+  "appid": 2054970,
+  "match": "Dragon's Dogma 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dune-awakening": {
+  "appid": 1172710,
+  "match": "Dune: Awakening",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "dying-light-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ea-sports-fc-27": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ea-sports-wrc": {
+  "appid": 1849250,
+  "match": "EA SPORTS™ WRC",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ea-star-wars-triple-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "elden-ring": {
+  "appid": 1245620,
+  "match": "ELDEN RING",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "expeditions-a-mudrunner-game": {
+  "appid": 2477340,
+  "match": "Expeditions: A MudRunner Game",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "f1-24": {
+  "appid": 2488620,
+  "match": "F1® 24",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "f1-25": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "fallout-4": {
+  "appid": 377160,
+  "match": "Fallout 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "far-cry-3": {
+  "appid": 220240,
+  "match": "Far Cry 3",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "far-cry-4-far-cry-primal": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "far-cry-5-far-cry-new-dawn": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "far-cry-6": {
+  "appid": 2369390,
+  "match": "Far Cry® 6",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "fc-24": {
+  "match": "EA Sports FC",
+  "score": 0.89,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/31/EA_Sports_FC_logo.svg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=original"
+ },
+ "fc-25": {
+  "appid": 2669320,
+  "match": "EA SPORTS FC™ 25",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "fc-26": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "final-fantasy-vii": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "final-fantasy-xvi": {
+  "appid": 2515020,
+  "match": "FINAL FANTASY XVI",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "fort-solis": {
+  "appid": 1931730,
+  "match": "Fort Solis",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "forza-horizon-5": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "frostpunk-2-deluxe-edition": {
+  "appid": 1601580,
+  "match": "Frostpunk 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ghost-of-tsushima": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ghost-of-yotei": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ghost-recon-breakpoint": {
+  "appid": 2231380,
+  "match": "Tom Clancy's Ghost Recon® Breakpoint",
+  "score": 0.77,
+  "source": "steam"
+ },
+ "ghostrunner-2": {
+  "appid": 2144740,
+  "match": "Ghostrunner 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "god-of-war-2018": {
+  "appid": 1593500,
+  "match": "God of War",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "god-of-war-iii-remastered": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "god-of-war-ragnarok": {
+  "appid": 2322010,
+  "match": "God of War Ragnarök",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "god-of-war-sons-of-sparta": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "gothic-1-remake": {
+  "appid": 1297900,
+  "match": "Gothic 1 Remake",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "gran-turismo-7": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "grand-theft-auto-vi": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "grounded-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "gta-5": {
+  "appid": 1546990,
+  "match": "Grand Theft Auto: Vice City – The Definitive Edition",
+  "score": 0.82,
+  "source": "steam"
+ },
+ "gta-trilogy": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hades-ii": {
+  "appid": 1145350,
+  "match": "Hades II",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "halloween-the-game": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "halo-campaign-evolved": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hell-let-loose-vietnam": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "high-on-life-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hitman": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hitman-3-world-of-assassination": {
+  "appid": 1659040,
+  "match": "HITMAN World of Assassination",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "hitman-world-of-assassination": {
+  "appid": 1659040,
+  "match": "HITMAN World of Assassination",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "hogwarts-legacy": {
+  "appid": 990080,
+  "match": "Hogwarts Legacy",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "hollow-knight-silksong": {
+  "appid": 1030300,
+  "match": "Hollow Knight: Silksong",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "horizon-forbidden-west": {
+  "appid": 2420110,
+  "match": "Horizon Forbidden West™ Complete Edition",
+  "score": 0.83,
+  "source": "steam"
+ },
+ "horizon-zero-dawn": {
+  "appid": 2561580,
+  "match": "Horizon Zero Dawn™ Remastered",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "hot-wheels": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hot-wheels-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "hunt-showdown-1896": {
+  "appid": 594650,
+  "match": "Hunt: Showdown 1896",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "indiana-jones-and-the-great-circle": {
+  "appid": 2677660,
+  "match": "Indiana Jones and the Great Circle",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "injustice-2": {
+  "appid": 627270,
+  "match": "Injustice™ 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "invincible-the-game": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "invincible-vs": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "it-takes-two": {
+  "appid": 1426210,
+  "match": "It Takes Two",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "job-simulator": {
+  "appid": 448280,
+  "match": "Job Simulator",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "jurassic-world-evolution-3": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "kena-bridge-of-spirits": {
+  "appid": 1954200,
+  "match": "Kena: Bridge of Spirits",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "kingdom-come-deliverance": {
+  "appid": 379430,
+  "match": "Kingdom Come: Deliverance",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "kingdom-come-deliverance-royal-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "lego-batman-legacy-of-the-dark-knight": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "lego-marvel-super-heroes-2": {
+  "appid": 647830,
+  "match": "LEGO® Marvel Super Heroes 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "lego-voyagers": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "lies-of-p-overture-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "limbo-inside-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "little-nightmares-1-and-2-bundle": {
+  "appid": 860510,
+  "match": "Little Nightmares II",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "little-nightmares-iii": {
+  "appid": 1392860,
+  "match": "Little Nightmares III",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "little-nightmares-vr-altered-echoes": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "mafia-the-old-country": {
+  "appid": 1941540,
+  "match": "Mafia: The Old Country",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "mafia-trilogy": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "marvel-guardians-of-the-galaxy": {
+  "appid": 1088850,
+  "match": "Marvel's Guardians of the Galaxy",
+  "score": 0.96,
+  "source": "steam"
+ },
+ "marvel-s-wolverine-deluxe": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "marvel-tokon-fighting-souls": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "metal-gear-solid-master-collection": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "metro-awakening-vr2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "metro-exodus": {
+  "appid": 412020,
+  "match": "Metro Exodus",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "metro-saga-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "minecraft": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "minecraft-dungeons": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "minecraft-legends": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "mistfall-hunters": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "monopoly": {
+  "appid": 2929170,
+  "match": "NEW MONOPOLY®",
+  "score": 0.8,
+  "source": "steam"
+ },
+ "mortal-kombat-1": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "mortal-kombat-11": {
+  "appid": 976310,
+  "match": "Mortal Kombat 11",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "mortal-kombat-11-ultimate": {
+  "appid": 976310,
+  "match": "Mortal Kombat 11",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "mortal-kombat-11-ultimate-injustice-2": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "mortal-kombat-elder-god-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "mortal-kombat-x": {
+  "appid": 307780,
+  "match": "Mortal Kombat X",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "mortal-kombat-xl": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "mortal-shell-2": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "moss-ii": {
+  "appid": 2059670,
+  "match": "Moss II VR",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "motogp-24": {
+  "appid": 2581700,
+  "match": "MotoGP™24",
+  "score": 0.94,
+  "source": "steam"
+ },
+ "mouse-p-i-for-hire": {
+  "appid": 2416450,
+  "match": "MOUSE: P.I. For Hire",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "moving-out-moving-out-2-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "naruto-shippuden-ultimate-ninja-storm-4": {
+  "appid": 349040,
+  "match": "NARUTO SHIPPUDEN: Ultimate Ninja STORM 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "naruto-x-boruto-ultimate-ninja-storm": {
+  "appid": 1020790,
+  "match": "NARUTO X BORUTO Ultimate Ninja STORM CONNECTIONS",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "nascar-25": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nba-2k24": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nba-2k25": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nba-2k26": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nba-2k27": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "need-for-speed-deluxe-edition": {
+  "appid": 1262540,
+  "match": "Need for Speed™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "need-for-speed-heat": {
+  "appid": 1222680,
+  "match": "Need for Speed™ Heat",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "need-for-speed-payback": {
+  "appid": 1262580,
+  "match": "Need for Speed™ Payback",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "need-for-speed-unbound": {
+  "appid": 1846380,
+  "match": "Need for Speed™ Unbound",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "need-for-speed-unbound-palace-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nfl-madden-27": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nhl-24": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nhl-25": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nhl-26-standard-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "nickelodeon-extreme-tennis-next": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ninja-gaiden-2-black": {
+  "appid": 3287520,
+  "match": "NINJA GAIDEN 2 Black",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ninja-gaiden-4": {
+  "appid": 2627260,
+  "match": "NINJA GAIDEN 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "nioh-3-deluxe": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "no-man-s-sky": {
+  "appid": 275850,
+  "match": "No Man's Sky",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "onimusha-way-of-the-sword": {
+  "appid": 2638890,
+  "match": "Onimusha: Way of the Sword",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "outlast-1-outlast-2-bundle": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "overcooked-overcooked-2": {
+  "appid": 728880,
+  "match": "Overcooked! 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "painkiller": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "pathologic-3": {
+  "appid": 3199650,
+  "match": "Pathologic 3",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "pavlov": {
+  "appid": 555160,
+  "match": "Pavlov",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "pets-stuff": {
+  "appid": 2740110,
+  "match": "Pets & Stuff",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "phantom-blade-zero": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "plants-vs-zombies-replanted": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "poppy-playtime-chapter-5": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "pragmata": {
+  "match": "Pragmata",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Pragmata_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=original"
+ },
+ "ratchet-clank": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ratchet-clank-rift-apart": {
+  "appid": 1895880,
+  "match": "Ratchet & Clank: Rift Apart",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "rayman-legends": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "rayman-legends-retold": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "reanimal": {
+  "appid": 2129530,
+  "match": "REANIMAL",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "red-dead-redemption": {
+  "appid": 2668510,
+  "match": "Red Dead Redemption",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "red-dead-redemption-2": {
+  "appid": 1174180,
+  "match": "Red Dead Redemption 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-2": {
+  "appid": 883710,
+  "match": "Resident Evil 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-2-remake": {
+  "appid": 883710,
+  "match": "Resident Evil 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-3": {
+  "appid": 952060,
+  "match": "Resident Evil 3",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-4": {
+  "appid": 254700,
+  "match": "Resident Evil 4 (2005)",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-4-remake-vr2": {
+  "appid": 2050650,
+  "match": "Resident Evil 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-7-biohazard-gold-edition": {
+  "appid": 418370,
+  "match": "Resident Evil 7 Biohazard",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-8-village-vr2": {
+  "appid": 1196590,
+  "match": "Resident Evil Village",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resident-evil-9-requiem": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "resident-evil-bundle-gold-edition": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "resident-evil-raccoon-city-edition-3-igry": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "resident-evil-remake-trilogy-4-chasti-srazu": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "resident-evil-triple-pack-4-5-6": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "resident-evil-village": {
+  "appid": 1196590,
+  "match": "Resident Evil Village",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "resonance-a-plague-tale-legacy": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "returnal": {
+  "appid": 1649240,
+  "match": "Returnal™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "rise-of-the-ronin": {
+  "appid": 1340990,
+  "match": "Rise of the Ronin",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "robocop-rogue-city": {
+  "appid": 1681430,
+  "match": "RoboCop: Rogue City",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "robocop-rogue-city-unfinished-business": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "rust-console-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "sackboy-a-big-adventure": {
+  "appid": 1599660,
+  "match": "Sackboy™: A Big Adventure",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "saros-deluxe": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "sekiro-shadows-die-twice": {
+  "appid": 814380,
+  "match": "Sekiro™: Shadows Die Twice - GOTY Edition",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "serious-sam-4": {
+  "appid": 257420,
+  "match": "Serious Sam 4",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "shadow-of-the-colossus": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "sifu": {
+  "appid": 2138710,
+  "match": "Sifu",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "silent-hill-2-remake": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "silent-hill-f": {
+  "appid": 2947440,
+  "match": "SILENT HILL f",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "silent-hill-townfall": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "sniper-elite-5": {
+  "appid": 1029690,
+  "match": "Sniper Elite 5",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "sniper-elite-resistance": {
+  "appid": 2169200,
+  "match": "Sniper Elite: Resistance",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "snowrunner": {
+  "appid": 1465360,
+  "match": "SnowRunner",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "spider-man": {
+  "appid": 1817070,
+  "match": "Marvel’s Spider-Man Remastered",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "spider-man-2": {
+  "appid": 2651280,
+  "match": "Marvel's Spider-Man 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "spider-man-miles-morales": {
+  "appid": 1817190,
+  "match": "Marvel’s Spider-Man: Miles Morales",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "split-fiction": {
+  "appid": 2001120,
+  "match": "Split Fiction",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "stalker-trilogy": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "star-wars-battlefront-ii": {
+  "appid": 1237950,
+  "match": "STAR WARS™ Battlefront™ II",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "star-wars-galactic-racer": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "star-wars-jedi-fallen-order": {
+  "appid": 1172380,
+  "match": "STAR WARS Jedi: Fallen Order™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "star-wars-jedi-survivor": {
+  "appid": 1774580,
+  "match": "STAR WARS Jedi: Survivor™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "star-wars-outlaws-ultimate-edition": {
+  "appid": 2842040,
+  "match": "Star Wars Outlaws",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "star-wars-zero-company": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "starfield": {
+  "appid": 1716740,
+  "match": "Starfield",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "stray": {
+  "appid": 1332010,
+  "match": "Stray",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "stride-fates": {
+  "appid": 2597880,
+  "match": "STRIDE: Fates",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "subnautica": {
+  "appid": 264710,
+  "match": "Subnautica",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "surviving-mars-relaunched": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "tachki-3-gonki": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "team-sonic-racing": {
+  "appid": 785260,
+  "match": "Team Sonic Racing™",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "tekken-7": {
+  "appid": 389730,
+  "match": "TEKKEN 7",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "tekken-8": {
+  "appid": 1778820,
+  "match": "TEKKEN 8",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-alters": {
+  "appid": 1601570,
+  "match": "The Alters",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-blood-of-dawnwalker": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "the-crew-2": {
+  "appid": 646910,
+  "match": "The Crew™ 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-crew-motorfest": {
+  "appid": 2698940,
+  "match": "The Crew Motorfest",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-elder-scrolls-v-skyrim": {
+  "appid": 611670,
+  "match": "The Elder Scrolls V: Skyrim VR",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-forest": {
+  "appid": 242760,
+  "match": "The Forest",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-last-of-us-part-1": {
+  "appid": 1888930,
+  "match": "The Last of Us™ Part I",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-last-of-us-part-2-remastered": {
+  "appid": 2531310,
+  "match": "The Last of Us™ Part II Remastered",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-sims-4-my-first-pet-stuff": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "the-sinking-city-2": {
+  "appid": 2825860,
+  "match": "The Sinking City 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "the-smurfs-village-party": {
+  "appid": 2800630,
+  "match": "The Smurfs - Village Party",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "tomb-raider": {
+  "appid": 750920,
+  "match": "Shadow of the Tomb Raider: Definitive Edition",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "trail-out": {
+  "appid": 1664220,
+  "match": "TRAIL OUT",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ufc-4": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ufc-5": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "ufc-6": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "uncharted-4": {
+  "appid": 1659420,
+  "match": "UNCHARTED™: Legacy of Thieves Collection",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "undisputed": {
+  "appid": 1451190,
+  "match": "Undisputed",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "unravel-1-2-yarnny-bundle": {
+  "appid": 1225570,
+  "match": "Unravel Two",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "ved-mak-3-dikaya-ohota": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "watch-dogs-2": {
+  "appid": 447040,
+  "match": "Watch_Dogs® 2",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "watch-dogs-legion": {
+  "appid": 2239550,
+  "match": "Watch Dogs®: Legion",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "way-of-the-hunter": {
+  "appid": 1288320,
+  "match": "Way of the Hunter",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "wolfenstein-alt-history-collection": {
+  "source": "channel",
+  "why": "набор из нескольких игр"
+ },
+ "wrc-10-deluxe-edition": {
+  "source": "channel",
+  "why": "не найдено"
+ },
+ "wreckfest": {
+  "appid": 228380,
+  "match": "Wreckfest",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "wwe-2k24": {
+  "appid": 2315690,
+  "match": "WWE 2K24",
+  "score": 1.0,
+  "source": "steam"
+ },
+ "wwe-2k25": {
+  "appid": 2878960,
+  "match": "WWE 2K25",
+  "score": 1.0,
+  "source": "steam"
+ }
+}

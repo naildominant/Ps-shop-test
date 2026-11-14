@@ -14,6 +14,7 @@ import json
 import os
 import re
 import shutil
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
@@ -109,7 +110,7 @@ def icon(name, cls=''):
 
 
 # ---------- разметка ----------
-NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5')]
+NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка')]
 
 
 def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head=''):
@@ -182,6 +183,7 @@ def footer():
         <li><a href="/catalog/">Каталог игр</a></li>
         <li><a href="/subscriptions/">Подписки PS Plus и EA Play</a></li>
         <li><a href="/rent/">Аренда PS5</a></li>
+        <li><a href="/install/">Как происходит установка</a></li>
       </ul>
     </div>
     <div>
@@ -228,7 +230,7 @@ def card(g, lazy=True):
     o = best_opt(g)
     return f'''<article class="card">
   <div class="card-media">
-    <a class="card-img" href="/game/{g['id']}/"><img src="/static/covers/sm/{g['id']}.webp" alt="{E(g['title'])}" width="400" height="400"{' loading="lazy"' if lazy else ''} decoding="async"></a>
+    <a class="card-img" href="/game/{g['id']}/"><img src="/static/covers/sm/{g['id']}.webp" alt="{E(g['title'])}" width="300" height="400"{' loading="lazy"' if lazy else ''} decoding="async"></a>
     <div class="card-tags">{tags(g)}</div>
     <button class="card-add" data-add="{g['id']}" data-opt="{E(o['key'])}" aria-label="В корзину: {E(g['title'])}">{icon('plus')}</button>
   </div>
@@ -281,7 +283,7 @@ def page_home(games):
         </div>
         <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>
       </div>
-      <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="380" height="380" fetchpriority="high"></a>
+      <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
     </div>
   </div>
 </section>'''
@@ -308,7 +310,7 @@ def page_home(games):
     pre = [g for g in pre if g['id'] != 'grand-theft-auto-vi']
     body = hero + perks + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
         + shelf('Новинки', new, '/catalog/?f=new') + promo + shelf('Играть вместе', coop, '/catalog/?f=coop') \
-        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + shelf('Для VR', vr, '/catalog/?f=vr')
+        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + shelf('Для VR', vr, '/catalog/?f=vr') + guarantees_block()
     return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home',
                   desc=f'{len(games)} цифровых игр для PlayStation 4 и 5, подписки PS Plus и аренда PS5. Подключим дистанционно, гарантия, на связи 24/7.',
                   body=body)
@@ -354,7 +356,7 @@ def page_game(g, games):
     body = f'''<div class="game">
   <div class="game-bg" style="background-image:url('/static/covers/{g['id']}.webp')"></div>
   <div class="wrap game-in">
-    <div class="game-cover"><img src="/static/covers/{g['id']}.webp" alt="{E(g['title'])}" width="380" height="380" fetchpriority="high"></div>
+    <div class="game-cover"><img src="/static/covers/{g['id']}.webp" alt="{E(g['title'])}" width="380" height="507" fetchpriority="high"></div>
     <div>
       <nav class="crumbs" aria-label="Навигация"><a href="/">Главная</a><span>/</span><a href="/catalog/">Каталог</a></nav>
       <div class="hero-tags">{tags(g, 3)}<span class="tag">{' / '.join(g['plats'])}</span></div>
@@ -383,6 +385,119 @@ def page_game(g, games):
     head = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
     return layout(title=f'{g["title"]} — {money(g["min"])} uzs для {plat} | PS SHOP', desc=desc, path=f'/game/{g["id"]}/',
                   page='game', og_image=f'{SITE_URL}/static/covers/{g["id"]}.webp', og_type='product', body=body, extra_head=head)
+
+
+def load_services():
+    return json.load(open(os.path.join(ROOT, 'data', 'services.json'), encoding='utf-8'))
+
+
+def months(n):
+    n = int(n)
+    return f'{n} месяц' if n == 1 else f'{n} месяца' if n in (2, 3, 4) else f'{n} месяцев'
+
+
+def days_word(n):
+    return 'сутки' if n == 1 else 'суток'
+
+
+def page_subs(sv):
+    def plan(p, kind):
+        rows = ''
+        for m, price in p['prices'].items():
+            best = m == '12'
+            rows += f'''<div class="sub-row{' is-best' if best else ''}">
+  <div><b>{months(m)}</b>{'<span class="best-pill">Выгоднее всего</span>' if best else ''}</div>
+  <div class="sub-price num">{money(price)}<small>uzs</small></div>
+  <button class="btn btn-sm{' btn-main' if best else ''}" data-add="{p['id']}" data-opt="{months(m)}" data-label="В корзину">В корзину</button>
+</div>'''
+        about = f'<p>{E(p["about"])}</p>' if p.get('about') else ''
+        return f'''<article class="sub glass">
+  <header><span class="sub-kind">{kind}</span><h3>{E(p['name'])}</h3>{about}</header>
+  <div class="sub-rows">{rows}</div>
+</article>'''
+    ea = sv['eaplay']
+    body = f'''<div class="wrap">
+  <div class="page-head"><h1>Подписки</h1><p>PS Plus для PS4 и PS5 и EA Play. Подписка на 12 месяцев выходит выгоднее всего: один раз оформили и играете весь год.</p></div>
+  <section class="sec"><div class="sec-head"><h2>PS Plus</h2></div><div class="subs">{''.join(plan(p, 'PS Plus') for p in sv['psplus'])}</div></section>
+  <section class="sec"><div class="sec-head"><h2>EA Play</h2></div>
+    <div class="subs subs-ea">{plan(ea, 'EA Play')}
+      <article class="sub glass ea-games"><header><h3>Что входит</h3><p>Большая коллекция игр EA: спорт, гонки, экшен и кооператив.</p></header>
+        <ul>{''.join(f'<li>{E(x)}</li>' for x in ea['games'])}</ul></article>
+    </div>
+  </section>
+  <p class="sec hint">Подписки оформляются так же, как игры: добавьте в корзину и отправьте заявку. Подключим дистанционно.</p>
+</div>'''
+    return layout(title='Подписки PS Plus и EA Play в Ташкенте — PS SHOP', path='/subscriptions/', page='subs',
+                  desc='PS Plus Essential, Extra и Deluxe (Premium) на 1, 3 и 12 месяцев, EA Play. Цены в сумах, подключим дистанционно.', body=body)
+
+
+def page_rent(sv):
+    r = sv['rent']
+
+    def table(rows, title):
+        base = rows[0]['price']
+        out = ''
+        for x in rows:
+            save = base * x['days'] - x['price']
+            right = '' if x['days'] == 1 else f'''<div class="rent-save"><span class="save-pill">Экономия {money(save)} uzs</span><span class="muted num">{money(x['price'] // x['days'])} uzs/сутки</span></div>'''
+            out += f'''<div class="rent-row glass"><div class="rent-days"><b class="grad-text">{x['days']}</b><span>{days_word(x['days'])}</span></div>
+  <div class="rent-price num">{money(x['price'])}<small>uzs</small></div>{right}</div>'''
+        return f'<section class="sec"><div class="sec-head"><h2>{title}</h2></div><div class="rent-list">{out}</div></section>'
+    tg = f'{CONTACTS["manager"]}?text=' + urllib.parse.quote('Здравствуйте! Хочу арендовать PS5.')
+    body = f'''<div class="wrap">
+  <div class="page-head"><h1>Аренда PS5</h1><p>Привезём PlayStation 5, установим и настроим у вас дома. Отлично для вечера с друзьями или турнира в FC.</p></div>
+  <div class="rent-cta"><a class="btn btn-main" href="{tg}" target="_blank" rel="noopener">{icon('tg')}Забронировать в Telegram</a>
+    <a class="link-quiet" href="{CONTACTS['rent']}" target="_blank" rel="noopener">Группа аренды @psshop_arenda</a></div>
+  <ul class="incl">{''.join(f'<li class="glass">{icon("check")}<span>{E(x)}</span></li>' for x in r['includes'])}</ul>
+  {table(r['rental'], 'Прокат')}
+  {table(r['extension'], 'Продление')}
+  <section class="sec"><div class="sec-head"><h2>Бронирование</h2></div>
+    <div class="book glass"><p>Чтобы забронировать консоль, внесите предоплату</p><div class="big-num grad-text num">{money(r['booking'])}<small>uzs</small></div></div>
+    <ol class="steps">
+      <li class="glass"><b>1</b><span>Вы вносите предоплату {money(r['booking'])} uzs</span></li>
+      <li class="glass"><b>2</b><span>Мы бронируем консоль за вами</span></li>
+      <li class="glass"><b>3</b><span>Готовим консоль для вас</span></li>
+    </ol>
+  </section>
+  <div class="sec rent-cta"><a class="btn btn-main" href="{tg}" target="_blank" rel="noopener">{icon('tg')}Забронировать в Telegram</a></div>
+</div>'''
+    return layout(title='Аренда PS5 в Ташкенте — PS SHOP', path='/rent/', page='rent',
+                  desc='Аренда PlayStation 5 в Ташкенте: от 200 000 uzs в сутки, доставка, установка и настройка дома.', body=body)
+
+
+GUARANTEES = [
+    ('Игра работает', 'Игра запустится и будет работать. Если что-то пойдёт не так, разберёмся сразу, а не «когда-нибудь».'),
+    ('Замена или возврат', 'Если проблему не получилось решить, заменим игру или вернём деньги. Без долгих споров.'),
+    ('Аккаунт в безопасности', 'Игра ставится через отдельного пользователя на консоли. Ваш личный профиль и данные остаются нетронутыми.'),
+    ('Понятная инструкция', 'Пришлём подробную пошаговую инструкцию. Справится даже тот, кто впервые держит джойстик.'),
+    ('На связи 24/7', 'Не пропадаем после оплаты. Пишите в любое время: подскажем, поможем, быстро решим.'),
+]
+
+
+def guarantees_block():
+    cards = ''.join(f'''<article class="gcard glass"><div class="perk-ic">{icon('shield' if i < 3 else 'chat' if i == 4 else 'check')}</div><h3>{E(t)}</h3><p>{E(d)}</p></article>'''
+                    for i, (t, d) in enumerate(GUARANTEES))
+    return f'''<section class="sec wrap"><div class="sec-head"><h2>Гарантии</h2><a href="{CONTACTS['reviews']}" target="_blank" rel="noopener">Отзывы клиентов</a></div>
+<div class="gcards">{cards}</div></section>'''
+
+
+def page_install():
+    steps = [
+        ('Получаете данные аккаунта', 'После оплаты пришлём логин и пароль от аккаунта с игрой, плюс подробную инструкцию.'),
+        ('Добавляете нового пользователя', 'На PlayStation выберите «Добавить пользователя» и войдите с нашими данными. Ваш аккаунт остаётся на месте: на одной консоли помещается до 16 аккаунтов.'),
+        ('Открываете Библиотеку', 'Войдите в новый профиль и откройте «Библиотеку». Игра уже ждёт там.'),
+        ('Устанавливаете и играете', 'Нажмите «Загрузить», дождитесь окончания установки и запускайте игру.'),
+        ('Мы рядом на каждом шаге', 'Если что-то непонятно, пишите в Telegram: подскажем по шагам или подключим дистанционно. Всё под ключ.'),
+    ]
+    items = ''.join(f'''<li class="istep glass"><b class="grad-text">{i + 1}</b><div><h3>{E(t)}</h3><p>{E(d)}</p></div></li>''' for i, (t, d) in enumerate(steps))
+    body = f'''<div class="wrap">
+  <div class="page-head"><h1>Как происходит установка</h1><p>Пять простых шагов, и игра на вашей консоли. Приезжать никуда не нужно, а если запутаетесь, проведём за руку.</p></div>
+  <ol class="isteps">{items}</ol>
+  <div class="rent-cta"><a class="btn btn-main" href="/catalog/">Выбрать игру</a><a class="link-quiet" href="{CONTACTS['manager']}" target="_blank" rel="noopener">{icon('tg')}Задать вопрос в Telegram</a></div>
+</div>
+{guarantees_block()}'''
+    return layout(title='Как происходит установка игры — PS SHOP', path='/install/', page='install',
+                  desc='Как установить игру из PS SHOP на PS4 или PS5: пять простых шагов, инструкция и поддержка 24/7.', body=body)
 
 
 def page_stub(path, page, title, h1, text):
@@ -435,14 +550,14 @@ VERSION = dt.datetime.now(TZ).strftime('%Y%m%d%H%M')
 
 
 def make_thumbs():
-    """Лёгкие обложки 400x400 для карточек (полные 800x800 — для страницы игры)."""
+    """Лёгкие обложки 330x440 для карточек (полные 600x800 — для страницы игры)."""
     from PIL import Image
     src = os.path.join(ROOT, 'src', 'static', 'covers')
     dst = os.path.join(DIST, 'static', 'covers', 'sm')
     os.makedirs(dst, exist_ok=True)
     for f in os.listdir(src):
         if f.endswith('.webp'):
-            Image.open(os.path.join(src, f)).resize((400, 400), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=74, method=6)
+            Image.open(os.path.join(src, f)).resize((330, 440), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=74, method=6)
 
 
 def write(rel, text):
@@ -462,11 +577,17 @@ def main():
     write('catalog/index.html', page_catalog(games))
     for g in games:
         write(f'game/{g["id"]}/index.html', page_game(g, games))
-    write('subscriptions/index.html', page_stub('/subscriptions/', 'subs', 'Подписки PS Plus и EA Play — PS SHOP', 'Подписки', 'Страница в работе.'))
-    write('rent/index.html', page_stub('/rent/', 'rent', 'Аренда PS5 в Ташкенте — PS SHOP', 'Аренда PS5', 'Страница в работе.'))
+    sv = load_services()
+    write('subscriptions/index.html', page_subs(sv))
+    write('rent/index.html', page_rent(sv))
+    write('install/index.html', page_install())
     write('404.html', page_404())
-    write('static/catalog.json', json.dumps(catalog_json(games), ensure_ascii=False, separators=(',', ':')))
-    urls = ['/', '/catalog/', '/subscriptions/', '/rent/'] + [f'/game/{g["id"]}/' for g in games]
+    rows = catalog_json(games)
+    for p in sv['psplus'] + [sv['eaplay']]:
+        rows.append({'id': p['id'], 't': ('PS Plus ' if p['id'].startswith('ps-plus') else '') + p['name'], 'k': 'sub',
+                     'o': [[months(m), v] for m, v in p['prices'].items()], 'pl': [], 'm': min(p['prices'].values()), 'f': [], 's': ''})
+    write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
+    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')

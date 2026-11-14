@@ -1,0 +1,24 @@
+{
+  "_как_менять": "Цены в сумах. Меняйте числа и сохраняйте файл — сайт пересоберётся сам.",
+  "psplus": [
+    {"id": "ps-plus-essential", "name": "Essential", "about": "Онлайн-игры с друзьями, ежемесячные игры и облачные сохранения.",
+     "prices": {"1": 269000, "3": 429000, "12": 629000}},
+    {"id": "ps-plus-extra", "name": "Extra", "about": "Всё из Essential и каталог из сотен игр для PS4 и PS5.",
+     "prices": {"1": 309000, "3": 629000, "12": 979000}},
+    {"id": "ps-plus-deluxe", "name": "Deluxe (Premium)", "about": "Всё из Extra, классические игры и пробные версии новинок.",
+     "prices": {"1": 389000, "3": 699000, "12": 1268000}}
+  ],
+  "eaplay": {"id": "ea-play", "name": "EA Play", "prices": {"1": 179000, "12": 659000},
+    "games": ["EA SPORTS FC 26", "Madden NFL 26", "College Football 26", "EA SPORTS FC 25", "NHL 25", "NHL 24", "F1 25", "F1 24",
+      "Need for Speed Unbound", "Need for Speed Heat", "Need for Speed Payback", "Need for Speed Hot Pursuit Remastered",
+      "GRID Legends", "Burnout Paradise Remastered", "Star Wars Jedi: Survivor", "Star Wars Jedi: Fallen Order",
+      "Battlefield 2042", "Battlefield V", "Battlefield 1", "Battlefield 4", "Titanfall 2", "Star Wars Battlefront II",
+      "Star Wars Squadrons", "UFC 4", "Mass Effect Legendary Edition", "Dragon Age: Inquisition", "It Takes Two", "A Way Out",
+      "Unravel Two", "Apex Legends", "The Sims 4", "Plants vs. Zombies: Garden Warfare 2", "Lost in Random", "Wild Hearts"]},
+  "rent": {
+    "rental": [{"days": 1, "price": 300000}, {"days": 3, "price": 750000}, {"days": 5, "price": 1100000}, {"days": 7, "price": 1400000}],
+    "extension": [{"days": 1, "price": 270000}, {"days": 3, "price": 675000}, {"days": 5, "price": 990000}, {"days": 7, "price": 1260000}],
+    "booking": 50000,
+    "includes": ["PlayStation 5 и 2 джойстика: играйте вдвоём", "Игры по подписке PS Plus", "Доставка по Ташкенту", "Установка и настройка у вас дома"]
+  }
+}

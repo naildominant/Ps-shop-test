@@ -10,8 +10,7 @@
   2. Находит посты с играми (есть «ЦЕНА» и цена для PS4/PS5 или издания).
   3. Если игра выкладывалась несколько раз, берёт самый свежий пост.
      Пост удалён -> игры нет в канале -> игры нет на сайте.
-  4. Скачивает обложки (WebP, до 640 px) в src/static/covers/.
-     Если в data/covers-manual/ лежит обложка с тем же именем, берётся она (чистая обложка вместо картинки из поста).
+  4. Готовит обложки 600x800 (WebP) в src/static/covers/: ручная > официальная (Steam/Википедия) > из поста.
   5. Пишет data/games.json. Посты, которые не удалось разобрать, пишет в data/skipped.json.
 """
 import concurrent.futures as cf
@@ -249,63 +248,64 @@ def build(posts):
 
 
 # ---------- обложки ----------
-def normalize_cover(path):
-    """Приводит обложку к квадрату 800x800, как плитки в PlayStation Store.
-    Почти квадратные картинки аккуратно подрезаются по краям. Вертикальные и горизонтальные
-    встают целиком, а пустое место заполняется их же размытым фоном — ничего важного не обрезается."""
+def normalize_cover(im):
+    """Приводит обложку к формату 3:4 (600x800), как коробка с игрой.
+    Вертикальные обложки (Steam, Википедия) аккуратно подрезаются по краям.
+    Квадратные и горизонтальные встают целиком, а пустое место заполняется их же размытым фоном."""
     from PIL import Image, ImageFilter
-    im = Image.open(path).convert('RGB')
+    im = im.convert('RGB')
+    W, H = 600, 800
     w, h = im.size
-    S = 800
-    if (w, h) == (S, S):
-        return
     r = w / h
-    if 0.88 <= r <= 1.14:
-        k = S / min(w, h)
-        im = im.resize((max(S, round(w * k)), max(S, round(h * k))), Image.LANCZOS)
-        l, t = (im.width - S) // 2, (im.height - S) // 2
-        out = im.crop((l, t, l + S, t + S))
-    else:
-        bg = im.resize((S, S), Image.LANCZOS).filter(ImageFilter.GaussianBlur(30))
-        bg = Image.blend(bg, Image.new('RGB', (S, S), (10, 8, 30)), 0.45)
-        k = min(S / w, S / h)
-        fit = im.resize((round(w * k), round(h * k)), Image.LANCZOS)
-        bg.paste(fit, ((S - fit.width) // 2, (S - fit.height) // 2))
-        out = bg
-    out.save(path, 'WEBP', quality=80, method=6)
+    if 0.62 <= r <= 0.84:
+        k = max(W / w, H / h)
+        im = im.resize((max(W, round(w * k)), max(H, round(h * k))), Image.LANCZOS)
+        l, t = (im.width - W) // 2, (im.height - H) // 2
+        return im.crop((l, t, l + W, t + H))
+    bg = im.resize((W, H), Image.LANCZOS).filter(ImageFilter.GaussianBlur(30))
+    bg = Image.blend(bg, Image.new('RGB', (W, H), (10, 8, 30)), 0.45)
+    k = min(W / w, H / h)
+    fit = im.resize((round(w * k), round(h * k)), Image.LANCZOS)
+    bg.paste(fit, ((W - fit.width) // 2, (H - fit.height) // 2))
+    return bg
 
 
 def fetch_covers(games):
+    """Для каждой игры выбирает лучшую обложку:
+    1) data/covers-manual/<id>.webp — заменённая вручную;
+    2) data/covers-official/<id>.jpg — официальная (Steam / Википедия, см. scripts/covers_official.py);
+    3) картинка из поста в канале."""
     from PIL import Image
     os.makedirs(COVERS, exist_ok=True)
     stamp_file = os.path.join(DATA, 'covers.json')
     stamps = json.load(open(stamp_file)) if os.path.exists(stamp_file) else {}
 
-    manual_dir = os.path.join(DATA, 'covers-manual')
-
     def one(g):
         path = os.path.join(COVERS, g['id'] + '.webp')
-        manual = os.path.join(manual_dir, g['id'] + '.webp')
-        if os.path.exists(manual):  # обложка, заменённая вручную, важнее картинки из поста
-            shutil.copyfile(manual, path)
-            normalize_cover(path)
-            return g['id'], g['post']
-        if os.path.exists(path) and stamps.get(g['id']) == g['post']:
-            normalize_cover(path)
-            return g['id'], g['post']
-        if not g.get('cover_url'):
+        manual = os.path.join(DATA, 'covers-manual', g['id'] + '.webp')
+        official = os.path.join(DATA, 'covers-official', g['id'] + '.jpg')
+        if os.path.exists(manual):
+            src, sig = manual, f'manual:{int(os.path.getmtime(manual))}'
+        elif os.path.exists(official):
+            src, sig = official, f'official:{os.path.getsize(official)}'
+        else:
+            src, sig = None, f'channel:{g["post"]}'
+        sig += ':v3'
+        if os.path.exists(path) and stamps.get(g['id']) == sig:
+            return g['id'], sig
+        if src:
+            im = Image.open(src)
+        elif g.get('cover_url'):
+            im = Image.open(io.BytesIO(get(g['cover_url'])))
+        else:
             return g['id'], None
-        data = get(g['cover_url'])
-        im = Image.open(io.BytesIO(data)).convert('RGB')
-        im.thumbnail((900, 900))
-        im.save(path, 'WEBP', quality=78, method=6)
-        normalize_cover(path)
-        return g['id'], g['post']
+        normalize_cover(im).save(path, 'WEBP', quality=80, method=6)
+        return g['id'], sig
 
     with cf.ThreadPoolExecutor(8) as ex:
-        for gid, post in ex.map(one, games):
-            if post:
-                stamps[gid] = post
+        for gid, sig in ex.map(one, games):
+            if sig:
+                stamps[gid] = sig
     live = {g['id'] for g in games}
     for f in glob.glob(os.path.join(COVERS, '*.webp')):
         if os.path.basename(f)[:-5] not in live:
