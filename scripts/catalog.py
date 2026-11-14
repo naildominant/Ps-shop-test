@@ -285,7 +285,7 @@ def fetch_covers(games):
         manual = os.path.join(DATA, 'covers-manual', g['id'] + '.webp')
         official = os.path.join(DATA, 'covers-official', g['id'] + '.jpg')
         if os.path.exists(manual):
-            src, sig = manual, f'manual:{int(os.path.getmtime(manual))}'
+            src, sig = manual, f'manual:{os.path.getsize(manual)}'
         elif os.path.exists(official):
             src, sig = official, f'official:{os.path.getsize(official)}'
         else:
