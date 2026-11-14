@@ -292,7 +292,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .istep p { margin: 0; color: var(--muted); max-width: 60ch; }
 
 /* ---------- отзывы ---------- */
-.revs { grid-auto-columns: minmax(280px, 340px); }
+.shelf.revs { grid-auto-columns: minmax(300px, 360px); }
 .rev { padding: 20px; display: flex; flex-direction: column; gap: 16px; justify-content: space-between; }
 .rev-text { margin: 0; font-size: 15px; line-height: 1.55; color: #e4e0ff; }
 .rev-text::before { content: "“"; display: block; font: 800 40px/0.6 var(--f-display); background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 10px; }
@@ -300,7 +300,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .rev footer { display: flex; gap: 12px; align-items: center; }
 .rev footer > span:nth-child(2) { display: grid; min-width: 0; }
 .rev footer b { font-size: 15px; }
-.rev footer small { color: var(--faint); font-size: 13px; font-weight: 600; }
+.rev footer small { color: var(--faint); font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rev-ava { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); font: 800 16px var(--f-display); color: #fff; flex: none; }
 .rev-src { margin-left: auto; color: var(--faint); font-size: 20px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; }
 .rev-src:hover { color: var(--text); background: rgba(120, 100, 255, .16); }
@@ -435,6 +435,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (max-width: 400px) {
   .buy-actions { grid-template-columns: 1fr; }
   .brand b { display: none; }
+}
+@media (max-width: 760px) {
+  .shelf.revs { grid-auto-columns: 86%; gap: 12px; }
+  .rev { padding: 18px; }
+  .rev-text { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }

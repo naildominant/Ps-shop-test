@@ -299,7 +299,7 @@ def load_reviews():
 
 def review_card(r, clamp=True):
     d = parse_date(r['date'])
-    when = f'{d.day} {MONTHS[d.month - 1]} {d.year}' if d else ''
+    when = d.strftime('%d.%m.%Y') if d else ''
     text = E(r['text']).replace('\n', '<br>')
     return f'''<article class="rev glass">
   <p class="rev-text{' is-clamp' if clamp else ''}">{text}</p>
@@ -312,7 +312,7 @@ def reviews_block(reviews):
     if not reviews:
         return ''
     return f'''<section class="sec wrap"><div class="sec-head"><h2>Отзывы</h2><a href="/reviews/">Все отзывы</a></div>
-<div class="shelf revs">{''.join(review_card(r) for r in reviews)}</div></section>'''
+<div class="shelf revs">{''.join(review_card(r) for r in reviews[:6])}</div></section>'''
 
 
 def page_reviews(reviews):
