@@ -269,6 +269,25 @@ def shelf(title, items, href=None, eager=0):
     return f'''<section class="sec wrap"><div class="sec-head"><h2>{title}</h2>{more}</div><div class="shelf">{cards}</div></section>'''
 
 
+GAMEPAD_SVG = '''<svg viewBox="0 0 320 200" class="pad-svg" role="presentation">
+<defs>
+  <linearGradient id="pg-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d06bff"/><stop offset=".5" stop-color="#6a55ff"/><stop offset="1" stop-color="#2bc8ff"/></linearGradient>
+  <linearGradient id="pg-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="pg-pad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a1f6e"/><stop offset="1" stop-color="#121040"/></linearGradient>
+  <radialGradient id="pg-stick" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#3a3190"/><stop offset="1" stop-color="#0d0b2c"/></radialGradient>
+</defs>
+<path d="M60 40C80 22 120 26 160 26S240 22 260 40C282 58 300 110 306 150C312 186 290 198 268 184C250 172 236 148 222 136H98C84 148 70 172 52 184C30 198 8 186 14 150C20 110 38 58 60 40Z" fill="url(#pg-body)"/>
+<path d="M60 40C80 22 120 26 160 26S240 22 260 40C282 58 300 110 306 150C312 186 290 198 268 184C250 172 236 148 222 136H98C84 148 70 172 52 184C30 198 8 186 14 150C20 110 38 58 60 40Z" fill="url(#pg-shine)" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+<rect x="116" y="34" width="88" height="54" rx="12" fill="url(#pg-pad)" stroke="#9fe6ff" stroke-opacity=".55" stroke-width="1.5"/>
+<path d="M124 36h72" stroke="#7ee0ff" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+<g fill="#120f3a" opacity=".85"><rect x="70" y="72" width="26" height="10" rx="3"/><rect x="78" y="64" width="10" height="26" rx="3"/></g>
+<g fill="#120f3a" opacity=".85"><circle cx="242" cy="62" r="7"/><circle cx="242" cy="94" r="7"/><circle cx="226" cy="78" r="7"/><circle cx="258" cy="78" r="7"/></g>
+<g><circle cx="124" cy="114" r="18" fill="url(#pg-stick)"/><circle cx="124" cy="114" r="11" fill="none" stroke="#9fe6ff" stroke-opacity=".5"/>
+<circle cx="196" cy="114" r="18" fill="url(#pg-stick)"/><circle cx="196" cy="114" r="11" fill="none" stroke="#9fe6ff" stroke-opacity=".5"/></g>
+<circle cx="160" cy="112" r="4" fill="#9fe6ff" opacity=".8"/>
+</svg>'''
+
+
 # ---------- страницы ----------
 def page_home(games):
     gta = next((g for g in games if g['id'] == 'grand-theft-auto-vi'), None)
@@ -302,7 +321,10 @@ def page_home(games):
         </div>
         <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>
       </div>
-      <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
+      <div class="hero-art">
+        <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
+        <div class="pad" id="pad" aria-hidden="true"><div class="pad-tilt">{GAMEPAD_SVG}</div></div>
+      </div>
     </div>
   </div>
 </section>'''

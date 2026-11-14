@@ -187,6 +187,19 @@
     s.classList.toggle('is-open', open); so.setAttribute('aria-expanded', String(open)); if (open) $('#search-q').focus();
   });
 
+  /* ---------- геймпад: наклон за мышкой ---------- */
+  const pad = $('#pad .pad-tilt');
+  if (pad && matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)').matches) {
+    let raf = 0;
+    window.addEventListener('pointermove', (e) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const x = e.clientX / innerWidth - 0.5; const y = e.clientY / innerHeight - 0.5;
+        pad.style.transform = `rotateY(${x * 28}deg) rotateX(${-y * 22}deg) translateZ(0)`;
+      });
+    }, { passive: true });
+  }
+
   /* ---------- таймер GTA 6 ---------- */
   const timer = $('#timer');
   if (timer) {
