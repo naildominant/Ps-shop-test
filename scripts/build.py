@@ -129,7 +129,7 @@ def icon(name, cls=''):
 
 
 # ---------- разметка ----------
-NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка')]
+NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы')]
 
 
 def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head=''):
@@ -203,6 +203,7 @@ def footer():
         <li><a href="/subscriptions/">Подписки PS Plus и EA Play</a></li>
         <li><a href="/rent/">Аренда PS5</a></li>
         <li><a href="/install/">Как происходит установка</a></li>
+        <li><a href="/reviews/">Отзывы</a></li>
       </ul>
     </div>
     <div>
@@ -288,6 +289,42 @@ GAMEPAD_SVG = '''<svg viewBox="0 0 320 200" class="pad-svg" role="presentation">
 </svg>'''
 
 
+MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+
+
+def load_reviews():
+    path = os.path.join(ROOT, 'data', 'reviews.json')
+    return json.load(open(path, encoding='utf-8')) if os.path.exists(path) else []
+
+
+def review_card(r, clamp=True):
+    d = parse_date(r['date'])
+    when = f'{d.day} {MONTHS[d.month - 1]} {d.year}' if d else ''
+    text = E(r['text']).replace('\n', '<br>')
+    return f'''<article class="rev glass">
+  <p class="rev-text{' is-clamp' if clamp else ''}">{text}</p>
+  <footer><span class="rev-ava">{E(r['name'][:1].upper())}</span><span><b>{E(r['name'])}</b><small>{E(r['tag'])} · {when}</small></span>
+  <a class="rev-src" href="{CONTACTS['reviews']}/{r['id']}" target="_blank" rel="noopener" aria-label="Отзыв в Telegram">{icon('tg')}</a></footer>
+</article>'''
+
+
+def reviews_block(reviews):
+    if not reviews:
+        return ''
+    return f'''<section class="sec wrap"><div class="sec-head"><h2>Отзывы</h2><a href="/reviews/">Все отзывы</a></div>
+<div class="shelf revs">{''.join(review_card(r) for r in reviews)}</div></section>'''
+
+
+def page_reviews(reviews):
+    body = f'''<div class="wrap">
+  <div class="page-head"><h1>Отзывы</h1><p>Что пишут наши клиенты. Ещё сотни отзывов — в нашей группе в Telegram.</p></div>
+  <div class="rev-grid">{''.join(review_card(r, clamp=False) for r in reviews)}</div>
+  <div class="rent-cta"><a class="btn btn-main" href="{CONTACTS['reviews']}" target="_blank" rel="noopener">{icon('tg')}Все отзывы в Telegram</a></div>
+</div>'''
+    return layout(title='Отзывы клиентов — PS SHOP', path='/reviews/', page='reviews',
+                  desc='Отзывы клиентов PS SHOP о покупке игр и подписок для PS4 и PS5 в Ташкенте.', body=body)
+
+
 # ---------- страницы ----------
 def page_home(games):
     gta = next((g for g in games if g['id'] == 'grand-theft-auto-vi'), None)
@@ -351,7 +388,7 @@ def page_home(games):
     pre = [g for g in pre if g['id'] != 'grand-theft-auto-vi']
     body = hero + perks + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
         + shelf('Новинки', new, '/catalog/?f=new') + promo + shelf('Играть вместе', coop, '/catalog/?f=coop') \
-        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + shelf('Для VR', vr, '/catalog/?f=vr') + guarantees_block()
+        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + reviews_block(load_reviews()) + shelf('Для VR', vr, '/catalog/?f=vr') + guarantees_block()
     return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home',
                   desc=f'{len(games)} цифровых игр для PlayStation 4 и 5, подписки PS Plus и аренда PS5. Подключим дистанционно, гарантия, на связи 24/7.',
                   body=body)
@@ -518,7 +555,7 @@ GUARANTEES = [
 def guarantees_block():
     cards = ''.join(f'''<article class="gcard glass"><div class="perk-ic">{icon('shield' if i < 3 else 'chat' if i == 4 else 'check')}</div><h3>{E(t)}</h3><p>{E(d)}</p></article>'''
                     for i, (t, d) in enumerate(GUARANTEES))
-    return f'''<section class="sec wrap"><div class="sec-head"><h2>Гарантии</h2><a href="{CONTACTS['reviews']}" target="_blank" rel="noopener">Отзывы клиентов</a></div>
+    return f'''<section class="sec wrap"><div class="sec-head"><h2>Гарантии</h2><a href="/reviews/">Отзывы клиентов</a></div>
 <div class="gcards">{cards}</div></section>'''
 
 
@@ -632,13 +669,14 @@ def main():
     write('subscriptions/index.html', page_subs(sv))
     write('rent/index.html', page_rent(sv))
     write('install/index.html', page_install())
+    write('reviews/index.html', page_reviews(load_reviews()))
     write('404.html', page_404())
     rows = catalog_json(games)
     for p in sv['psplus'] + [sv['eaplay']]:
         rows.append({'id': p['id'], 't': ('PS Plus ' if p['id'].startswith('ps-plus') else '') + p['name'], 'k': 'sub',
                      'o': [[months(m), v] for m, v in p['prices'].items()], 'pl': [], 'm': min(p['prices'].values()), 'f': [], 's': ''})
     write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
-    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/'] + [f'/game/{g["id"]}/' for g in games]
+    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')

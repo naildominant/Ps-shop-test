@@ -291,6 +291,21 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .istep h3 { margin: 4px 0 6px; font: 700 19px/1.25 var(--f-display); }
 .istep p { margin: 0; color: var(--muted); max-width: 60ch; }
 
+/* ---------- отзывы ---------- */
+.revs { grid-auto-columns: minmax(280px, 340px); }
+.rev { padding: 20px; display: flex; flex-direction: column; gap: 16px; justify-content: space-between; }
+.rev-text { margin: 0; font-size: 15px; line-height: 1.55; color: #e4e0ff; }
+.rev-text::before { content: "“"; display: block; font: 800 40px/0.6 var(--f-display); background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 10px; }
+.rev-text.is-clamp { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.rev footer { display: flex; gap: 12px; align-items: center; }
+.rev footer > span:nth-child(2) { display: grid; min-width: 0; }
+.rev footer b { font-size: 15px; }
+.rev footer small { color: var(--faint); font-size: 13px; font-weight: 600; }
+.rev-ava { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); font: 800 16px var(--f-display); color: #fff; flex: none; }
+.rev-src { margin-left: auto; color: var(--faint); font-size: 20px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; }
+.rev-src:hover { color: var(--text); background: rgba(120, 100, 255, .16); }
+.rev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 26px; align-items: start; }
+
 /* ---------- аренда ---------- */
 .rent-cta { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 22px; }
 .incl { list-style: none; padding: 0; margin: 26px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
