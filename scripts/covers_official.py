@@ -52,8 +52,12 @@ QUERY = {
     'expeditions-a-mudrunner-game': 'Expeditions: A MudRunner Game', 'hollow-knight-silksong': 'Hollow Knight: Silksong',
     'detroit-become-human': 'Detroit: Become Human', 'sifu': 'Sifu', 'way-of-the-hunter': 'Way of the Hunter',
 }
+# Точный номер игры в Steam, если поиск ошибается
+APPID = {'gta-5': 3240220, 'the-elder-scrolls-v-skyrim': 489830, 'brothers': 2153350, 'kingdom-come-deliverance-royal-edition': 379430,
+         'kingdom-come-deliverance': 379430}
 # Игры, которых точно нет в Steam: сразу ищем на Википедии
 WIKI_ONLY = {
+    'fc-24': 'EA Sports FC 24',
     'bloodborne-game-of-the-year': 'Bloodborne', 'demon-s-souls': "Demon's Souls (2020 video game)", 'gran-turismo-7': 'Gran Turismo 7',
     'astro-bot': 'Astro Bot', 'astro-bot-rescue-mission-vr': 'Astro Bot Rescue Mission', 'shadow-of-the-colossus': 'Shadow of the Colossus (2018 video game)',
     'grand-theft-auto-vi': 'Grand Theft Auto VI', 'minecraft': 'Minecraft', 'minecraft-legends': 'Minecraft Legends',
@@ -68,7 +72,8 @@ SKIP = {'ea-star-wars-triple-bundle', 'resident-evil-remake-trilogy-4', 'residen
         'resident-evil-bundle-gold-edition', 'mortal-kombat-11-ultimate-injustice-2', 'mortal-kombat-elder-god-bundle', 'metro-saga-bundle',
         'outlast-1-outlast-2-bundle', 'far-cry-4-far-cry-primal', 'far-cry-5-far-cry-new-dawn', 'assassin-s-creed-bundle-black-flag-unity-syndicate',
         'limbo-inside-bundle', 'moving-out-moving-out-2-bundle', 'mafia-trilogy', 'the-sims-4-my-first-pet-stuff', 'crysis-remastered-trilogy',
-        'wolfenstein-alt-history-collection', 'batman-arkham-collection'}
+        'wolfenstein-alt-history-collection', 'batman-arkham-collection', 'monopoly', 'tomb-raider', 'little-nightmares-1-and-2-bundle',
+        'unravel-1-2-yarnny-bundle', 'overcooked-overcooked-2', 'job-simulator', 'carx-street'}
 BAD_WORDS = re.compile(r'soundtrack|dlc|season pass|demo|artbook|upgrade|pack\b|bundle|expansion|costume|wallpaper|playtest|benchmark|editor|server', re.I)
 
 
@@ -100,7 +105,18 @@ def clean_title(t):
     return re.sub(r'\s+', ' ', t).strip(' -:')
 
 
+def steam_image(appid):
+    for name in ('library_600x900_2x.jpg', 'library_600x900.jpg'):
+        img = get(f'https://cdn.cloudflare.steamstatic.com/steam/apps/{appid}/{name}', binary=True)
+        if img and len(img) > 5000:
+            return img
+    return None
+
+
 def steam(gid, title):
+    if gid in APPID:
+        img = steam_image(APPID[gid])
+        return {'source': 'steam', 'match': f'appid {APPID[gid]}', 'score': 1, 'appid': APPID[gid], 'image': img} if img else None
     q = QUERY.get(gid, clean_title(title))
     raw = get('https://store.steampowered.com/api/storesearch/?' + urllib.parse.urlencode({'term': q, 'cc': 'us', 'l': 'english'}))
     if not raw:
@@ -113,11 +129,8 @@ def steam(gid, title):
             best, score = i, s
     if not best or score < 0.62:
         return None
-    for name in ('library_600x900_2x.jpg', 'library_600x900.jpg'):
-        img = get(f'https://cdn.cloudflare.steamstatic.com/steam/apps/{best["id"]}/{name}', binary=True)
-        if img and len(img) > 5000:
-            return {'source': 'steam', 'match': best['name'], 'score': round(score, 2), 'appid': best['id'], 'image': img}
-    return None
+    img = steam_image(best['id'])
+    return {'source': 'steam', 'match': best['name'], 'score': round(score, 2), 'appid': best['id'], 'image': img} if img else None
 
 
 _last = [0.0]
@@ -165,6 +178,17 @@ def wiki(gid, title):
     return None
 
 
+def valid_image(data):
+    import io
+    from PIL import Image
+    try:
+        im = Image.open(io.BytesIO(data))
+        im.verify()
+        return im.size[0] >= 200
+    except Exception:
+        return False
+
+
 def main():
     games = json.load(open(os.path.join(DATA, 'games.json'), encoding='utf-8'))
     os.makedirs(OUT, exist_ok=True)
@@ -177,12 +201,17 @@ def main():
         if only and gid not in only:
             continue
         if gid in SKIP:
-            sources[gid] = {'source': 'channel', 'why': 'набор из нескольких игр'}
+            sources[gid] = {'source': 'channel', 'why': 'оставлена картинка из канала'}
+            p = os.path.join(OUT, gid + '.jpg')
+            if os.path.exists(p):
+                os.remove(p)
             continue
         if not redo and not only and gid in sources and not ('--missing' in sys.argv and sources[gid].get('why') == 'не найдено'):
             continue
         r = None if gid in WIKI_ONLY else steam(gid, g['title'])
         r = r or wiki(gid, g['title'])
+        if r and not valid_image(r['image']):
+            r = None
         if r:
             img = r.pop('image')
             open(os.path.join(OUT, gid + '.jpg'), 'wb').write(img)

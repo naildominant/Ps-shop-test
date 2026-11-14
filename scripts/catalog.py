@@ -293,8 +293,16 @@ def fetch_covers(games):
         sig += ':v3'
         if os.path.exists(path) and stamps.get(g['id']) == sig:
             return g['id'], sig
+        im = None
         if src:
-            im = Image.open(src)
+            try:
+                im = Image.open(src)
+                im.load()
+            except Exception:
+                print(f'битая обложка {src}, беру из канала')
+                im = None
+        if im is not None:
+            pass
         elif g.get('cover_url'):
             im = Image.open(io.BytesIO(get(g['cover_url'])))
         else:
