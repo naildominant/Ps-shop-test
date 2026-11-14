@@ -73,7 +73,12 @@ SKIP = {'ea-star-wars-triple-bundle', 'resident-evil-remake-trilogy-4', 'residen
         'outlast-1-outlast-2-bundle', 'far-cry-4-far-cry-primal', 'far-cry-5-far-cry-new-dawn', 'assassin-s-creed-bundle-black-flag-unity-syndicate',
         'limbo-inside-bundle', 'moving-out-moving-out-2-bundle', 'mafia-trilogy', 'the-sims-4-my-first-pet-stuff', 'crysis-remastered-trilogy',
         'wolfenstein-alt-history-collection', 'batman-arkham-collection', 'monopoly', 'tomb-raider', 'little-nightmares-1-and-2-bundle',
-        'unravel-1-2-yarnny-bundle', 'overcooked-overcooked-2', 'job-simulator', 'carx-street'}
+        'unravel-1-2-yarnny-bundle', 'overcooked-overcooked-2', 'job-simulator', 'carx-street',
+        # Википедия подобрала не ту часть игры или слишком мелкую картинку
+        'call-of-duty-modern-warfare-2-campaign-remastered', 'call-of-duty-modern-warfare-2', 'diablo-2', 'diablo-3', 'hot-wheels',
+        'hot-wheels-2', 'mortal-kombat-xl', 'mortal-shell-2', 'grounded-2', 'high-on-life-2', 'ratchet-clank', 'rayman-legends',
+        'poppy-playtime-chapter-5', 'painkiller', 'hell-let-loose-vietnam', 'god-of-war-sons-of-sparta', 'minecraft-dungeons',
+        'god-of-war-iii-remastered'}
 BAD_WORDS = re.compile(r'soundtrack|dlc|season pass|demo|artbook|upgrade|pack\b|bundle|expansion|costume|wallpaper|playtest|benchmark|editor|server', re.I)
 
 

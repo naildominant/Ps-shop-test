@@ -1,7 +1,9 @@
 {
  "007-first-light": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "007 First Light",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/2b/007_First_Light_%282026%29_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "a-way-out": {
   "appid": 1222700,
@@ -10,8 +12,10 @@
   "source": "steam"
  },
  "ace-combat-8-wings-of-theve": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Ace Combat 8: Wings of Theve",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/b/bd/Ace_Combat_8_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "aces-of-thunder": {
   "appid": 2754090,
@@ -36,8 +40,10 @@
   "source": "steam"
  },
  "alan-wake-2": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Alan Wake 2",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/e/ed/Alan_Wake_2_box_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "among-us-vr": {
   "appid": 1849900,
@@ -52,8 +58,10 @@
   "source": "steam"
  },
  "aphelion": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Aphelion (video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/1a/Aphelion_video_game_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "arc-raiders": {
   "appid": 1808500,
@@ -120,8 +128,10 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Astro_Bot_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=original"
  },
  "astro-bot-rescue-mission-vr": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Astro Bot Rescue Mission",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/2c/Astro_Bot_Rescue_Mission_NA_Box_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "astroneer": {
   "appid": 361420,
@@ -162,8 +172,10 @@
   "source": "steam"
  },
  "battlefield-6": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Battlefield 6",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/87/Battlefield_6_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "battlefield-v": {
   "appid": 1238810,
@@ -172,8 +184,10 @@
   "source": "steam"
  },
  "beast-of-reincarnation": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Beast of Reincarnation",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/8f/Beast_of_Reincarnation_cover_artwork.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "beat-the-beats-vr2": {
   "appid": 2677480,
@@ -182,8 +196,10 @@
   "source": "steam"
  },
  "black-desert-standard-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Black Desert Online",
+  "score": 0.77,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/85/Black_Desert_Online_Logo_%28En%29.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "black-myth-wukong": {
   "appid": 2358720,
@@ -192,8 +208,10 @@
   "source": "steam"
  },
  "bloodborne-game-of-the-year": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Bloodborne",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/6/68/Bloodborne_Cover_Wallpaper.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "bloodlines-2": {
   "source": "channel",
@@ -206,18 +224,22 @@
   "source": "steam"
  },
  "brothers": {
-  "appid": 336760,
-  "match": "Pilot Brothers",
-  "score": 0.73,
+  "appid": 2153350,
+  "match": "appid 2153350",
+  "score": 1,
   "source": "steam"
  },
  "call-of-duty-black-ops-6": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Call of Duty: Black Ops 6",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/c/c9/Call_of_Duty_Black_Ops_6_Key_Art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "call-of-duty-black-ops-7": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Call of Duty: Black Ops 7",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/a/a3/Call_of_Duty_Black_Ops_7_Key_Art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "call-of-duty-black-ops-cold-war": {
   "appid": 1985810,
@@ -232,24 +254,30 @@
   "source": "steam"
  },
  "call-of-duty-modern-warfare-1": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Call of Duty: Modern Warfare (2019 video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/1f/Call_of_Duty_Modern_Warfare_%282019%29_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "call-of-duty-modern-warfare-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "call-of-duty-modern-warfare-2-campaign-remastered": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "call-of-duty-modern-warfare-3": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Call of Duty: Modern Warfare III (2023 video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/f/f6/MWIII_Cover_Art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "call-of-duty-modern-warfare-4": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Call of Duty: Modern Warfare 4",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/0/05/Call_of_Duty_Modern_Warfare_4_cover_art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "call-of-duty-vanguard": {
   "appid": 1985820,
@@ -264,10 +292,8 @@
   "source": "steam"
  },
  "carx-street": {
-  "appid": 1114150,
-  "match": "CarX Street",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "cherepashki-nindzya-the-cowabunga-collection": {
   "source": "channel",
@@ -280,8 +306,10 @@
   "source": "steam"
  },
  "creed-rise-to-glory-championship-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Creed: Rise to Glory",
+  "score": 0.75,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/90/Creed_Rise_to_Glory.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "crimson-desert": {
   "appid": 3321460,
@@ -330,20 +358,28 @@
   "source": "steam"
  },
  "dead-space-remake": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Dead Space (2023 video game)",
+  "score": 0.74,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/3/36/Dead_Space_2022_Teaser_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "death-stranding": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Death Stranding",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/22/Death_Stranding.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "death-stranding-2": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Death Stranding 2: On the Beach",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/e/e0/Death_Stranding_2_Icon.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "demon-s-souls": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Demon's Souls (2020 video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/11/Demons_Souls_remake_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "detroit-become-human": {
   "appid": 1222140,
@@ -353,11 +389,11 @@
  },
  "diablo-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "diablo-3": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "diablo-4": {
   "appid": 2344520,
@@ -420,12 +456,16 @@
   "source": "steam"
  },
  "dying-light-2": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Dying Light 2",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/6/6d/Dying_Light_2_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "ea-sports-fc-27": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "EA Sports FC 27",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/4/48/FC_27_Cover.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "ea-sports-wrc": {
   "appid": 1849250,
@@ -456,8 +496,10 @@
   "source": "steam"
  },
  "f1-25": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "F1 25",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/9e/F1_25_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "fallout-4": {
   "appid": 377160,
@@ -486,10 +528,10 @@
   "source": "steam"
  },
  "fc-24": {
-  "match": "EA Sports FC",
-  "score": 0.89,
+  "match": "EA Sports FC 24",
+  "score": 1.0,
   "source": "wikipedia",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/3/31/EA_Sports_FC_logo.svg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=original"
+  "url": "https://upload.wikimedia.org/wikipedia/en/b/b3/EA_FC24_Cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "fc-25": {
   "appid": 2669320,
@@ -498,12 +540,16 @@
   "source": "steam"
  },
  "fc-26": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "EA Sports FC 26",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/FC_26_Cover.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "final-fantasy-vii": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Final Fantasy VII Remake",
+  "score": 0.83,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/c/ce/FFVIIRemake.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "final-fantasy-xvi": {
   "appid": 2515020,
@@ -518,8 +564,10 @@
   "source": "steam"
  },
  "forza-horizon-5": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Forza Horizon 5",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/86/Forza_Horizon_5_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "frostpunk-2-deluxe-edition": {
   "appid": 1601580,
@@ -528,12 +576,16 @@
   "source": "steam"
  },
  "ghost-of-tsushima": {
-  "source": "channel",
-  "why": "не найдено"
+  "appid": 2215430,
+  "match": "Ghost of Tsushima DIRECTOR'S CUT",
+  "score": 0.69,
+  "source": "steam"
  },
  "ghost-of-yotei": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Ghost of Yōtei",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/18/Ghost_of_Y%C5%8Dtei_cover_art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "ghost-recon-breakpoint": {
   "appid": 2231380,
@@ -555,7 +607,7 @@
  },
  "god-of-war-iii-remastered": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "god-of-war-ragnarok": {
   "appid": 2322010,
@@ -565,7 +617,7 @@
  },
  "god-of-war-sons-of-sparta": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "gothic-1-remake": {
   "appid": 1297900,
@@ -574,26 +626,32 @@
   "source": "steam"
  },
  "gran-turismo-7": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Gran Turismo 7",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/14/Gran_Turismo_7_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "grand-theft-auto-vi": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Grand Theft Auto VI",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "grounded-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "gta-5": {
-  "appid": 1546990,
-  "match": "Grand Theft Auto: Vice City – The Definitive Edition",
-  "score": 0.82,
+  "appid": 3240220,
+  "match": "appid 3240220",
+  "score": 1,
   "source": "steam"
  },
  "gta-trilogy": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Grand Theft Auto: The Trilogy – The Definitive Edition",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/7/7f/Grand_Theft_Auto_-_The_Trilogy_-_The_Definitive_Edition.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "hades-ii": {
   "appid": 1145350,
@@ -602,24 +660,30 @@
   "source": "steam"
  },
  "halloween-the-game": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Halloween: The Game",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/c/c8/Halloween_The_Game_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "halo-campaign-evolved": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Halo: Campaign Evolved",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/0/0d/Halo_Campaign_Evolved_Key_Art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "hell-let-loose-vietnam": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "high-on-life-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "hitman": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Hitman (2016 video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/84/Hitman_2015.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "hitman-3-world-of-assassination": {
   "appid": 1659040,
@@ -659,11 +723,11 @@
  },
  "hot-wheels": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "hot-wheels-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "hunt-showdown-1896": {
   "appid": 594650,
@@ -684,12 +748,16 @@
   "source": "steam"
  },
  "invincible-the-game": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "The Invincible (video game)",
+  "score": 0.8,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/5/59/The_Invincible_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "invincible-vs": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Invincible VS",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/84/Invincible_VS_cover_art.jpeg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "it-takes-two": {
   "appid": 1426210,
@@ -698,14 +766,14 @@
   "source": "steam"
  },
  "job-simulator": {
-  "appid": 448280,
-  "match": "Job Simulator",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "jurassic-world-evolution-3": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Jurassic World Evolution 3",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/7/7e/Jurassic_World_Evolution_3_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "kena-bridge-of-spirits": {
   "appid": 1954200,
@@ -715,17 +783,21 @@
  },
  "kingdom-come-deliverance": {
   "appid": 379430,
-  "match": "Kingdom Come: Deliverance",
-  "score": 1.0,
+  "match": "appid 379430",
+  "score": 1,
   "source": "steam"
  },
  "kingdom-come-deliverance-royal-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "appid": 379430,
+  "match": "appid 379430",
+  "score": 1,
+  "source": "steam"
  },
  "lego-batman-legacy-of-the-dark-knight": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Lego Batman: Legacy of the Dark Knight",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/83/Lego_Batman_Legacy_of_the_Dark_Knight_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "lego-marvel-super-heroes-2": {
   "appid": 647830,
@@ -734,8 +806,10 @@
   "source": "steam"
  },
  "lego-voyagers": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Lego Voyagers",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/8f/Lego_Voyagers_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "lies-of-p-overture-edition": {
   "source": "channel",
@@ -746,10 +820,8 @@
   "why": "набор из нескольких игр"
  },
  "little-nightmares-1-and-2-bundle": {
-  "appid": 860510,
-  "match": "Little Nightmares II",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "little-nightmares-iii": {
   "appid": 1392860,
@@ -758,8 +830,10 @@
   "source": "steam"
  },
  "little-nightmares-vr-altered-echoes": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Little Nightmares VR: Altered Echoes",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/93/Little_Nightmares_VR_Altered_Echoes.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "mafia-the-old-country": {
   "appid": 1941540,
@@ -778,20 +852,26 @@
   "source": "steam"
  },
  "marvel-s-wolverine-deluxe": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Marvel's Wolverine",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/3/3d/Marvel%27s_Wolverine_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "marvel-tokon-fighting-souls": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Marvel Tōkon: Fighting Souls",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/8e/MarvelTokonFinal.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "metal-gear-solid-master-collection": {
   "source": "channel",
   "why": "не найдено"
  },
  "metro-awakening-vr2": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Metro Awakening",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/c/c2/Metro_Awakening_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "metro-exodus": {
   "appid": 412020,
@@ -809,25 +889,27 @@
  },
  "minecraft-dungeons": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "minecraft-legends": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Minecraft Legends",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/23/Minecraft_Legends_Cover_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "mistfall-hunters": {
   "source": "channel",
   "why": "не найдено"
  },
  "monopoly": {
-  "appid": 2929170,
-  "match": "NEW MONOPOLY®",
-  "score": 0.8,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "mortal-kombat-1": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Mortal Kombat 1",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/5/5b/Mortal_Kombat_1_key_art.jpeg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "mortal-kombat-11": {
   "appid": 976310,
@@ -857,11 +939,11 @@
  },
  "mortal-kombat-xl": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "mortal-shell-2": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "moss-ii": {
   "appid": 2059670,
@@ -898,24 +980,34 @@
   "source": "steam"
  },
  "nascar-25": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NASCAR 25",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/1b/NASCAR_25_Cover_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nba-2k24": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NBA 2K24",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/4/48/NBA_2K24_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nba-2k25": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NBA 2K25",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/2f/NBA_2K25_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nba-2k26": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NBA 2K26",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/1d/NBA_2K26_Leave_No_Doubt_edition_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nba-2k27": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NBA 2K27",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/2/20/NBA2K27_Standard_Cover.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "need-for-speed-deluxe-edition": {
   "appid": 1262540,
@@ -942,24 +1034,32 @@
   "source": "steam"
  },
  "need-for-speed-unbound-palace-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Need for Speed Unbound",
+  "score": 0.86,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/d/db/Need_for_Speed_Unbound.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nfl-madden-27": {
   "source": "channel",
   "why": "не найдено"
  },
  "nhl-24": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NHL 24",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/6/63/NHL_24_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nhl-25": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NHL 25",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/a/a4/NHL_25_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nhl-26-standard-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "NHL 26",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/6/63/NHL_26_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "nickelodeon-extreme-tennis-next": {
   "source": "channel",
@@ -978,8 +1078,10 @@
   "source": "steam"
  },
  "nioh-3-deluxe": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Nioh 3",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/d/db/Nioh_3_cover_art_2026.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "no-man-s-sky": {
   "appid": 275850,
@@ -998,14 +1100,12 @@
   "why": "набор из нескольких игр"
  },
  "overcooked-overcooked-2": {
-  "appid": 728880,
-  "match": "Overcooked! 2",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "painkiller": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "pathologic-3": {
   "appid": 3199650,
@@ -1026,16 +1126,20 @@
   "source": "steam"
  },
  "phantom-blade-zero": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Phantom Blade Zero",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/4/41/Phantom_Blade_Zero_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "plants-vs-zombies-replanted": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Plants vs. Zombies: Replanted",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/9d/Plants_vs._Zombies_Replanted_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "poppy-playtime-chapter-5": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "pragmata": {
   "match": "Pragmata",
@@ -1045,7 +1149,7 @@
  },
  "ratchet-clank": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "ratchet-clank-rift-apart": {
   "appid": 1895880,
@@ -1055,11 +1159,13 @@
  },
  "rayman-legends": {
   "source": "channel",
-  "why": "не найдено"
+  "why": "оставлена картинка из канала"
  },
  "rayman-legends-retold": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Rayman Legends Retold",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/6/6e/Rayman_Legends_Retold_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "reanimal": {
   "appid": 2129530,
@@ -1122,8 +1228,10 @@
   "source": "steam"
  },
  "resident-evil-9-requiem": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Resident Evil Requiem",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/15/Resident_Evil_Requiem_Cover_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "resident-evil-bundle-gold-edition": {
   "source": "channel",
@@ -1148,8 +1256,10 @@
   "source": "steam"
  },
  "resonance-a-plague-tale-legacy": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Resonance: A Plague Tale Legacy",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/95/Resonance_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "returnal": {
   "appid": 1649240,
@@ -1184,8 +1294,10 @@
   "source": "steam"
  },
  "saros-deluxe": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Saros (video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/95/Saros_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "sekiro-shadows-die-twice": {
   "appid": 814380,
@@ -1200,8 +1312,10 @@
   "source": "steam"
  },
  "shadow-of-the-colossus": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Shadow of the Colossus",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/f/f8/Shadow_of_the_Colossus_%282005%29_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "sifu": {
   "appid": 2138710,
@@ -1210,8 +1324,10 @@
   "source": "steam"
  },
  "silent-hill-2-remake": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Silent Hill 2 (2024 video game)",
+  "score": 0.79,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/c/c1/Silent_Hill_2_remake_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "silent-hill-f": {
   "appid": 2947440,
@@ -1220,8 +1336,10 @@
   "source": "steam"
  },
  "silent-hill-townfall": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Silent Hill: Townfall",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/3/3e/Silent_Hill_Townfall_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "sniper-elite-5": {
   "appid": 1029690,
@@ -1276,8 +1394,10 @@
   "source": "steam"
  },
  "star-wars-galactic-racer": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Star Wars: Galactic Racer",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/14/Star_Wars_Galactic_Racer_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "star-wars-jedi-fallen-order": {
   "appid": 1172380,
@@ -1298,8 +1418,10 @@
   "source": "steam"
  },
  "star-wars-zero-company": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Star Wars Zero Company",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/9/95/Star_Wars_Zero_Company_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "starfield": {
   "appid": 1716740,
@@ -1326,12 +1448,16 @@
   "source": "steam"
  },
  "surviving-mars-relaunched": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Surviving Mars",
+  "score": 0.72,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/1/10/Surviving_Mars_cover_art.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "tachki-3-gonki": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "Cars 3: Driven to Win",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/88/Cars_3_Driven_to_Win.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "team-sonic-racing": {
   "appid": 785260,
@@ -1358,8 +1484,10 @@
   "source": "steam"
  },
  "the-blood-of-dawnwalker": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "The Blood of Dawnwalker",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/8c/The_Blood_of_Dawnwalker_cover_art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "the-crew-2": {
   "appid": 646910,
@@ -1374,9 +1502,9 @@
   "source": "steam"
  },
  "the-elder-scrolls-v-skyrim": {
-  "appid": 611670,
-  "match": "The Elder Scrolls V: Skyrim VR",
-  "score": 1.0,
+  "appid": 489830,
+  "match": "appid 489830",
+  "score": 1,
   "source": "steam"
  },
  "the-forest": {
@@ -1414,10 +1542,8 @@
   "source": "steam"
  },
  "tomb-raider": {
-  "appid": 750920,
-  "match": "Shadow of the Tomb Raider: Definitive Edition",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "trail-out": {
   "appid": 1664220,
@@ -1450,10 +1576,8 @@
   "source": "steam"
  },
  "unravel-1-2-yarnny-bundle": {
-  "appid": 1225570,
-  "match": "Unravel Two",
-  "score": 1.0,
-  "source": "steam"
+  "source": "channel",
+  "why": "оставлена картинка из канала"
  },
  "ved-mak-3-dikaya-ohota": {
   "source": "channel",
@@ -1482,8 +1606,10 @@
   "why": "набор из нескольких игр"
  },
  "wrc-10-deluxe-edition": {
-  "source": "channel",
-  "why": "не найдено"
+  "match": "WRC 10",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/b/b1/WRC_10_Cover_Art.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
  "wreckfest": {
   "appid": 228380,
