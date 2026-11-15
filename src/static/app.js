@@ -233,37 +233,18 @@
     });
   }
 
-  /* ---------- бесконечные полки ----------
-     Три одинаковых набора карточек, стартуем со среднего. Перескок на один набор назад/вперёд
-     делаем только когда прокрутка остановилась — так не обрывается инерция пальца на телефоне. */
+  /* ---------- полки по кругу ----------
+     Обычная прокрутка без копий. Долистали до конца — через секунду полка плавно едет в начало. */
   $$('.shelf:not(.revs)').forEach((row) => {
-    const items = [...row.children];
-    if (items.length < 4) return;
-    const clone = () => items.map((el) => {
-      const c = el.cloneNode(true); c.dataset.clone = '1';
-      c.querySelectorAll('img').forEach((i) => { i.setAttribute('loading', 'lazy'); i.removeAttribute('fetchpriority'); });
-      return c;
-    });
-    row.prepend(...clone());
-    row.append(...clone());
-    let setW = 0;
-    const measure = () => { setW = row.children[items.length].offsetLeft - row.children[0].offsetLeft; };
-    const jump = (dx) => {
-      row.style.scrollSnapType = 'none'; row.style.scrollBehavior = 'auto';
-      row.scrollLeft += dx;
-      requestAnimationFrame(() => { row.style.scrollSnapType = ''; row.style.scrollBehavior = ''; });
+    let idle; let back;
+    const atEnd = () => row.scrollLeft >= row.scrollWidth - row.clientWidth - 4;
+    const onStop = () => {
+      clearTimeout(back);
+      if (atEnd()) back = setTimeout(() => { if (atEnd()) row.scrollTo({ left: 0, behavior: 'smooth' }); }, 1000);
     };
-    const recenter = () => {
-      if (!setW) return;
-      if (row.scrollLeft < setW * 0.5) jump(setW);
-      else if (row.scrollLeft > setW * 1.5) jump(-setW);
-    };
-    requestAnimationFrame(() => { measure(); jump(setW); });
-    window.addEventListener('resize', () => { const k = setW ? row.scrollLeft / setW : 1; measure(); row.scrollLeft = k * setW; });
-    let idle;
-    if ('onscrollend' in window) row.addEventListener('scrollend', recenter);
-    else row.addEventListener('scroll', () => { clearTimeout(idle); idle = setTimeout(recenter, 160); }, { passive: true });
-    row.querySelectorAll('[data-add]').forEach(syncBtn);
+    if ('onscrollend' in window) row.addEventListener('scrollend', onStop);
+    else row.addEventListener('scroll', () => { clearTimeout(idle); idle = setTimeout(onStop, 200); }, { passive: true });
+    row.addEventListener('touchstart', () => clearTimeout(back), { passive: true });
   });
 
   /* ---------- таймер GTA 6 ---------- */
