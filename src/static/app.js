@@ -205,24 +205,24 @@
   if (padBtn) {
     // Вибрация: Android — через navigator.vibrate (ритм под анимацию),
     // iPhone (iOS 18+) — лёгкий системный «тик» от скрытого переключателя.
-    let hapticLabel = null;
+    // iPhone (iOS 18+): нажатие на системный переключатель даёт тактильный «тик».
+    // Переключатель создаём прямо в обработчике нажатия, кликаем и сразу убираем.
     const iosTick = () => {
-      if (!hapticLabel) {
-        const id = 'haptic-switch';
-        const input = document.createElement('input');
-        input.type = 'checkbox'; input.id = id; input.setAttribute('switch', '');
-        hapticLabel = document.createElement('label'); hapticLabel.htmlFor = id;
-        const box = document.createElement('div');
-        box.setAttribute('aria-hidden', 'true');
-        box.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
-        box.append(input, hapticLabel); document.body.append(box);
-      }
-      hapticLabel.click();
+      const label = document.createElement('label');
+      label.ariaHidden = 'true';
+      label.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      label.appendChild(input);
+      document.head.appendChild(label);
+      label.click();
+      document.head.removeChild(label);
     };
     const buzz = () => {
       try {
         if (navigator.vibrate) navigator.vibrate([18, 520, 40, 120, 25]);
-        else iosTick();
+        else { iosTick(); }
       } catch { /* вибрация недоступна — просто анимация */ }
     };
     padBtn.addEventListener('click', () => {
