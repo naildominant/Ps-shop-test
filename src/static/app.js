@@ -203,8 +203,31 @@
   /* ---------- геймпад: подбросить по нажатию ---------- */
   const padBtn = $('#pad');
   if (padBtn) {
+    // Вибрация: Android — через navigator.vibrate (ритм под анимацию),
+    // iPhone (iOS 18+) — лёгкий системный «тик» от скрытого переключателя.
+    let hapticLabel = null;
+    const iosTick = () => {
+      if (!hapticLabel) {
+        const id = 'haptic-switch';
+        const input = document.createElement('input');
+        input.type = 'checkbox'; input.id = id; input.setAttribute('switch', '');
+        hapticLabel = document.createElement('label'); hapticLabel.htmlFor = id;
+        const box = document.createElement('div');
+        box.setAttribute('aria-hidden', 'true');
+        box.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+        box.append(input, hapticLabel); document.body.append(box);
+      }
+      hapticLabel.click();
+    };
+    const buzz = () => {
+      try {
+        if (navigator.vibrate) navigator.vibrate([18, 520, 40, 120, 25]);
+        else iosTick();
+      } catch { /* вибрация недоступна — просто анимация */ }
+    };
     padBtn.addEventListener('click', () => {
       if (padBtn.classList.contains('is-flying')) return;
+      buzz();
       padBtn.classList.add('is-flying'); track('gamepad_toss');
       setTimeout(() => padBtn.classList.remove('is-flying'), 1300);
     });
