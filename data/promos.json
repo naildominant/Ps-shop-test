@@ -1,0 +1,366 @@
+[
+ {
+  "post": 1228,
+  "date": "2026-11-11",
+  "until": "2026-11-11",
+  "title": "BLACK FRIDAY 11.11",
+  "items": [
+   {
+    "id": "gta-5",
+    "old": 229000,
+    "new": 114500,
+    "plat": null
+   },
+   {
+    "id": "minecraft",
+    "old": 189000,
+    "new": 94500,
+    "plat": null
+   },
+   {
+    "id": "red-dead-redemption-2",
+    "old": 239000,
+    "new": 119500,
+    "plat": null
+   },
+   {
+    "id": "spider-man",
+    "old": 269000,
+    "new": 134500,
+    "plat": null
+   },
+   {
+    "id": "call-of-duty-black-ops-iii",
+    "old": 269000,
+    "new": 134500,
+    "plat": null
+   },
+   {
+    "id": "the-last-of-us-part-1",
+    "old": 359000,
+    "new": 179500,
+    "plat": null
+   },
+   {
+    "id": "spider-man-2",
+    "old": 425000,
+    "new": 212500,
+    "plat": null
+   },
+   {
+    "id": "fc-26",
+    "old": 319000,
+    "new": 159500,
+    "plat": null
+   },
+   {
+    "id": "spider-man-miles-morales",
+    "old": 298000,
+    "new": 149000,
+    "plat": null
+   },
+   {
+    "id": "elden-ring",
+    "old": 329000,
+    "new": 164500,
+    "plat": null
+   },
+   {
+    "id": "hogwarts-legacy",
+    "old": 359000,
+    "new": 179500,
+    "plat": null
+   },
+   {
+    "id": "uncharted-4",
+    "old": 228000,
+    "new": 114000,
+    "plat": null
+   },
+   {
+    "id": "ved-mak-3-dikaya-ohota",
+    "old": 249000,
+    "new": 124500,
+    "plat": null
+   },
+   {
+    "id": "horizon-zero-dawn",
+    "old": 219000,
+    "new": 109500,
+    "plat": null
+   },
+   {
+    "id": "ghost-of-tsushima",
+    "old": 249000,
+    "new": 124500,
+    "plat": null
+   },
+   {
+    "id": "the-last-of-us-part-2-remastered",
+    "old": 329000,
+    "new": 164500,
+    "plat": null
+   },
+   {
+    "id": "god-of-war-ragnarok",
+    "old": 398000,
+    "new": 199000,
+    "plat": null
+   },
+   {
+    "id": "call-of-duty-black-ops-cold-war",
+    "old": 229000,
+    "new": 114500,
+    "plat": null
+   },
+   {
+    "id": "ghost-of-yotei",
+    "old": 379000,
+    "new": 189500,
+    "plat": null
+   },
+   {
+    "id": "the-elder-scrolls-v-skyrim",
+    "old": 289000,
+    "new": 144500,
+    "plat": null
+   },
+   {
+    "id": "mortal-kombat-11-ultimate",
+    "old": 198000,
+    "new": 99000,
+    "plat": null
+   },
+   {
+    "id": "assassin-s-creed-valhalla",
+    "old": 198000,
+    "new": 99000,
+    "plat": null
+   },
+   {
+    "id": "assassin-s-creed-odyssey",
+    "old": 189000,
+    "new": 94500,
+    "plat": null
+   },
+   {
+    "id": "far-cry-5-far-cry-new-dawn",
+    "old": 249000,
+    "new": 124500,
+    "plat": null
+   },
+   {
+    "id": "battlefield-v",
+    "old": 239000,
+    "new": 119500,
+    "plat": null
+   },
+   {
+    "id": "gran-turismo-7",
+    "old": 389000,
+    "new": 194500,
+    "plat": null
+   },
+   {
+    "id": "horizon-forbidden-west",
+    "old": 319000,
+    "new": 159500,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-4",
+    "old": 289000,
+    "new": 144500,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-village",
+    "old": 269000,
+    "new": 134500,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-2-remake",
+    "old": 249000,
+    "new": 124500,
+    "plat": null
+   },
+   {
+    "id": "days-gone",
+    "old": 279000,
+    "new": 139500,
+    "plat": null
+   },
+   {
+    "id": "death-stranding",
+    "old": 319000,
+    "new": 159500,
+    "plat": null
+   },
+   {
+    "id": "dark-souls-iii",
+    "old": 249000,
+    "new": 124500,
+    "plat": null
+   },
+   {
+    "id": "it-takes-two",
+    "old": 259000,
+    "new": 129500,
+    "plat": null
+   },
+   {
+    "id": "batman-arkham-collection",
+    "old": 259000,
+    "new": 129500,
+    "plat": null
+   },
+   {
+    "id": "star-wars-jedi-fallen-order",
+    "old": 239000,
+    "new": 119500,
+    "plat": null
+   },
+   {
+    "id": "sekiro-shadows-die-twice",
+    "old": 219000,
+    "new": 109500,
+    "plat": null
+   },
+   {
+    "id": "diablo-4",
+    "old": 334000,
+    "new": 167000,
+    "plat": null
+   },
+   {
+    "id": "nba-2k26",
+    "old": 439000,
+    "new": 219500,
+    "plat": null
+   },
+   {
+    "id": "battlefield-6",
+    "old": 519000,
+    "new": 259500,
+    "plat": null
+   },
+   {
+    "id": "black-myth-wukong",
+    "old": 279000,
+    "new": 139500,
+    "plat": null
+   },
+   {
+    "id": "star-wars-jedi-survivor",
+    "old": 319000,
+    "new": 159500,
+    "plat": null
+   },
+   {
+    "id": "detroit-become-human",
+    "old": 318000,
+    "new": 159000,
+    "plat": null
+   }
+  ]
+ },
+ {
+  "post": 1210,
+  "date": "2026-10-31",
+  "until": "2026-11-02",
+  "title": "🎃 PS SHOP ПОЗДРАВЛЯЕТ С ХЕЛЛОУИНОМ! 👻  Пусть эта ночь будет полной мистики, ярки",
+  "items": [
+   {
+    "id": "outlast-1-outlast-2-bundle",
+    "old": 259000,
+    "new": 207000,
+    "plat": null
+   },
+   {
+    "id": "metro-exodus",
+    "old": 259000,
+    "new": 207000,
+    "plat": null
+   },
+   {
+    "id": "days-gone",
+    "old": 279000,
+    "new": 223000,
+    "plat": null
+   },
+   {
+    "id": "the-last-of-us-part-1",
+    "old": 359000,
+    "new": 287000,
+    "plat": null
+   },
+   {
+    "id": "the-forest",
+    "old": 239000,
+    "new": 191000,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-2-remake",
+    "old": 249000,
+    "new": 199000,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-3",
+    "old": 239000,
+    "new": 191000,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-4",
+    "old": 289000,
+    "new": 231000,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-triple-pack-4-5-6",
+    "old": 249000,
+    "new": 199000,
+    "plat": null
+   },
+   {
+    "id": "resident-evil-7-biohazard-gold-edition",
+    "old": 239000,
+    "new": 191000,
+    "plat": null
+   },
+   {
+    "id": "silent-hill-f",
+    "old": 459000,
+    "new": 367000,
+    "plat": null
+   },
+   {
+    "id": "silent-hill-townfall",
+    "old": 439000,
+    "new": 351000,
+    "plat": null
+   },
+   {
+    "id": "poppy-playtime-chapter-5",
+    "old": 269000,
+    "new": 215000,
+    "plat": null
+   },
+   {
+    "id": "halloween-the-game",
+    "old": 449000,
+    "new": 359000,
+    "plat": null
+   },
+   {
+    "id": "reanimal",
+    "old": 326000,
+    "new": 261000,
+    "plat": null
+   }
+  ]
+ }
+]

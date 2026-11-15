@@ -341,6 +341,10 @@ def main():
     for g in games:
         g.pop('cover_url', None)
     json.dump(games, open(os.path.join(DATA, 'games.json'), 'w'), ensure_ascii=False, indent=1)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import promos
+    pr = promos.build(posts, games)
+    print(f'акций за последние 45 дней: {len(pr)}')
     json.dump(skipped, open(os.path.join(DATA, 'skipped.json'), 'w'), ensure_ascii=False, indent=1)
     print(f'постов: {len(posts)}, игр: {len(games)}, хитов: {sum(1 for g in games if g.get("hit"))}, не разобрано: {len(skipped)}')
 

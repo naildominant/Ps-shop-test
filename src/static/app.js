@@ -170,7 +170,7 @@
     else if (t.matches('[data-close-cart]')) closeCart();
     else if (t.matches('.opt')) {
       $$('.opt').forEach((b) => b.setAttribute('aria-checked', String(b === t)));
-      $('#buy-price').innerHTML = `${money(t.dataset.price)}<small>uzs</small>`;
+      $('#buy-price').innerHTML = `${t.dataset.old ? `<s>${money(t.dataset.old)}</s>` : ''}<span class="grad-text">${money(t.dataset.price)}</span><small>uzs</small>`;
       $$('.buy [data-opt]').forEach((b) => { b.dataset.opt = t.dataset.key; if (b.dataset.add) syncBtn(b); });
     } else if (t.matches('[data-track]')) track(t.dataset.track);
   });
@@ -287,13 +287,13 @@
     const plural = (n) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? 'игра' : m >= 2 && m <= 4 && (h < 10 || h >= 20) ? 'игры' : 'игр'; };
     const card = (g) => {
       const o = g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
-      const tags = [g.f.includes('pre') && '<span class="tag tag-pre">Предзаказ</span>', g.f.includes('hit') && '<span class="tag tag-hit">Хит</span>',
+      const tags = [g.f.includes('sale') && '<span class="tag tag-sale">Акция</span>', g.f.includes('pre') && '<span class="tag tag-pre">Предзаказ</span>', g.f.includes('hit') && '<span class="tag tag-hit">Хит</span>',
         g.f.includes('new') && !g.f.includes('pre') && '<span class="tag tag-new">Новинка</span>'].filter(Boolean).slice(0, 2).join('');
       const from = new Set(g.o.map((x) => x[1])).size > 1 ? '<span class="from">от</span>' : '';
       return `<article class="card"><div class="card-media"><a class="card-img" href="${B}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
         <div class="card-tags">${tags}</div><button class="card-add" data-add="${g.id}" data-opt="${esc(o[0])}" aria-label="В корзину: ${esc(g.t)}"></button></div>
         <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="${B}/game/${g.id}/">${esc(g.t)}</a>
-        <div class="price">${from}${money(g.m)}<small>uzs</small></div></div></article>`;
+        <div class="price">${from}${g.od && g.od[o[0]] ? `<s>${money(g.od[o[0]])}</s>` : ''}${money(g.m)}<small>uzs</small></div></div></article>`;
     };
     const FILTER = { '': () => true, ps5: (g) => g.pl.includes('PS5'), ps4: (g) => g.pl.includes('PS4') };
     function render() {

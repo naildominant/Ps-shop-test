@@ -72,8 +72,22 @@ def cart_hits():
     return {gid for _, gid in top}
 
 
+def load_promos():
+    path = os.path.join(ROOT, 'data', 'promos.json')
+    promos = json.load(open(path, encoding='utf-8')) if os.path.exists(path) else []
+    for p in promos:
+        p['until_d'] = dt.date.fromisoformat(p['until'])
+        p['active'] = p['until_d'] >= TODAY
+    return promos
+
+
 def load():
     games = json.load(open(os.path.join(ROOT, 'data', 'games.json'), encoding='utf-8'))
+    active = {}
+    for p in load_promos():
+        if p['active']:
+            for it in p['items']:
+                active.setdefault(it['id'], (it, p))
     popular = cart_hits()
     rel_file = os.path.join(ROOT, 'data', 'releases.json')
     releases = json.load(open(rel_file, encoding='utf-8')) if os.path.exists(rel_file) else {}
@@ -86,6 +100,14 @@ def load():
         if not opts:
             continue
         rel = parse_date(releases.get(g['id'])) or parse_date(g.get('release_post'))
+        promo = active.get(g['id'])
+        if promo:  # действующая акция: новая цена, старая зачёркнута
+            it, p = promo
+            for o in opts:
+                if (not it['plat'] or it['plat'] == o['plat']) and o['price'] > it['new']:
+                    o['old'] = o['price']
+                    o['price'] = it['new'] if (it['plat'] or len(opts) == 1 or o['price'] == it['old']) else max(it['new'], round(o['price'] * it['new'] / it['old'], -3))
+            g['promo_until'] = p['until_d'] if any(o.get('old') for o in opts) else None
         g['opts'] = opts
         g['min'] = min(o['price'] for o in opts)
         g['plats'] = sorted({o['plat'] for o in opts})
@@ -129,7 +151,7 @@ def icon(name, cls=''):
 
 
 # ---------- разметка ----------
-NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы'), ('about', '/about/', 'О нас')]
+NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы'), ('promos', '/promos/', 'Акции'), ('about', '/about/', 'О нас')]
 
 
 def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head=''):
@@ -252,7 +274,9 @@ def cart_drawer():
 
 def price_html(g, from_=True):
     frm = '<span class="from">от</span>' if from_ and len(g['opts']) > 1 and len({o['price'] for o in g['opts']}) > 1 else ''
-    return f'<div class="price">{frm}{money(g["min"])}<small>uzs</small></div>'
+    o = best_opt(g)
+    old = f'<s>{money(o["old"])}</s>' if o.get('old') else ''
+    return f'<div class="price{" is-sale" if old else ""}">{frm}{old}{money(g["min"])}<small>uzs</small></div>'
 
 
 def tags(g, limit=2):
@@ -263,6 +287,8 @@ def tags(g, limit=2):
         t.append('<span class="tag tag-hit">Хит</span>')
     if g['new'] and not g['pre']:
         t.append('<span class="tag tag-new">Новинка</span>')
+    if g.get('promo_until'):
+        t.insert(0, '<span class="tag tag-sale">Акция</span>')
     return ''.join(t[:limit])
 
 
@@ -380,6 +406,37 @@ def page_about():
                   desc='PS SHOP — сообщество игроков из Ташкента. Цифровые игры и подписки для PS4 и PS5, работаем более 3 лет.', body=body)
 
 
+def page_promos(games):
+    by_id = {g['id']: g for g in games}
+    blocks = ''
+    for p in load_promos()[:8]:
+        status = (f'<span class="tag tag-sale">Действует до {p["until_d"].strftime("%d.%m")}</span>' if p['active']
+                  else '<span class="tag">Акция завершилась</span>')
+        rows = ''
+        for it in p['items']:
+            g = by_id.get(it['id'])
+            if not g:
+                continue
+            now = '' if p['active'] else f'<span class="muted">сейчас {money(g["min"])} uzs</span>'
+            rows += f'''<a class="pr-row" href="/game/{g['id']}/"><img src="/static/covers/sm/{g['id']}.webp" alt="" width="44" height="58" loading="lazy">
+  <b>{E(g['title'])}</b><span class="pr-prices{'' if p['active'] else ' is-over'}"><s>{money(it['old'])}</s> {money(it['new'])} uzs</span>{now}</a>'''
+        if not rows:
+            continue
+        blocks += f'''<section class="promo-post glass{' is-over' if not p['active'] else ''}">
+  <header><div><h2>{E(p['title'])}</h2><span class="muted">{dt.date.fromisoformat(p['date']).strftime('%d.%m.%Y')}</span></div>{status}</header>
+  <div class="pr-list">{rows}</div>
+  <a class="link-quiet" href="{CONTACTS['channel']}/{p['post']}" target="_blank" rel="noopener">{icon('tg')}Пост в канале</a>
+</section>'''
+    if not blocks:
+        blocks = '<div class="empty glass"><h3>Сейчас акций нет</h3><p>Следите за каналом: скидки появляются там первыми.</p></div>'
+    body = f'''<div class="wrap">
+  <div class="page-head"><h1>Акции</h1><p>Скидки из нашего Telegram-канала. Когда акция заканчивается, снова действует обычная цена.</p></div>
+  <div class="promo-posts">{blocks}</div>
+</div>'''
+    return layout(title='Акции и скидки на игры PS4 и PS5 — PS SHOP', path='/promos/', page='promos',
+                  desc='Скидки и акции на игры для PlayStation 4 и 5 в PS SHOP.', body=body)
+
+
 # ---------- страницы ----------
 def page_home(games):
     gta = next((g for g in games if g['id'] == 'grand-theft-auto-vi'), None)
@@ -441,7 +498,8 @@ def page_home(games):
   </a>
 </section>'''
     pre = [g for g in pre if g['id'] != 'grand-theft-auto-vi']
-    body = hero + perks + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
+    sale = [g for g in games if g.get('promo_until')]
+    body = hero + perks + shelf('Акции', sale, '/promos/', eager=3) + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
         + shelf('Новинки', new, '/catalog/?f=new') + promo + shelf('Играть вместе', coop, '/catalog/?f=coop') \
         + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + reviews_block(load_reviews()) + shelf('Для VR', vr, '/catalog/?f=vr') + extra_services_block() + guarantees_block()
     return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home',
@@ -476,7 +534,7 @@ def page_catalog(games):
 
 def page_game(g, games):
     o = best_opt(g)
-    opts = ''.join(f'<button class="opt" role="radio" aria-checked="{"true" if x is o else "false"}" data-key="{E(x["key"])}" data-price="{x["price"]}"><b>{E(x["label"])}</b><span>{money(x["price"])} uzs</span></button>' for x in g['opts'])
+    opts = ''.join(f'<button class="opt" role="radio" aria-checked="{"true" if x is o else "false"}" data-key="{E(x["key"])}" data-price="{x["price"]}" data-old="{x.get("old", "")}"><b>{E(x["label"])}</b><span>{f"<s>{money(x['old'])}</s> " if x.get("old") else ""}{money(x["price"])} uzs</span></button>' for x in g['opts'])
     facts = [('Язык', LANG_RU.get(g.get('lang', ''), '')), ('Издание', ' / '.join(e['name'] for e in g['editions']) if g.get('editions') else (g.get('edition') or 'Standard')),
              ('Игроков', g.get('players') or '1'), ('Дата выхода' if g['rel'] else 'Платформа', g['rel'].strftime('%d.%m.%Y') if g['rel'] else ' / '.join(g['plats']))]
     notes = []
@@ -496,7 +554,8 @@ def page_game(g, games):
       <h1>{E(g['title'])}</h1>
       <div class="opts" role="radiogroup" aria-label="{'Издание' if g.get('editions') else 'Платформа'}">{opts}</div>
       <div class="buy glass" data-game="{g['id']}">
-        <div class="buy-price grad-text" id="buy-price">{money(o['price'])}<small>uzs</small></div>
+        <div class="buy-price" id="buy-price">{f'<s>{money(o["old"])}</s>' if o.get('old') else ''}<span class="grad-text">{money(o['price'])}</span><small>uzs</small></div>
+        {f'<p class="sale-note">Акция до {g["promo_until"].strftime("%d.%m")}</p>' if g.get('promo_until') else ''}
         <p class="buy-note">{'Предзаказ: игра станет доступна в день выхода.' if g['pre'] else 'Цифровая версия. Подключим дистанционно.'}</p>
         <div class="buy-actions">
           <button class="btn btn-main" data-order="{g['id']}" data-opt="{E(o['key'])}">Оформить</button>
@@ -689,9 +748,10 @@ def catalog_json(games):
     for g in games:
         rows.append({'id': g['id'], 't': g['title'], 's': search_words(g['title']), 'o': [[o['key'], o['price']] for o in g['opts']],
                      'pl': g['plats'], 'm': g['min'], 'p': g['post'],
-                     'f': [k for k in ('pre', 'hit', 'new', 'vr', 'coop') if g.get(k)] + (['voice'] if g.get('lang') == 'voice' else [])
+                     'f': [k for k in ('pre', 'hit', 'new', 'vr', 'coop') if g.get(k)] + (['sale'] if g.get('promo_until') else []) + (['voice'] if g.get('lang') == 'voice' else [])
                      + (['ru'] if g.get('lang') in ('voice', 'subs') else []),
-                     'r': g['rel'].isoformat() if g['rel'] else None})
+                     'r': g['rel'].isoformat() if g['rel'] else None,
+                     'od': {o['key']: o['old'] for o in g['opts'] if o.get('old')}})
     return rows
 
 
@@ -742,13 +802,14 @@ def main():
     write('install/index.html', page_install())
     write('reviews/index.html', page_reviews(load_reviews()))
     write('about/index.html', page_about())
+    write('promos/index.html', page_promos(games))
     write('404.html', page_404())
     rows = catalog_json(games)
     for p in sv['psplus'] + [sv['eaplay']]:
         rows.append({'id': p['id'], 't': ('PS Plus ' if p['id'].startswith('ps-plus') else '') + p['name'], 'k': 'sub',
                      'o': [[months(m), v] for m, v in p['prices'].items()], 'pl': [], 'm': min(p['prices'].values()), 'f': [], 's': ''})
     write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
-    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/', '/about/'] + [f'/game/{g["id"]}/' for g in games]
+    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/', '/about/', '/promos/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
