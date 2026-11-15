@@ -156,7 +156,7 @@ def icon(name, cls=''):
 NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы'), ('promos', '/promos/', 'Акции'), ('about', '/about/', 'О нас')]
 
 
-def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head=''):
+def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head='', lcp=None):
     og = og_image or f'{SITE_URL}/static/img/og-default.jpg'
     nav = ''.join(f'<a href="{href}"{" aria-current=\"page\"" if key == page else ""}>{label}</a>' for key, href, label in NAV)
     return f'''<!doctype html>
@@ -183,8 +183,10 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap"></noscript>
 <link rel="stylesheet" href="/static/styles.css?v={VERSION}">
+{f'<link rel="preload" as="image" href="{lcp}" fetchpriority="high">' if lcp else ''}
 {extra_head}</head>
 <body data-page="{page}">
 <a class="sr" href="#main">К содержимому</a>
@@ -317,6 +319,7 @@ def shelf(title, items, href=None, eager=0):
     if not items:
         return ''
     more = f'<a href="{href}">Смотреть все</a>' if href else ''
+    items = items[:20]  # на главной полка до 20 игр, остальные — «Смотреть все» (быстрее грузится)
     cards = ''.join(card(g, lazy=i >= eager) for i, g in enumerate(items))
     return f'''<section class="sec wrap"><div class="sec-head"><h2>{title}</h2>{more}</div><div class="shelf">{cards}</div></section>'''
 
@@ -507,7 +510,7 @@ def page_home(games):
     body = hero + perks + shelf('Акции', sale, '/promos/', eager=3) + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
         + shelf('Новинки', new, '/catalog/?f=new') + promo + shelf('Играть вместе', coop, '/catalog/?f=coop') \
         + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + reviews_block(load_reviews()) + shelf('Для VR', vr, '/catalog/?f=vr') + extra_services_block() + guarantees_block()
-    return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home',
+    return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home', lcp='/static/covers/grand-theft-auto-vi.webp' if gta else None,
                   desc=f'{len(games)} цифровых игр для PlayStation 4 и 5, подписки PS Plus и аренда PS5. Подключим дистанционно, гарантия, на связи 24/7.',
                   body=body)
 
@@ -633,7 +636,8 @@ def page_game(g, games):
                      'availability': 'https://schema.org/PreOrder' if g['pre'] else 'https://schema.org/InStock'}}
     head = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
     return layout(title=f'{g["title"]} — {money(g["min"])} uzs для {plat} | PS SHOP', desc=desc, path=f'/game/{g["id"]}/',
-                  page='game', og_image=f'{SITE_URL}/static/covers/{g["id"]}.webp', og_type='product', body=body, extra_head=head)
+                  page='game', og_image=f'{SITE_URL}/static/covers/{g["id"]}.webp', og_type='product', body=body, extra_head=head,
+                  lcp=f'/static/covers/{g["id"]}.webp')
 
 
 def load_services():
@@ -816,14 +820,14 @@ VERSION = dt.datetime.now(TZ).strftime('%Y%m%d%H%M')
 
 
 def make_thumbs():
-    """Лёгкие обложки 330x440 для карточек (полные 600x800 — для страницы игры)."""
+    """Лёгкие обложки 264x352 для карточек (полные 600x800 — для страницы игры)."""
     from PIL import Image
     src = os.path.join(ROOT, 'src', 'static', 'covers')
     dst = os.path.join(DIST, 'static', 'covers', 'sm')
     os.makedirs(dst, exist_ok=True)
     for f in os.listdir(src):
         if f.endswith('.webp'):
-            Image.open(os.path.join(src, f)).resize((330, 440), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=74, method=6)
+            Image.open(os.path.join(src, f)).resize((264, 352), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=70, method=6)
 
 
 def with_base(text):

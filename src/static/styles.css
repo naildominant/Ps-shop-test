@@ -536,6 +536,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 /* ---------- язык ---------- */
 .lang-btn { font: 800 13px/1 var(--f-display); letter-spacing: .02em; }
+/* ---------- скорость: нижние блоки рисуются, когда до них долистали ---------- */
+main > .sec, main > section.sec { content-visibility: auto; contain-intrinsic-size: auto 460px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
