@@ -324,6 +324,94 @@
     $('#search').addEventListener('submit', (e) => { e.preventDefault(); });
   }
 
+
+  /* ---------- чат-помощник ---------- */
+  const chatBox = $('#chat'); const chatFab = $('#chat-fab');
+  if (chatBox && chatFab) {
+    const log = $('#chat-log'); const chips = $('#chat-chips'); const input = $('#chat-input');
+    const QUICK = ['Как купить?', 'Как установить?', 'Гарантия', 'Сколько стоит GTA 6?', 'PS Plus', 'Аренда PS5', 'Оплата', 'Написать менеджеру'];
+    const tgLink = (text) => `${PS.manager}?text=${encodeURIComponent(text)}`;
+    const tgA = (text, label) => `<a href="${tgLink(text)}" target="_blank" rel="noopener" data-track="chat_to_tg">${label}</a>`;
+    let opened = false;
+    const say = (html, who = 'bot') => {
+      const el = document.createElement('div'); el.className = `msg msg-${who}`; el.innerHTML = html; log.appendChild(el);
+      log.scrollTop = log.scrollHeight; return el;
+    };
+    const bot = (html, extra) => {
+      const t = say('…', 'bot'); t.classList.add('msg-typing');
+      setTimeout(() => {
+        t.remove(); say(html);
+        if (extra) { const box = document.createElement('div'); box.style.display = 'contents'; box.innerHTML = extra; log.appendChild(box); $$('[data-add]', box).forEach(syncBtn); }
+        log.scrollTop = log.scrollHeight;
+      }, 380);
+    };
+    const showChips = () => { chips.innerHTML = QUICK.map((q) => `<button type="button" data-chip="${esc(q)}">${esc(q)}</button>`).join(''); };
+    const open = () => {
+      chatBox.hidden = false; chatFab.hidden = true; chatFab.setAttribute('aria-expanded', 'true');
+      if (!opened) { opened = true; bot('Привет! Я помощник PS SHOP 👋\nНапишите название игры, и я покажу цену. Или выберите вопрос ниже.'); showChips(); loadCatalog(); }
+      track('chat_open');
+      if (matchMedia('(min-width: 761px)').matches) setTimeout(() => input.focus(), 60);
+    };
+    const close = () => { chatBox.hidden = true; chatFab.hidden = false; chatFab.setAttribute('aria-expanded', 'false'); };
+    chatFab.addEventListener('click', open);
+    $('#chat-close').addEventListener('click', close);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !chatBox.hidden) close(); });
+    const mini = (g) => {
+      const o = g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
+      return `<div class="mini"><a href="${B}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="" width="46" height="61"></a>
+        <div><b>${esc(g.t)}</b><span>${g.o.map((x) => `${esc(x[0])}: ${money(x[1])} uzs`).join(' · ')}</span></div>
+        <button class="btn btn-main" data-add="${g.id}" data-opt="${esc(o[0])}" data-label="В корзину">В корзину</button></div>`;
+    };
+    const answer = async (raw) => {
+      const q = norm(raw); const words = q.split(' ');
+      const has = (...w) => w.some((x) => (x.length <= 3 ? words.includes(x) : q.includes(x)));
+      track('chat_question', { q: raw.slice(0, 80) });
+      if (has('менеджер', 'оператор', 'связат', 'позвон', 'живой', 'написать', 'наиль')) {
+        return bot(`Конечно! Наиль на связи 24/7: ${tgA('Здравствуйте! Пишу с сайта PS SHOP.', 'написать в Telegram')}`);
+      }
+      if (has('установ', 'скача', 'загруз', 'как играть', 'аккаунт', 'войти')) {
+        return bot(`Всё просто: после оплаты мы присылаем логин и пароль, вы добавляете нового пользователя на PlayStation, заходите в Библиотеку и устанавливаете игру. Пришлём подробную инструкцию и поможем на каждом шаге.\n<a href="${B}/install/">Как происходит установка</a>`);
+      }
+      if (has('как купить', 'как заказ', 'как оформ', 'купить', 'заказ', 'оформ')) {
+        return bot('1. Добавьте игру в корзину и выберите PS4 или PS5.\n2. Нажмите «Оформить заказ» и оставьте имя и телефон или Telegram.\n3. Вы перейдёте к нам в Telegram с готовым текстом заказа, а мы подключим игру дистанционно.');
+      }
+      if (has('гарант', 'обман', 'безопас', 'надеж', 'вернут', 'возврат', 'отзыв')) {
+        return bot(`Даём гарантию работоспособности, замены или возврата и безопасности аккаунта. Работаем более 3 лет, на связи 24/7 и после покупки.\n<a href="${B}/reviews/">Отзывы клиентов</a>`);
+      }
+      if (has('оплат', 'карт', 'click', 'payme', 'uzcard', 'humo', 'перевод', 'налич', 'предоплат')) {
+        return bot(`Оплату обсудим в Telegram при оформлении заказа: ${tgA('Здравствуйте! Подскажите, как оплатить заказ?', 'спросить про оплату')}`);
+      }
+      if (has('аренд', 'прокат', 'напрокат', 'арендовать')) {
+        return bot(`Аренда PS5 в Ташкенте: от 200 000 uzs в сутки при аренде на 7 дней, сутки — 300 000 uzs. Привезём, установим и настроим.\n<a href="${B}/rent/">Все цены на аренду</a> · ${tgA('Здравствуйте! Хочу арендовать PS5.', 'забронировать')}`);
+      }
+      if (has('ps plus', 'psplus', 'пс плюс', 'плюс', 'подписк', 'ea play', 'еа плей', 'essential', 'extra', 'deluxe', 'premium')) {
+        return bot(`PS Plus на 12 месяцев: Essential — 629 000, Extra — 979 000, Deluxe (Premium) — 1 268 000 uzs. Есть варианты на 1 и 3 месяца и EA Play.\n<a href="${B}/subscriptions/">Выбрать подписку</a>`);
+      }
+      if (has('чистк', 'почист', 'аксессуар', 'джойстик', 'геймпад', 'гарнитур')) {
+        return bot(`Чистку консоли и аксессуары подберём индивидуально: ${tgA('Здравствуйте! Интересует чистка консоли или аксессуары.', 'узнать цену в Telegram')}`);
+      }
+      if (has('привет', 'здравств', 'салам', 'добрый', 'hello', 'assalom') && words.length <= 3) {
+        return bot('Привет! Какую игру ищете? Напишите название, например «FC 26» или «человек паук».');
+      }
+      await loadCatalog();
+      const STOP = new Set(['сколько', 'стоит', 'стоят', 'цена', 'цену', 'есть', 'ли', 'у', 'вас', 'игра', 'игру', 'игры', 'хочу', 'на', 'для', 'ps5', 'ps4', 'пс5', 'пс4', 'а', 'и', 'в', 'подскажите', 'пожалуйста', 'какая', 'наличии', 'нужна', 'нужен']);
+      const w = words.filter((x) => x && !STOP.has(x));
+      if (w.length) {
+        const list = searchList(CATALOG.filter((g) => g.k !== 'sub'), w.join(' '));
+        if (list.length) {
+          const top = list.slice(0, 4);
+          return bot(top.length === 1 ? 'Нашёл:' : `Вот что нашлось (${list.length}):`,
+            top.map(mini).join('') + (list.length > 4 ? `<a class="btn btn-sm" href="${B}/catalog/?q=${encodeURIComponent(w.join(' '))}" style="align-self:flex-start">Показать все</a>` : ''));
+        }
+      }
+      track('chat_not_found', { q: raw.slice(0, 80) });
+      return bot(`Не нашёл такой игры на сайте, но Наиль найдёт её за 10 минут: ${tgA(`Здравствуйте! Ищу игру: ${raw}`, 'написать в Telegram')}`);
+    };
+    const ask = (text) => { text = text.trim(); if (!text) return; say(esc(text), 'me'); answer(text); };
+    chips.addEventListener('click', (e) => { const b = e.target.closest('[data-chip]'); if (b) ask(b.dataset.chip); });
+    $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); ask(input.value); input.value = ''; });
+  }
+
   /* старт */
   if (cart.length) loadCatalog().then(save); else save();
   $$('[data-add]').forEach(syncBtn);

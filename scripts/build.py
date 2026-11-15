@@ -129,7 +129,7 @@ def icon(name, cls=''):
 
 
 # ---------- разметка ----------
-NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы')]
+NAV = [('catalog', '/catalog/', 'Каталог'), ('subs', '/subscriptions/', 'Подписки'), ('rent', '/rent/', 'Аренда PS5'), ('install', '/install/', 'Установка'), ('reviews', '/reviews/', 'Отзывы'), ('about', '/about/', 'О нас')]
 
 
 def layout(*, title, desc, body, path, page='', og_image=None, og_type='website', extra_head=''):
@@ -180,6 +180,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 </main>
 {footer()}
 {cart_drawer()}
+{chat_widget()}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>window.PS={{base:{json.dumps(BASE)},api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])}}};</script>
 <script src="/static/app.js?v={VERSION}" defer></script>
@@ -204,6 +205,7 @@ def footer():
         <li><a href="/rent/">Аренда PS5</a></li>
         <li><a href="/install/">Как происходит установка</a></li>
         <li><a href="/reviews/">Отзывы</a></li>
+        <li><a href="/about/">О нас</a></li>
       </ul>
     </div>
     <div>
@@ -220,6 +222,24 @@ def footer():
   </div>
   <div class="wrap foot-note">PS SHOP — независимый магазин. PlayStation, PS4 и PS5 — товарные знаки их владельцев.</div>
 </footer>'''
+
+
+def chat_widget():
+    return f'''<button class="chat-fab" id="chat-fab" aria-label="Открыть чат-помощник" aria-expanded="false">{icon('chat')}<span>Помощник</span></button>
+<section class="chat" id="chat" aria-label="Чат-помощник PS SHOP" hidden>
+  <header class="chat-head">
+    <img src="/static/img/mark-96.webp" width="36" height="36" alt="">
+    <div><b>Помощник PS SHOP</b><span><i></i>На связи 24/7</span></div>
+    <button class="icon-btn" id="chat-close" aria-label="Закрыть чат">{icon('close')}</button>
+  </header>
+  <div class="chat-log" id="chat-log" aria-live="polite"></div>
+  <div class="chat-chips" id="chat-chips"></div>
+  <form class="chat-form" id="chat-form">
+    <label class="sr" for="chat-input">Сообщение</label>
+    <input id="chat-input" autocomplete="off" placeholder="Название игры или вопрос">
+    <button class="btn btn-main chat-send" aria-label="Отправить">{icon('arrow')}</button>
+  </form>
+</section>'''
 
 
 def cart_drawer():
@@ -328,6 +348,38 @@ def page_reviews(reviews):
 PLUS_ICON = '''<svg class="plus-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="pl-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset=".55" stop-color="#ffc21a"/><stop offset="1" stop-color="#f29d00"/></linearGradient></defs><path d="M18 4h12v14h14v12H30v14H18V30H4V18h14z" fill="url(#pl-g)"/><path d="M18 4h12v14h14v4H18z" fill="#fff" opacity=".28"/></svg>'''
 
 
+EXTRA_SERVICES = [
+    ('Чистка консоли', 'Почистим вашу PS4 или PS5. Стоимость и сроки подскажем в Telegram.',
+     'Здравствуйте! Хочу почистить консоль.'),
+    ('Аксессуары', 'Поможем подобрать аксессуары для PlayStation. Наличие и цены — в Telegram.',
+     'Здравствуйте! Интересуют аксессуары для PlayStation.'),
+]
+
+
+def extra_services_block():
+    cards = ''.join(f'''<article class="xs glass"><h3>{E(t)}</h3><p>{E(d)}</p>
+  <a class="btn btn-sm" href="{CONTACTS['manager']}?text={urllib.parse.quote(q)}" target="_blank" rel="noopener">{icon('tg')}Узнать цену</a></article>'''
+                    for t, d, q in EXTRA_SERVICES)
+    return f'''<section class="sec wrap"><div class="sec-head"><h2>Доп. услуги</h2></div><div class="xs-grid">{cards}</div></section>'''
+
+
+def page_about():
+    body = f'''<div class="wrap about">
+  <div class="page-head"><h1>О нас</h1></div>
+  <div class="about-text glass">
+    <p>Привет! Мы — PS SHOP, и мы такое же сообщество игроков, как и вы. Всё началось с простой мысли: в Ташкенте купить игру для PlayStation должно быть так же легко, как включить консоль. Без поездок по городу, переплат и сомнений, заработает ли.</p>
+    <p>Мы работаем уже более 3 лет. За это время через нас прошли сотни игр и подписок, и за каждой стоит конкретный человек: кто-то собирал друзей на вечер FC, кто-то покупал первую игру ребёнку, кто-то наконец добрался до игры, о которой давно мечтал. Для нас нет «маленьких» заказов — мы ценим каждого клиента и помним, что вы выбрали нас.</p>
+    <p>Мы на связи 24/7 и не пропадаем после оплаты: поможем с установкой, подскажем, решим любой вопрос. А если у вас есть идея, как сделать PS SHOP лучше, — пишите, мы всегда открыты к предложениям.</p>
+    <p>Спасибо, что вы с нами. Увидимся в игре!</p>
+    <p class="about-sign">Основатель и CEO — Наиль Гайнуллин</p>
+  </div>
+  <div class="rent-cta"><a class="btn btn-main" href="{CONTACTS['manager']}" target="_blank" rel="noopener">{icon('tg')}Написать нам</a>
+    <a class="link-quiet" href="{CONTACTS['community']}" target="_blank" rel="noopener">Сообщество игроков в Telegram</a></div>
+</div>'''
+    return layout(title='О нас — PS SHOP', path='/about/', page='about',
+                  desc='PS SHOP — сообщество игроков из Ташкента. Цифровые игры и подписки для PS4 и PS5, работаем более 3 лет.', body=body)
+
+
 # ---------- страницы ----------
 def page_home(games):
     gta = next((g for g in games if g['id'] == 'grand-theft-auto-vi'), None)
@@ -391,7 +443,7 @@ def page_home(games):
     pre = [g for g in pre if g['id'] != 'grand-theft-auto-vi']
     body = hero + perks + shelf('Предзаказы', pre, '/catalog/?f=pre', eager=3) + shelf('Хиты', hits, '/catalog/?f=hit') \
         + shelf('Новинки', new, '/catalog/?f=new') + promo + shelf('Играть вместе', coop, '/catalog/?f=coop') \
-        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + reviews_block(load_reviews()) + shelf('Для VR', vr, '/catalog/?f=vr') + guarantees_block()
+        + shelf('До 200 000 uzs', cheap, '/catalog/?sort=price') + reviews_block(load_reviews()) + shelf('Для VR', vr, '/catalog/?f=vr') + extra_services_block() + guarantees_block()
     return layout(title='PS SHOP — игры для PS4 и PS5 в Ташкенте', path='/', page='home',
                   desc=f'{len(games)} цифровых игр для PlayStation 4 и 5, подписки PS Plus и аренда PS5. Подключим дистанционно, гарантия, на связи 24/7.',
                   body=body)
@@ -556,7 +608,8 @@ def page_rent(sv):
     </ol>
   </section>
   <div class="sec rent-cta"><a class="btn btn-main" href="{tg}" target="_blank" rel="noopener">{icon('tg')}Забронировать в Telegram</a></div>
-</div>'''
+</div>
+{extra_services_block()}'''
     return layout(title='Аренда PS5 в Ташкенте — PS SHOP', path='/rent/', page='rent',
                   desc='Аренда PlayStation 5 в Ташкенте: от 200 000 uzs в сутки, доставка, установка и настройка дома.', body=body)
 
@@ -688,13 +741,14 @@ def main():
     write('rent/index.html', page_rent(sv))
     write('install/index.html', page_install())
     write('reviews/index.html', page_reviews(load_reviews()))
+    write('about/index.html', page_about())
     write('404.html', page_404())
     rows = catalog_json(games)
     for p in sv['psplus'] + [sv['eaplay']]:
         rows.append({'id': p['id'], 't': ('PS Plus ' if p['id'].startswith('ps-plus') else '') + p['name'], 'k': 'sub',
                      'o': [[months(m), v] for m, v in p['prices'].items()], 'pl': [], 'm': min(p['prices'].values()), 'f': [], 's': ''})
     write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
-    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/'] + [f'/game/{g["id"]}/' for g in games]
+    urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/', '/about/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
