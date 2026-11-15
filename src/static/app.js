@@ -210,20 +210,36 @@
     });
   }
 
-  /* ---------- бесконечные полки ---------- */
+  /* ---------- бесконечные полки ----------
+     Три одинаковых набора карточек, стартуем со среднего. Перескок на один набор назад/вперёд
+     делаем только когда прокрутка остановилась — так не обрывается инерция пальца на телефоне. */
   $$('.shelf:not(.revs)').forEach((row) => {
     const items = [...row.children];
     if (items.length < 4) return;
-    const clone = () => items.map((el) => { const c = el.cloneNode(true); c.dataset.clone = '1'; c.querySelectorAll('img').forEach((i) => i.setAttribute('loading', 'lazy')); return c; });
-    clone().forEach((c) => row.appendChild(c));
-    clone().forEach((c) => row.appendChild(c));
+    const clone = () => items.map((el) => {
+      const c = el.cloneNode(true); c.dataset.clone = '1';
+      c.querySelectorAll('img').forEach((i) => { i.setAttribute('loading', 'lazy'); i.removeAttribute('fetchpriority'); });
+      return c;
+    });
+    row.prepend(...clone());
+    row.append(...clone());
     let setW = 0;
     const measure = () => { setW = row.children[items.length].offsetLeft - row.children[0].offsetLeft; };
-    measure(); window.addEventListener('resize', measure);
-    row.addEventListener('scroll', () => {
+    const jump = (dx) => {
+      row.style.scrollSnapType = 'none'; row.style.scrollBehavior = 'auto';
+      row.scrollLeft += dx;
+      requestAnimationFrame(() => { row.style.scrollSnapType = ''; row.style.scrollBehavior = ''; });
+    };
+    const recenter = () => {
       if (!setW) return;
-      if (row.scrollLeft >= setW * 2 - 2) { row.style.scrollSnapType = 'none'; row.scrollLeft -= setW; requestAnimationFrame(() => { row.style.scrollSnapType = ''; }); }
-    }, { passive: true });
+      if (row.scrollLeft < setW * 0.5) jump(setW);
+      else if (row.scrollLeft > setW * 1.5) jump(-setW);
+    };
+    requestAnimationFrame(() => { measure(); jump(setW); });
+    window.addEventListener('resize', () => { const k = setW ? row.scrollLeft / setW : 1; measure(); row.scrollLeft = k * setW; });
+    let idle;
+    if ('onscrollend' in window) row.addEventListener('scrollend', recenter);
+    else row.addEventListener('scroll', () => { clearTimeout(idle); idle = setTimeout(recenter, 160); }, { passive: true });
     row.querySelectorAll('[data-add]').forEach(syncBtn);
   });
 
