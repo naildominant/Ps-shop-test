@@ -32,9 +32,19 @@ def transparent(src):
     return Image.fromarray(out, 'RGBA')
 
 
+def bright_with_inner_face():
+    """Яркий вырезанный логотип (brand/logo-transparent.png) + тёмная внутренняя грань из оригинала.
+    Вырезанная версия ярче оригинала, но в ней пропала грань — подкладываем её снизу."""
+    base = transparent(os.path.join(ROOT, 'brand', 'logo.png'))
+    base = base.crop(base.getbbox())
+    bright = Image.open(os.path.join(ROOT, 'brand', 'logo-transparent.png')).convert('RGBA')
+    bright = bright.crop(bright.getbbox()).resize(base.size, Image.LANCZOS)
+    out = Image.alpha_composite(base, bright)
+    return out
+
+
 def main():
-    full = transparent(os.path.join(ROOT, 'brand', 'logo.png'))
-    full = full.crop(full.getbbox())
+    full = bright_with_inner_face()
     full.save(os.path.join(ROOT, 'brand', 'logo-transparent-full.png'))
     a = np.asarray(full)[:, :, 3]
     rows = np.where(a.max(1) > 20)[0]
