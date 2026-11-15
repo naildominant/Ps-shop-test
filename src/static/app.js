@@ -3,6 +3,9 @@
   'use strict';
   const PS = window.PS || {};
   const B = PS.base || ''; // путь сайта: '' на psshop.uz, '/Ps-shop-test' на github.io
+  const UZ = document.documentElement.lang === 'uz'; // узбекская версия сайта
+  const P = B + (UZ ? '/uz' : ''); // ссылки на страницы с учётом языка
+  const T = (ru, uz) => (UZ ? uz : ru);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -41,7 +44,7 @@
     const g = CATALOG && CATALOG.byId[i.id];
     if (!g) return null;
     const o = g.o.find((x) => x[0] === i.opt) || g.o[0];
-    return { title: g.t, opt: o[0], price: o[1], cover: g.k === 'sub' ? null : `${B}/static/covers/sm/${g.id}.webp`, href: g.k === 'sub' ? `${B}/subscriptions/` : `${B}/game/${g.id}/` };
+    return { title: g.t, opt: o[0], price: o[1], cover: g.k === 'sub' ? null : `${B}/static/covers/sm/${g.id}.webp`, href: g.k === 'sub' ? `${P}/subscriptions/` : `${P}/game/${g.id}/` };
   }
   function save() {
     if (CATALOG) cart = cart.filter((i) => info(i));
@@ -55,14 +58,14 @@
     b.classList.toggle('is-in', on);
     if (b.classList.contains('card-add')) {
       b.innerHTML = on ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-    } else if (b.dataset.label) b.textContent = on ? 'В корзине' : b.dataset.label;
+    } else if (b.dataset.label) b.textContent = on ? T('В корзине', 'Savatda') : b.dataset.label;
   }
   function add(id, opt, quiet) {
     if (has(id, opt)) return false;
     cart.push({ id, opt }); save();
     track('add_to_cart', { game: id, option: opt });
     if (PS.api) { try { fetch(`${PS.api}/event`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ type: 'add', id }) }).catch(() => {}); } catch { /* */ } }
-    if (!quiet) loadCatalog().then(() => { const x = info({ id, opt }); toast(x ? `${x.title} в корзине` : 'Добавлено в корзину'); });
+    if (!quiet) loadCatalog().then(() => { const x = info({ id, opt }); toast(x ? T(`${x.title} в корзине`, `${x.title} savatda`) : T('Добавлено в корзину', 'Savatga qo‘shildi')); });
     return true;
   }
 
@@ -83,31 +86,31 @@
   function renderCart() {
     const body = $('#cart-body');
     if (!cart.length) {
-      body.innerHTML = `<div class="cart-empty"><p>В корзине пока пусто</p><a class="btn btn-main" href="${B}/catalog/">Открыть каталог</a></div>`;
+      body.innerHTML = `<div class="cart-empty"><p>${T('В корзине пока пусто', 'Savat hozircha bo‘sh')}</p><a class="btn btn-main" href="${P}/catalog/">${T('Открыть каталог', 'Katalogni ochish')}</a></div>`;
       return;
     }
     const me = store.get('ps.me', {});
     const lines = cart.map((i) => {
       const x = info(i);
       return `<div class="line"><a href="${x.href}">${x.cover ? `<img src="${x.cover}" alt="" width="54" height="72" loading="lazy">` : '<span class="ph">PS+</span>'}</a>
-        <div><b>${esc(x.title)}</b><span>${esc(x.opt)}</span><br><button class="line-rm" data-rm="${esc(keyOf(i))}">Убрать</button></div>
+        <div><b>${esc(x.title)}</b><span>${esc(x.opt)}</span><br><button class="line-rm" data-rm="${esc(keyOf(i))}">${T('Убрать', 'Olib tashlash')}</button></div>
         <div class="line-price">${money(x.price)} uzs</div></div>`;
     }).join('');
     const plats = cart.map((i) => info(i).opt).filter((o) => o === 'PS4' || o === 'PS5');
     const guess = me.console || (plats.length && plats.every((o) => o === 'PS4') ? 'PS4' : plats.some((o) => o === 'PS4') ? '' : plats.length ? 'PS5' : '');
     body.innerHTML = `${lines}
-      <div class="total"><span>Итого</span><b class="num">${money(total())} uzs</b></div>
+      <div class="total"><span>${T('Итого', 'Jami')}</span><b class="num">${money(total())} uzs</b></div>
       <form class="form" id="order" novalidate>
-        <div class="field"><label for="o-name">Имя</label><input id="o-name" name="name" autocomplete="given-name" required value="${esc(me.name || '')}"></div>
-        <div class="field"><label for="o-contact">Телефон или Telegram</label><input id="o-contact" name="contact" autocomplete="tel" placeholder="+998 90 123 45 67 или @username" required value="${esc(me.contact || '')}"></div>
-        <div class="field"><fieldset><legend>Консоль</legend><div class="seg">
+        <div class="field"><label for="o-name">${T('Имя', 'Ism')}</label><input id="o-name" name="name" autocomplete="given-name" required value="${esc(me.name || '')}"></div>
+        <div class="field"><label for="o-contact">${T('Телефон или Telegram', 'Telefon yoki Telegram')}</label><input id="o-contact" name="contact" autocomplete="tel" placeholder="+998 90 123 45 67 ${T('или', 'yoki')} @username" required value="${esc(me.contact || '')}"></div>
+        <div class="field"><fieldset><legend>${T('Консоль', 'Konsol')}</legend><div class="seg">
           <label><input type="radio" name="console" value="PS4" ${guess === 'PS4' ? 'checked' : ''}><span>PS4</span></label>
           <label><input type="radio" name="console" value="PS5" ${guess === 'PS5' ? 'checked' : ''}><span>PS5</span></label>
         </div></fieldset></div>
         <div class="hp" aria-hidden="true"><label for="o-site">Сайт</label><input id="o-site" name="website" tabindex="-1" autocomplete="off"></div>
         <p class="err" id="o-err" hidden></p>
-        <button class="btn btn-main btn-block" type="submit">Оформить заказ</button>
-        <p class="hint">Заявка сразу придёт нам, а вы перейдёте в Telegram к менеджеру с готовым текстом заказа. Оплату обсудим там.</p>
+        <button class="btn btn-main btn-block" type="submit">${T('Оформить заказ', 'Buyurtma berish')}</button>
+        <p class="hint">${T('Заявка сразу придёт нам, а вы перейдёте в Telegram к менеджеру с готовым текстом заказа. Оплату обсудим там.', 'Ariza darhol bizga keladi, siz esa tayyor buyurtma matni bilan Telegramda menejerga o‘tasiz. To‘lovni o‘sha yerda kelishamiz.')}</p>
       </form>`;
     const f = $('#order');
     f.addEventListener('focusin', () => track('form_start'), { once: true });
@@ -115,8 +118,8 @@
 
   function orderText(d) {
     const lines = cart.map((i, n) => { const x = info(i); return `${n + 1}. ${x.title} (${x.opt}) — ${money(x.price)} uzs`; });
-    return ['Здравствуйте! Хочу оформить заказ с сайта PS SHOP:', '', ...lines, '', `Итого: ${money(total())} uzs`,
-      `Консоль: ${d.console}`, `Имя: ${d.name}`, `Контакт: ${d.contact}`].join('\n');
+    return [T('Здравствуйте! Хочу оформить заказ с сайта PS SHOP:', 'Assalomu alaykum! PS SHOP saytidan buyurtma bermoqchiman:'), '', ...lines, '', `${T('Итого', 'Jami')}: ${money(total())} uzs`,
+      `${T('Консоль', 'Konsol')}: ${d.console}`, `${T('Имя', 'Ism')}: ${d.name}`, `${T('Контакт', 'Aloqa')}: ${d.contact}`].join('\n');
   }
   function validContact(s) {
     const digits = s.replace(/\D/g, '');
@@ -127,9 +130,9 @@
     Object.keys(d).forEach((k) => { d[k] = String(d[k] || '').trim(); });
     const err = $('#o-err'); const bad = [];
     $$('input', f).forEach((i) => i.removeAttribute('aria-invalid'));
-    if (d.name.length < 2) bad.push(['#o-name', 'Напишите имя']);
-    if (!validContact(d.contact)) bad.push(['#o-contact', 'Укажите телефон или Telegram @username']);
-    if (!d.console) bad.push([null, 'Выберите консоль: PS4 или PS5']);
+    if (d.name.length < 2) bad.push(['#o-name', T('Напишите имя', 'Ismingizni yozing')]);
+    if (!validContact(d.contact)) bad.push(['#o-contact', T('Укажите телефон или Telegram @username', 'Telefon yoki Telegram @username kiriting')]);
+    if (!d.console) bad.push([null, T('Выберите консоль: PS4 или PS5', 'Konsolni tanlang: PS4 yoki PS5')]);
     if (bad.length) {
       bad.forEach(([s]) => s && $(s).setAttribute('aria-invalid', 'true'));
       err.textContent = bad.map((b) => b[1]).join('. '); err.hidden = false;
@@ -151,10 +154,10 @@
     }
     try { navigator.clipboard?.writeText(text).catch(() => {}); } catch { /* */ }
     const url = `${PS.manager}?text=${encodeURIComponent(text)}`;
-    $('#cart-body').innerHTML = `<div class="done"><h3>Заявка принята</h3>
-      <p>Сейчас откроется Telegram с текстом заказа. Отправьте его менеджеру, и мы сразу ответим.</p>
-      <a class="btn btn-main btn-block" href="${url}" target="_blank" rel="noopener" data-track="tg_after_order">Открыть Telegram</a>
-      <p class="hint">Текст заказа мы скопировали. Если он не подставился, вставьте его в чат.</p></div>`;
+    $('#cart-body').innerHTML = `<div class="done"><h3>${T('Заявка принята', 'Ariza qabul qilindi')}</h3>
+      <p>${T('Сейчас откроется Telegram с текстом заказа. Отправьте его менеджеру, и мы сразу ответим.', 'Hozir buyurtma matni bilan Telegram ochiladi. Uni menejerga yuboring, darhol javob beramiz.')}</p>
+      <a class="btn btn-main btn-block" href="${url}" target="_blank" rel="noopener" data-track="tg_after_order">${T('Открыть Telegram', 'Telegramni ochish')}</a>
+      <p class="hint">${T('Текст заказа мы скопировали. Если он не подставился, вставьте его в чат.', 'Buyurtma matnini nusxaladik. Agar o‘zi qo‘yilmasa, chatga joylashtiring.')}</p></div>`;
     cart = []; save();
     track('tg_redirect');
     setTimeout(() => { location.href = url; }, 700);
@@ -250,7 +253,7 @@
   }
 
   /* ---------- поиск: алиасы + опечатки ---------- */
-  const norm = (s) => String(s).toLowerCase().replace(/ё/g, 'е').replace(/[’'`]/g, '').replace(/[^a-z0-9а-я]+/g, ' ').trim();
+  const norm = (s) => String(s).toLowerCase().replace(/ё/g, 'е').replace(/[’'`‘ʻ]/g, '').replace(/[^a-z0-9а-я]+/g, ' ').trim();
   function dist(a, b, max) { // расстояние Дамерау-Левенштейна с ранним выходом
     if (Math.abs(a.length - b.length) > max) return max + 1;
     const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
@@ -284,16 +287,17 @@
     const params = new URLSearchParams(location.search);
     let f = params.get('f') || ''; let sort = params.get('sort') || 'new'; let q = params.get('q') || ''; let limit = 48;
     sortSel.value = sort; $('#search-q').value = q;
-    const plural = (n) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? 'игра' : m >= 2 && m <= 4 && (h < 10 || h >= 20) ? 'игры' : 'игр'; };
+    const plural = (n) => { if (UZ) return 'ta o‘yin'; const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? 'игра' : m >= 2 && m <= 4 && (h < 10 || h >= 20) ? 'игры' : 'игр'; };
     const card = (g) => {
       const o = g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
-      const tags = [g.f.includes('sale') && '<span class="tag tag-sale">Акция</span>', g.f.includes('pre') && '<span class="tag tag-pre">Предзаказ</span>', g.f.includes('hit') && '<span class="tag tag-hit">Хит</span>',
-        g.f.includes('new') && !g.f.includes('pre') && '<span class="tag tag-new">Новинка</span>'].filter(Boolean).slice(0, 2).join('');
-      const from = new Set(g.o.map((x) => x[1])).size > 1 ? '<span class="from">от</span>' : '';
-      return `<article class="card"><div class="card-media"><a class="card-img" href="${B}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
-        <div class="card-tags">${tags}</div><button class="card-add" data-add="${g.id}" data-opt="${esc(o[0])}" aria-label="В корзину: ${esc(g.t)}"></button></div>
-        <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="${B}/game/${g.id}/">${esc(g.t)}</a>
-        <div class="price">${from}${g.od && g.od[o[0]] ? `<s>${money(g.od[o[0]])}</s>` : ''}${money(g.m)}<small>uzs</small></div></div></article>`;
+      const tags = [g.f.includes('sale') && `<span class="tag tag-sale">${T('Акция', 'Aksiya')}</span>`, g.f.includes('pre') && `<span class="tag tag-pre">${T('Предзаказ', 'Oldindan buyurtma')}</span>`, g.f.includes('hit') && `<span class="tag tag-hit">${T('Хит', 'Xit')}</span>`,
+        g.f.includes('new') && !g.f.includes('pre') && `<span class="tag tag-new">${T('Новинка', 'Yangi')}</span>`].filter(Boolean).slice(0, 2).join('');
+      const multi = new Set(g.o.map((x) => x[1])).size > 1;
+      const from = multi && !UZ ? '<span class="from">от</span>' : '';
+      return `<article class="card"><div class="card-media"><a class="card-img" href="${P}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="${esc(g.t)}" width="300" height="400" loading="lazy" decoding="async"></a>
+        <div class="card-tags">${tags}</div><button class="card-add" data-add="${g.id}" data-opt="${esc(o[0])}" aria-label="${T('В корзину', 'Savatga')}: ${esc(g.t)}"></button></div>
+        <div class="card-body"><span class="card-meta">${g.pl.join(' / ')}</span><a class="card-title" href="${P}/game/${g.id}/">${esc(g.t)}</a>
+        <div class="price">${from}${g.od && g.od[o[0]] ? `<s>${money(g.od[o[0]])}</s>` : ''}${money(g.m)}<small>uzs${multi && UZ ? ' dan' : ''}</small></div></div></article>`;
     };
     const FILTER = { '': () => true, ps5: (g) => g.pl.includes('PS5'), ps4: (g) => g.pl.includes('PS4') };
     function render() {
@@ -302,18 +306,18 @@
       if (sort === 'price') list = [...list].sort((a, b) => a.m - b.m);
       else if (sort === 'price-desc') list = [...list].sort((a, b) => b.m - a.m);
       else if (sort === 'az') list = [...list].sort((a, b) => a.t.localeCompare(b.t, 'ru'));
-      found.textContent = q ? `По запросу «${q}»: ${list.length} ${plural(list.length)}` : `${list.length} ${plural(list.length)}`;
+      found.textContent = q ? T(`По запросу «${q}»: ${list.length} ${plural(list.length)}`, `«${q}» bo‘yicha: ${list.length} ${plural(list.length)}`) : `${list.length} ${plural(list.length)}`;
       grid.innerHTML = list.slice(0, limit).map(card).join('');
       empty.hidden = list.length > 0;
       if (!list.length) {
-        $('#empty-tg').href = `${PS.manager}?text=${encodeURIComponent(`Здравствуйте! Ищу игру: ${q || ''}`)}`;
+        $('#empty-tg').href = `${PS.manager}?text=${encodeURIComponent(T(`Здравствуйте! Ищу игру: ${q || ''}`, `Assalomu alaykum! O‘yin qidiryapman: ${q || ''}`))}`;
         track('not_found', { q });
       }
       more.hidden = list.length <= limit;
       $$('[data-f]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.f === f)));
       $$('[data-add]', grid).forEach(syncBtn);
       const p = new URLSearchParams(); if (q) p.set('q', q); if (f) p.set('f', f); if (sort !== 'new') p.set('sort', sort);
-      history.replaceState(null, '', `${B}/catalog/${p.toString() ? `?${p}` : ''}`);
+      history.replaceState(null, '', `${P}/catalog/${p.toString() ? `?${p}` : ''}`);
     }
     loadCatalog().then(render);
     $('#chips').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (!c) return; f = c.dataset.f; limit = 48; render(); });
@@ -329,7 +333,8 @@
   const chatBox = $('#chat'); const chatFab = $('#chat-fab');
   if (chatBox && chatFab) {
     const log = $('#chat-log'); const chips = $('#chat-chips'); const input = $('#chat-input');
-    const QUICK = ['Как купить?', 'Как установить?', 'Гарантия', 'Сколько стоит GTA 6?', 'PS Plus', 'Аренда PS5', 'Оплата', 'Написать менеджеру'];
+    const QUICK = UZ ? ['Qanday sotib olaman?', 'Qanday o‘rnataman?', 'Kafolat', 'GTA 6 qancha turadi?', 'PS Plus', 'PS5 ijarasi', 'To‘lov', 'Menejerga yozish']
+      : ['Как купить?', 'Как установить?', 'Гарантия', 'Сколько стоит GTA 6?', 'PS Plus', 'Аренда PS5', 'Оплата', 'Написать менеджеру'];
     const tgLink = (text) => `${PS.manager}?text=${encodeURIComponent(text)}`;
     const tgA = (text, label) => `<a href="${tgLink(text)}" target="_blank" rel="noopener" data-track="chat_to_tg">${label}</a>`;
     let opened = false;
@@ -348,7 +353,7 @@
     const showChips = () => { chips.innerHTML = QUICK.map((q) => `<button type="button" data-chip="${esc(q)}">${esc(q)}</button>`).join(''); };
     const open = () => {
       chatBox.hidden = false; chatFab.hidden = true; chatFab.setAttribute('aria-expanded', 'true');
-      if (!opened) { opened = true; bot('Привет! Я помощник PS SHOP 👋\nНапишите название игры, и я покажу цену. Или выберите вопрос ниже.'); showChips(); loadCatalog(); }
+      if (!opened) { opened = true; bot(T('Привет! Я помощник PS SHOP 👋\nНапишите название игры, и я покажу цену. Или выберите вопрос ниже.', 'Salom! Men PS SHOP yordamchisiman 👋\nO‘yin nomini yozing, narxini ko‘rsataman. Yoki quyidagi savollardan birini tanlang.')); showChips(); loadCatalog(); }
       track('chat_open');
       if (matchMedia('(min-width: 761px)').matches) setTimeout(() => input.focus(), 60);
     };
@@ -358,59 +363,66 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !chatBox.hidden) close(); });
     const mini = (g) => {
       const o = g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
-      return `<div class="mini"><a href="${B}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="" width="46" height="61"></a>
+      return `<div class="mini"><a href="${P}/game/${g.id}/"><img src="${B}/static/covers/sm/${g.id}.webp" alt="" width="46" height="61"></a>
         <div><b>${esc(g.t)}</b><span>${g.o.map((x) => `${esc(x[0])}: ${money(x[1])} uzs`).join(' · ')}</span></div>
-        <button class="btn btn-main" data-add="${g.id}" data-opt="${esc(o[0])}" data-label="В корзину">В корзину</button></div>`;
+        <button class="btn btn-main" data-add="${g.id}" data-opt="${esc(o[0])}" data-label="${T('В корзину', 'Savatga')}">${T('В корзину', 'Savatga')}</button></div>`;
     };
     const answer = async (raw) => {
       const q = norm(raw); const words = q.split(' ');
       const has = (...w) => w.some((x) => (x.length <= 3 ? words.includes(x) : q.includes(x)));
       track('chat_question', { q: raw.slice(0, 80) });
-      if (has('менеджер', 'оператор', 'связат', 'позвон', 'живой', 'написать', 'наиль')) {
-        return bot(`Конечно! Наиль на связи 24/7: ${tgA('Здравствуйте! Пишу с сайта PS SHOP.', 'написать в Telegram')}`);
+      if (has('менеджер', 'оператор', 'связат', 'позвон', 'живой', 'написать', 'наиль', 'menejer', 'yozish', 'nail', 'boglan', 'aloqa')) {
+        return bot(T(`Конечно! Наиль на связи 24/7: ${tgA('Здравствуйте! Пишу с сайта PS SHOP.', 'написать в Telegram')}`, `Albatta! Nail 24/7 aloqada: ${tgA('Assalomu alaykum! PS SHOP saytidan yozyapman.', 'Telegramga yozish')}`));
       }
-      if (has('установ', 'скача', 'загруз', 'как играть', 'аккаунт', 'войти')) {
-        return bot(`Всё просто: после оплаты мы присылаем логин и пароль, вы добавляете нового пользователя на PlayStation, заходите в Библиотеку и устанавливаете игру. Пришлём подробную инструкцию и поможем на каждом шаге.\n<a href="${B}/install/">Как происходит установка</a>`);
+      if (has('установ', 'скача', 'загруз', 'как играть', 'аккаунт', 'войти', 'ornat', 'yukla', 'akkaunt', 'kirish')) {
+        return bot(T(`Всё просто: после оплаты мы присылаем логин и пароль, вы добавляете нового пользователя на PlayStation, заходите в Библиотеку и устанавливаете игру. Пришлём подробную инструкцию и поможем на каждом шаге.\n<a href="${P}/install/">Как происходит установка</a>`, `Hammasi oddiy: to‘lovdan keyin login va parol yuboramiz, siz PlayStation ga yangi foydalanuvchi qo‘shasiz, Kutubxonaga kirib o‘yinni o‘rnatasiz. Batafsil yo‘riqnoma yuboramiz va har bir qadamda yordam beramiz.\n<a href="${P}/install/">O‘rnatish qanday bo‘ladi</a>`));
       }
-      if (has('как купить', 'как заказ', 'как оформ', 'купить', 'заказ', 'оформ')) {
-        return bot('1. Добавьте игру в корзину и выберите PS4 или PS5.\n2. Нажмите «Оформить заказ» и оставьте имя и телефон или Telegram.\n3. Вы перейдёте к нам в Telegram с готовым текстом заказа, а мы подключим игру дистанционно.');
+      if (has('как купить', 'как заказ', 'как оформ', 'купить', 'заказ', 'оформ', 'sotib', 'buyurtma', 'qanday olaman', 'xarid')) {
+        return bot(T('1. Добавьте игру в корзину и выберите PS4 или PS5.\n2. Нажмите «Оформить заказ» и оставьте имя и телефон или Telegram.\n3. Вы перейдёте к нам в Telegram с готовым текстом заказа, а мы подключим игру дистанционно.', '1. O‘yinni savatga qo‘shing va PS4 yoki PS5 ni tanlang.\n2. «Buyurtma berish» ni bosing, ism va telefon yoki Telegramingizni qoldiring.\n3. Tayyor buyurtma matni bilan Telegramda bizga o‘tasiz, biz o‘yinni masofadan ulab beramiz.'));
       }
-      if (has('гарант', 'обман', 'безопас', 'надеж', 'вернут', 'возврат', 'отзыв')) {
-        return bot(`Даём гарантию работоспособности, замены или возврата и безопасности аккаунта. Работаем более 3 лет, на связи 24/7 и после покупки.\n<a href="${B}/reviews/">Отзывы клиентов</a>`);
+      if (has('гарант', 'обман', 'безопас', 'надеж', 'вернут', 'возврат', 'отзыв', 'kafolat', 'aldash', 'xavfsiz', 'ishonch', 'qaytar', 'fikr')) {
+        return bot(T(`Даём гарантию работоспособности, замены или возврата и безопасности аккаунта. Работаем более 3 лет, на связи 24/7 и после покупки.\n<a href="${P}/reviews/">Отзывы клиентов</a>`, `Ishlashi, almashtirish yoki pulni qaytarish va akkaunt xavfsizligiga kafolat beramiz. 3 yildan ortiq ishlayapmiz, xariddan keyin ham 24/7 aloqadamiz.\n<a href="${P}/reviews/">Mijozlar fikrlari</a>`));
       }
-      if (has('оплат', 'карт', 'click', 'payme', 'uzcard', 'humo', 'перевод', 'налич', 'предоплат')) {
-        return bot(`Оплату обсудим в Telegram при оформлении заказа: ${tgA('Здравствуйте! Подскажите, как оплатить заказ?', 'спросить про оплату')}`);
+      if (has('оплат', 'карт', 'click', 'payme', 'uzcard', 'humo', 'перевод', 'налич', 'предоплат', 'tolov', 'tola', 'karta', 'naqd', 'pul')) {
+        return bot(T(`Оплату обсудим в Telegram при оформлении заказа: ${tgA('Здравствуйте! Подскажите, как оплатить заказ?', 'спросить про оплату')}`, `To‘lovni buyurtma paytida Telegramda kelishamiz: ${tgA('Assalomu alaykum! Buyurtmani qanday to‘lasam bo‘ladi?', 'to‘lov haqida so‘rash')}`));
       }
-      if (has('аренд', 'прокат', 'напрокат', 'арендовать')) {
-        return bot(`Аренда PS5 в Ташкенте: от 200 000 uzs в сутки при аренде на 7 дней, сутки — 300 000 uzs. Привезём, установим и настроим.\n<a href="${B}/rent/">Все цены на аренду</a> · ${tgA('Здравствуйте! Хочу арендовать PS5.', 'забронировать')}`);
+      if (has('аренд', 'прокат', 'напрокат', 'арендовать', 'ijara', 'ijaraga', 'prokat')) {
+        return bot(T(`Аренда PS5 в Ташкенте: от 200 000 uzs в сутки при аренде на 7 дней, сутки — 300 000 uzs. Привезём, установим и настроим.\n<a href="${P}/rent/">Все цены на аренду</a> · ${tgA('Здравствуйте! Хочу арендовать PS5.', 'забронировать')}`, `Toshkentda PS5 ijarasi: 7 kunlik ijarada sutkasiga 200 000 uzs dan, 1 sutka — 300 000 uzs. Olib kelamiz, o‘rnatib, sozlab beramiz.\n<a href="${P}/rent/">Ijaraning barcha narxlari</a> · ${tgA('Assalomu alaykum! PS5 ijaraga olmoqchiman.', 'band qilish')}`));
       }
-      if (has('ps plus', 'psplus', 'пс плюс', 'плюс', 'подписк', 'ea play', 'еа плей', 'essential', 'extra', 'deluxe', 'premium')) {
-        return bot(`PS Plus на 12 месяцев: Essential — 629 000, Extra — 979 000, Deluxe (Premium) — 1 268 000 uzs. Есть варианты на 1 и 3 месяца и EA Play.\n<a href="${B}/subscriptions/">Выбрать подписку</a>`);
+      if (has('ps plus', 'psplus', 'пс плюс', 'плюс', 'подписк', 'ea play', 'еа плей', 'essential', 'extra', 'deluxe', 'premium', 'obuna', 'plus')) {
+        return bot(T(`PS Plus на 12 месяцев: Essential — 629 000, Extra — 979 000, Deluxe (Premium) — 1 268 000 uzs. Есть варианты на 1 и 3 месяца и EA Play.\n<a href="${P}/subscriptions/">Выбрать подписку</a>`, `12 oylik PS Plus: Essential — 629 000, Extra — 979 000, Deluxe (Premium) — 1 268 000 uzs. 1 va 3 oylik variantlar hamda EA Play ham bor.\n<a href="${P}/subscriptions/">Obunani tanlash</a>`));
       }
-      if (has('чистк', 'почист', 'аксессуар', 'джойстик', 'геймпад', 'гарнитур')) {
-        return bot(`Чистку консоли и аксессуары подберём индивидуально: ${tgA('Здравствуйте! Интересует чистка консоли или аксессуары.', 'узнать цену в Telegram')}`);
+      if (has('чистк', 'почист', 'аксессуар', 'джойстик', 'геймпад', 'гарнитур', 'tozala', 'aksessuar', 'joystik', 'geympad')) {
+        return bot(T(`Чистку консоли и аксессуары подберём индивидуально: ${tgA('Здравствуйте! Интересует чистка консоли или аксессуары.', 'узнать цену в Telegram')}`, `Konsolni tozalash va aksessuarlarni alohida kelishamiz: ${tgA('Assalomu alaykum! Konsolni tozalash yoki aksessuarlar qiziqtiradi.', 'narxini Telegramda bilish')}`));
       }
-      if (has('привет', 'здравств', 'салам', 'добрый', 'hello', 'assalom') && words.length <= 3) {
-        return bot('Привет! Какую игру ищете? Напишите название, например «FC 26» или «человек паук».');
+      if (has('привет', 'здравств', 'салам', 'добрый', 'hello', 'assalom', 'salom') && words.length <= 3) {
+        return bot(T('Привет! Какую игру ищете? Напишите название, например «FC 26» или «человек паук».', 'Salom! Qaysi o‘yinni qidiryapsiz? Nomini yozing, masalan «FC 26» yoki «spider man».'));
       }
       await loadCatalog();
-      const STOP = new Set(['сколько', 'стоит', 'стоят', 'цена', 'цену', 'есть', 'ли', 'у', 'вас', 'игра', 'игру', 'игры', 'хочу', 'на', 'для', 'ps5', 'ps4', 'пс5', 'пс4', 'а', 'и', 'в', 'подскажите', 'пожалуйста', 'какая', 'наличии', 'нужна', 'нужен']);
+      const STOP = new Set(['сколько', 'стоит', 'стоят', 'цена', 'цену', 'есть', 'ли', 'у', 'вас', 'игра', 'игру', 'игры', 'хочу', 'на', 'для', 'ps5', 'ps4', 'пс5', 'пс4', 'а', 'и', 'в', 'подскажите', 'пожалуйста', 'какая', 'наличии', 'нужна', 'нужен', 'qancha', 'turadi', 'narxi', 'narx', 'bormi', 'bor', 'uchun', 'oyin', 'kerak', 'iltimos', 'necha']);
       const w = words.filter((x) => x && !STOP.has(x));
       if (w.length) {
         const list = searchList(CATALOG.filter((g) => g.k !== 'sub'), w.join(' '));
         if (list.length) {
           const top = list.slice(0, 4);
-          return bot(top.length === 1 ? 'Нашёл:' : `Вот что нашлось (${list.length}):`,
-            top.map(mini).join('') + (list.length > 4 ? `<a class="btn btn-sm" href="${B}/catalog/?q=${encodeURIComponent(w.join(' '))}" style="align-self:flex-start">Показать все</a>` : ''));
+          return bot(top.length === 1 ? T('Нашёл:', 'Topdim:') : T(`Вот что нашлось (${list.length}):`, `Mana nimalar topildi (${list.length}):`),
+            top.map(mini).join('') + (list.length > 4 ? `<a class="btn btn-sm" href="${P}/catalog/?q=${encodeURIComponent(w.join(' '))}" style="align-self:flex-start">${T('Показать все', 'Hammasini ko‘rsatish')}</a>` : ''));
         }
       }
       track('chat_not_found', { q: raw.slice(0, 80) });
-      return bot(`Не нашёл такой игры на сайте, но Наиль найдёт её за 10 минут: ${tgA(`Здравствуйте! Ищу игру: ${raw}`, 'написать в Telegram')}`);
+      return bot(T(`Не нашёл такой игры на сайте, но Наиль найдёт её за 10 минут: ${tgA(`Здравствуйте! Ищу игру: ${raw}`, 'написать в Telegram')}`, `Saytda bunday o‘yinni topmadim, lekin Nail uni 10 daqiqada topadi: ${tgA(`Assalomu alaykum! O‘yin qidiryapman: ${raw}`, 'Telegramga yozish')}`));
     };
     const ask = (text) => { text = text.trim(); if (!text) return; say(esc(text), 'me'); answer(text); };
     chips.addEventListener('click', (e) => { const b = e.target.closest('[data-chip]'); if (b) ask(b.dataset.chip); });
     $('#chat-form').addEventListener('submit', (e) => { e.preventDefault(); ask(input.value); input.value = ''; });
   }
+
+  /* ---------- язык ---------- */
+  const langBtn = $('#lang-btn');
+  langBtn?.addEventListener('click', () => { store.set('ps.lang', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
+  const wanted = store.get('ps.lang', null);
+  if (wanted === 'uz' && !UZ && langBtn) location.replace(langBtn.href);
+  else if (wanted === 'ru' && UZ && langBtn) location.replace(langBtn.href);
 
   /* старт */
   if (cart.length) loadCatalog().then(save); else save();

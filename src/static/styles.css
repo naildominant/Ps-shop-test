@@ -534,6 +534,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .pr-row { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "img name" "img price" "img now"; }
   .pr-prices, .pr-row .muted { text-align: left; }
 }
+/* ---------- язык ---------- */
+.lang-btn { font: 800 13px/1 var(--f-display); letter-spacing: .02em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }

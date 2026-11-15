@@ -17,6 +17,8 @@ import re
 import shutil
 import urllib.parse
 
+import i18n_uz
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, 'dist')
 SITE_URL = os.environ.get('SITE_URL', 'https://psshop.uz').rstrip('/')
@@ -165,6 +167,8 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{SITE_URL}{path}">
+<link rel="alternate" hreflang="ru" href="{SITE_URL}{path}">
+<link rel="alternate" hreflang="uz" href="{SITE_URL}/uz{path}">
 <meta name="theme-color" content="#07061a">
 <meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="PS SHOP">
@@ -192,6 +196,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
       <form class="search" id="search" action="/catalog/" role="search">
         {icon('search')}<input id="search-q" name="q" type="search" placeholder="Найти игру" autocomplete="off" aria-label="Найти игру">
       </form>
+      <a class="icon-btn lang-btn" id="lang-btn" href="/uz{path}" data-alt="{path}" hreflang="uz" aria-label="O‘zbekcha">UZ</a>
       <button class="icon-btn search-open" id="search-open" aria-label="Поиск" aria-expanded="false">{icon('search')}</button>
       <button class="icon-btn" id="cart-open" aria-label="Корзина">{icon('cart')}<span class="cart-count" id="cart-count" hidden>0</span></button>
     </div>
@@ -777,9 +782,38 @@ def with_base(text):
     return text.replace("url('/static/", f"url('{BASE}/static/")
 
 
+def to_uz(page):
+    """Узбекская копия готовой русской страницы: переводим тексты, ссылки ведём на /uz/."""
+    keep = {}
+
+    def hold(m):  # отзывы клиентов и скрипты не трогаем
+        keep[f'@@K{len(keep)}@@'] = m.group(0)
+        return f'@@K{len(keep) - 1}@@'
+    page = re.sub(r'<script.*?</script>|<article class="rev.*?</article>', hold, page, flags=re.S)
+    # «от 229 000 uzs» -> «229 000 uzs dan»: по-узбекски «от» ставится после числа
+    page = re.sub(r'<span class="from">от</span>((?:<s>[^<]*</s>)?[^<]*)<small>uzs</small>', r'\1<small>uzs dan</small>', page)
+    page = re.sub(r'<span class="num">от ([^<]+)</span> <small style="display:inline">uzs</small>', r'<span class="num">\1</span> <small style="display:inline">uzs dan</small>', page)
+    page = page.replace('от 200&nbsp;000<small>uzs / сутки</small>', '200&nbsp;000<small>uzs dan / sutka</small>')
+    page = re.sub(r'>([^<>]+)<', lambda m: '>' + i18n_uz.tr(m.group(1)) + '<', page)
+    page = re.sub(r'((?:aria-label|placeholder|content|alt|title)=")([^"]*)(")', lambda m: m.group(1) + E(i18n_uz.tr(html.unescape(m.group(2)))) + m.group(3), page)
+    page = re.sub(r'(href|action)="/(?!/|static/|favicon|uz/)', r'\1="/uz/', page)
+    page = page.replace('<html lang="ru">', '<html lang="uz">').replace('content="ru_RU"', 'content="uz_UZ"')
+    page = re.sub(r'(<link rel="canonical" href="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/uz\2', page)
+    page = re.sub(r'(<meta property="og:url" content="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/uz\2', page)
+    page = re.sub(r'<a class="icon-btn lang-btn" id="lang-btn" href="[^"]*" data-alt="([^"]*)" hreflang="uz" aria-label="[^"]*">UZ</a>',
+                  r'<a class="icon-btn lang-btn" id="lang-btn" href="\1" hreflang="ru" aria-label="Русский">RU</a>', page)
+    for k, v in keep.items():
+        page = page.replace(k, v)
+    return page
+
+
 def write(rel, text):
     if rel.endswith('.html'):
+        uz = to_uz(text)
         text = with_base(text)
+        path = os.path.join(DIST, 'uz', rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        open(path, 'w', encoding='utf-8').write(with_base(uz))
     path = os.path.join(DIST, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, 'w', encoding='utf-8').write(text)
@@ -811,7 +845,7 @@ def main():
     write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
     urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/', '/about/', '/promos/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-          + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n' for u in urls) + '</urlset>\n')
+          + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n<url><loc>{SITE_URL}/uz{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
     if SITE_URL.startswith('https://psshop.uz'):
         open(os.path.join(DIST, 'CNAME'), 'w').write('psshop.uz\n')

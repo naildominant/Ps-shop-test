@@ -69,6 +69,17 @@ def dates_in(text):
     return res
 
 
+ROMAN = {'ii': '2', 'iii': '3', 'iv': '4', 'v': '5', 'vi': '6', 'vii': '7', 'viii': '8', 'ix': '9', 'x': '10'}
+
+
+def part_numbers(name):
+    """Номера частей в названии: «Deliverance II» -> {'2'}, «FC 26» -> {'26'}. Годы в скобках не считаем."""
+    name = re.sub(r'\([^)]*\)', ' ', name.lower())
+    out = set(re.findall(r'\b\d{1,2}\b', name))
+    out |= {ROMAN[w] for w in re.findall(r'\b[ivx]{1,4}\b', name) if w in ROMAN}
+    return out
+
+
 def release_of(gid, title):
     q = WIKI_ONLY.get(gid) or QUERY.get(gid) or clean_title(title)
     d = api({'action': 'query', 'generator': 'search', 'gsrsearch': f'{q} video game', 'gsrlimit': 3,
@@ -79,6 +90,8 @@ def release_of(gid, title):
     for pg in pages:
         page = pg['title']
         if difflib.SequenceMatcher(None, norm(q.split('(')[0]), norm(page.split('(')[0])).ratio() < 0.7:
+            continue
+        if part_numbers(q) != part_numbers(page):  # не путать первую часть со второй
             continue
         try:
             text = pg['revisions'][0]['slots']['main']['*']
@@ -110,7 +123,8 @@ def main():
         if date:
             data[gid] = date
             found += 1
-            print(f'+ {gid:45} {date}  ({page})')
+            print(f'+ {gid:45} {date}  ({page})', flush=True)
+            json.dump(dict(sorted(data.items())), open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
         else:
             print(f'- {gid:45} не найдено')
     json.dump(dict(sorted(data.items())), open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
