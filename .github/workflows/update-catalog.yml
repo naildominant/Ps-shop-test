@@ -37,7 +37,9 @@ jobs:
 
       - name: Update catalog from the channel
         if: github.event_name != 'push'
-        run: python3 scripts/catalog.py
+        run: |
+          python3 scripts/catalog.py
+          python3 scripts/ea_play.py || echo 'EA недоступен, оставляю прежний список'
 
       - name: Save catalog changes
         if: github.event_name != 'push'

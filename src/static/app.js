@@ -200,6 +200,33 @@
     }, { passive: true });
   }
 
+  /* ---------- геймпад: подбросить по нажатию ---------- */
+  const padBtn = $('#pad');
+  if (padBtn) {
+    padBtn.addEventListener('click', () => {
+      if (padBtn.classList.contains('is-flying')) return;
+      padBtn.classList.add('is-flying'); track('gamepad_toss');
+      setTimeout(() => padBtn.classList.remove('is-flying'), 1300);
+    });
+  }
+
+  /* ---------- бесконечные полки ---------- */
+  $$('.shelf:not(.revs)').forEach((row) => {
+    const items = [...row.children];
+    if (items.length < 4) return;
+    const clone = () => items.map((el) => { const c = el.cloneNode(true); c.dataset.clone = '1'; c.querySelectorAll('img').forEach((i) => i.setAttribute('loading', 'lazy')); return c; });
+    clone().forEach((c) => row.appendChild(c));
+    clone().forEach((c) => row.appendChild(c));
+    let setW = 0;
+    const measure = () => { setW = row.children[items.length].offsetLeft - row.children[0].offsetLeft; };
+    measure(); window.addEventListener('resize', measure);
+    row.addEventListener('scroll', () => {
+      if (!setW) return;
+      if (row.scrollLeft >= setW * 2 - 2) { row.style.scrollSnapType = 'none'; row.scrollLeft -= setW; requestAnimationFrame(() => { row.style.scrollSnapType = ''; }); }
+    }, { passive: true });
+    row.querySelectorAll('[data-add]').forEach(syncBtn);
+  });
+
   /* ---------- таймер GTA 6 ---------- */
   const timer = $('#timer');
   if (timer) {

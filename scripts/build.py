@@ -209,7 +209,7 @@ def footer():
     <div>
       <h3>Связь</h3>
       <ul>
-        <li><a href="{c['manager']}" target="_blank" rel="noopener">Заказы: @Gaynullin_Nail</a></li>
+        <li><a href="{c['manager']}" target="_blank" rel="noopener">По всем вопросам</a></li>
         <li><a href="{c['channel']}" target="_blank" rel="noopener">Telegram-канал</a></li>
         <li><a href="{c['reviews']}" target="_blank" rel="noopener">Отзывы</a></li>
         <li><a href="{c['community']}" target="_blank" rel="noopener">Сообщество игроков</a></li>
@@ -325,6 +325,9 @@ def page_reviews(reviews):
                   desc='Отзывы клиентов PS SHOP о покупке игр и подписок для PS4 и PS5 в Ташкенте.', body=body)
 
 
+PLUS_ICON = '''<svg class="plus-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="pl-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset=".55" stop-color="#ffc21a"/><stop offset="1" stop-color="#f29d00"/></linearGradient></defs><path d="M18 4h12v14h14v12H30v14H18V30H4V18h14z" fill="url(#pl-g)"/><path d="M18 4h12v14h14v4H18z" fill="#fff" opacity=".28"/></svg>'''
+
+
 # ---------- страницы ----------
 def page_home(games):
     gta = next((g for g in games if g['id'] == 'grand-theft-auto-vi'), None)
@@ -360,7 +363,7 @@ def page_home(games):
       </div>
       <div class="hero-art">
         <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
-        <div class="pad" id="pad" aria-hidden="true"><div class="pad-tilt">{GAMEPAD_SVG}</div></div>
+        <button class="pad" id="pad" type="button" aria-label="Подбросить геймпад"><span class="pad-fly"><span class="pad-tilt">{GAMEPAD_SVG}</span></span></button>
       </div>
     </div>
   </div>
@@ -373,7 +376,7 @@ def page_home(games):
 </section>'''
     promo = f'''<section class="sec wrap promo">
   <a class="promo-card glass" href="/subscriptions/">
-    <h3>PS Plus</h3>
+    <h3 class="with-plus">PS Plus{PLUS_ICON}</h3>
     <p>Сотни игр по подписке, онлайн с друзьями и облачные сохранения. Есть EA Play.</p>
     <div class="big-num grad-text">269&nbsp;000<small>uzs / месяц</small></div>
     <span class="btn btn-sm">Выбрать подписку</span>
@@ -478,6 +481,20 @@ def days_word(n):
     return 'сутки' if n == 1 else 'суток'
 
 
+def ea_games():
+    """Свежие игры с ea.com (data/ea_play.json) первыми, затем проверенный список из services.json."""
+    base = load_services()['eaplay']['games']
+    path = os.path.join(ROOT, 'data', 'ea_play.json')
+    fresh = json.load(open(path, encoding='utf-8')).get('fresh', []) if os.path.exists(path) else []
+    out, seen = [], set()
+    for t in fresh + base:
+        k = re.sub(r'[^a-z0-9]', '', t.lower().replace('ea sports', ''))
+        if k not in seen:
+            seen.add(k)
+            out.append(t)
+    return out
+
+
 def page_subs(sv):
     def plan(p, kind):
         rows = ''
@@ -496,11 +513,12 @@ def page_subs(sv):
     ea = sv['eaplay']
     body = f'''<div class="wrap">
   <div class="page-head"><h1>Подписки</h1><p>PS Plus для PS4 и PS5 и EA Play. Подписка на 12 месяцев выходит выгоднее всего: один раз оформили и играете весь год.</p></div>
-  <section class="sec"><div class="sec-head"><h2>PS Plus</h2></div><div class="subs">{''.join(plan(p, 'PS Plus') for p in sv['psplus'])}</div></section>
+  <section class="sec"><div class="sec-head"><h2 class="with-plus">PS Plus{PLUS_ICON}</h2></div><div class="subs">{''.join(plan(p, 'PS Plus') for p in sv['psplus'])}</div></section>
   <section class="sec"><div class="sec-head"><h2>EA Play</h2></div>
     <div class="subs subs-ea">{plan(ea, 'EA Play')}
       <article class="sub glass ea-games"><header><h3>Что входит</h3><p>Большая коллекция игр EA: спорт, гонки, экшен и кооператив.</p></header>
-        <ul>{''.join(f'<li>{E(x)}</li>' for x in ea['games'])}</ul></article>
+        <ul>{''.join(f'<li>{E(x)}</li>' for x in ea_games())}</ul>
+        <a class="link-quiet" href="https://www.ea.com/ru-ru/ea-play/games#playstation" target="_blank" rel="noopener">Полный список на сайте EA</a></article>
     </div>
   </section>
   <p class="sec hint">Подписки оформляются так же, как игры: добавьте в корзину и отправьте заявку. Подключим дистанционно.</p>
