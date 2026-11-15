@@ -170,7 +170,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <link rel="alternate" hreflang="uz" href="{SITE_URL}{path}">
 <link rel="alternate" hreflang="ru" href="{SITE_URL}/ru{path}">
 <link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}">
-<script>try{{var l=JSON.parse(localStorage.getItem('ps.lang')),r=location.pathname.indexOf('/ru/')===0;if(l==='ru'&&!r)location.replace('/ru'+location.pathname+location.search);else if(l==='uz'&&r)location.replace(location.pathname.slice(3)+location.search)}}catch(e){{}}</script>
+<script>try{{var l=JSON.parse(localStorage.getItem('ps.lang2')),r=location.pathname.indexOf('/ru/')===0;if(l==='ru'&&!r)location.replace('/ru'+location.pathname+location.search);else if(l==='uz'&&r)location.replace(location.pathname.slice(3)+location.search)}}catch(e){{}}</script>
 <meta name="theme-color" content="#07061a">
 <meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="PS SHOP">
@@ -189,7 +189,6 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <link rel="preload" as="font" type="font/woff2" href="/static/fonts/manrope-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/static/fonts/unbounded-latin.woff2" crossorigin>
 <link rel="stylesheet" href="/static/fonts/fonts.css?v={VERSION}">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&text=%D0%B6%D0%BC%D1%8F%D0%BA!bos&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="/static/styles.css?v={VERSION}">
 {f'<link rel="preload" as="image" href="{lcp}" fetchpriority="high">' if lcp else ''}
 {extra_head}</head>

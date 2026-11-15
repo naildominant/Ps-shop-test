@@ -420,7 +420,7 @@
 
   /* ---------- язык ---------- */
   const langBtn = $('#lang-btn');
-  langBtn?.addEventListener('click', () => { store.set('ps.lang', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
+  langBtn?.addEventListener('click', () => { store.set('ps.lang2', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
 
   /* старт */
   if (cart.length) loadCatalog().then(save); else save();
