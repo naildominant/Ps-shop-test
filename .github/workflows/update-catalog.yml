@@ -40,7 +40,7 @@ jobs:
         run: |
           python3 scripts/catalog.py
           python3 scripts/ea_play.py || echo 'EA недоступен, оставляю прежний список'
-          python3 scripts/releases.py || echo 'Википедия недоступна, даты выхода не обновлены'
+          timeout 300 python3 scripts/releases.py || echo 'Даты выхода обновлены не полностью, продолжим в следующий раз'
 
       - name: Save catalog changes
         if: github.event_name != 'push'
