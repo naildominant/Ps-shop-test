@@ -167,8 +167,10 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{SITE_URL}{path}">
-<link rel="alternate" hreflang="ru" href="{SITE_URL}{path}">
-<link rel="alternate" hreflang="uz" href="{SITE_URL}/uz{path}">
+<link rel="alternate" hreflang="uz" href="{SITE_URL}{path}">
+<link rel="alternate" hreflang="ru" href="{SITE_URL}/ru{path}">
+<link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}">
+<script>try{{var l=JSON.parse(localStorage.getItem('ps.lang')),r=location.pathname.indexOf('/ru/')===0;if(l==='ru'&&!r)location.replace('/ru'+location.pathname+location.search);else if(l==='uz'&&r)location.replace(location.pathname.slice(3)+location.search)}}catch(e){{}}</script>
 <meta name="theme-color" content="#07061a">
 <meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="PS SHOP">
@@ -199,7 +201,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
       <form class="search" id="search" action="/catalog/" role="search">
         {icon('search')}<input id="search-q" name="q" type="search" placeholder="Найти игру" autocomplete="off" aria-label="Найти игру">
       </form>
-      <a class="icon-btn lang-btn" id="lang-btn" href="/uz{path}" data-alt="{path}" hreflang="uz" aria-label="O‘zbekcha">UZ</a>
+      <a class="icon-btn lang-btn" id="lang-btn" href="{path}" data-alt="{path}" hreflang="uz" aria-label="O‘zbekcha">UZ</a>
       <button class="icon-btn search-open" id="search-open" aria-label="Поиск" aria-expanded="false">{icon('search')}</button>
       <button class="icon-btn" id="cart-open" aria-label="Корзина">{icon('cart')}<span class="cart-count" id="cart-count" hidden>0</span></button>
     </div>
@@ -823,7 +825,7 @@ def with_base(text):
 
 
 def to_uz(page):
-    """Узбекская копия готовой русской страницы: переводим тексты, ссылки ведём на /uz/."""
+    """Узбекская версия готовой русской страницы (живёт в корне сайта): переводим тексты."""
     keep = {}
 
     def hold(m):  # отзывы клиентов и скрипты не трогаем
@@ -836,24 +838,40 @@ def to_uz(page):
     page = page.replace('от 200&nbsp;000<small>uzs / сутки</small>', '200&nbsp;000<small>uzs dan / sutka</small>')
     page = re.sub(r'>([^<>]+)<', lambda m: '>' + i18n_uz.tr(m.group(1)) + '<', page)
     page = re.sub(r'((?:aria-label|placeholder|content|alt|title)=")([^"]*)(")', lambda m: m.group(1) + E(i18n_uz.tr(html.unescape(m.group(2)))) + m.group(3), page)
-    page = re.sub(r'(href|action)="/(?!/|static/|favicon|uz/)', r'\1="/uz/', page)
     page = page.replace('<html lang="ru">', '<html lang="uz">').replace('content="ru_RU"', 'content="uz_UZ"')
-    page = re.sub(r'(<link rel="canonical" href="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/uz\2', page)
-    page = re.sub(r'(<meta property="og:url" content="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/uz\2', page)
     page = re.sub(r'<a class="icon-btn lang-btn" id="lang-btn" href="[^"]*" data-alt="([^"]*)" hreflang="uz" aria-label="[^"]*">UZ</a>',
-                  r'<a class="icon-btn lang-btn" id="lang-btn" href="\1" hreflang="ru" aria-label="Русский">RU</a>', page)
+                  r'<a class="icon-btn lang-btn" id="lang-btn" href="/ru\1" hreflang="ru" aria-label="Русский">RU</a>', page)
     for k, v in keep.items():
         page = page.replace(k, v)
     return page
 
 
+def to_ru(page):
+    """Русская версия живёт в /ru/: ссылки на страницы ведём туда же, адрес страницы — /ru/..."""
+    page = re.sub(r'(href|action)="/(?!/|static/|favicon|ru/)', r'\1="/ru/', page)
+    page = page.replace('href="/ru/" data-alt=', 'href="/" data-alt=')  # кнопка UZ ведёт на узбекскую версию
+    page = re.sub(r'(<a class="icon-btn lang-btn" id="lang-btn" href=")/ru(/[^"]*)(" data-alt)', r'\1\2\3', page)
+    page = re.sub(r'(<link rel="canonical" href="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/ru\2', page)
+    page = re.sub(r'(<meta property="og:url" content="{0})(/[^"]*")'.format(re.escape(SITE_URL)), r'\1/ru\2', page)
+    return page
+
+
+def redirect_stub(target):
+    """Старые адреса /uz/... перекидывают на новые (узбекский теперь в корне)."""
+    return (f'<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>PS SHOP</title>'
+            f'<link rel="canonical" href="{SITE_URL}{target}"><meta http-equiv="refresh" content="0; url={target}">'
+            f'<meta name="robots" content="noindex"></head><body><a href="{target}">PS SHOP</a></body></html>')
+
+
 def write(rel, text):
     if rel.endswith('.html'):
-        uz = to_uz(text)
-        text = with_base(text)
-        path = os.path.join(DIST, 'uz', rel)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        open(path, 'w', encoding='utf-8').write(with_base(uz))
+        page_path = '/' + rel[:-len('index.html')] if rel.endswith('index.html') else '/' + rel
+        for out_rel, content in ((rel, to_uz(text)), (os.path.join('ru', rel), to_ru(text)),
+                                 (os.path.join('uz', rel), redirect_stub(page_path))):
+            path = os.path.join(DIST, out_rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            open(path, 'w', encoding='utf-8').write(with_base(content))
+        return
     path = os.path.join(DIST, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, 'w', encoding='utf-8').write(text)
@@ -885,7 +903,7 @@ def main():
     write('static/catalog.json', json.dumps(rows, ensure_ascii=False, separators=(',', ':')))
     urls = ['/', '/catalog/', '/subscriptions/', '/rent/', '/install/', '/reviews/', '/about/', '/promos/'] + [f'/game/{g["id"]}/' for g in games]
     write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-          + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n<url><loc>{SITE_URL}/uz{u}</loc></url>\n' for u in urls) + '</urlset>\n')
+          + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n<url><loc>{SITE_URL}/ru{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
     if SITE_URL.startswith('https://psshop.uz'):
         open(os.path.join(DIST, 'CNAME'), 'w').write('psshop.uz\n')

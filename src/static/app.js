@@ -4,7 +4,7 @@
   const PS = window.PS || {};
   const B = PS.base || ''; // путь сайта: '' на psshop.uz, '/Ps-shop-test' на github.io
   const UZ = document.documentElement.lang === 'uz'; // узбекская версия сайта
-  const P = B + (UZ ? '/uz' : ''); // ссылки на страницы с учётом языка
+  const P = B + (UZ ? '' : '/ru'); // узбекский — в корне сайта, русский — в /ru/
   const T = (ru, uz) => (UZ ? uz : ru);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -421,9 +421,6 @@
   /* ---------- язык ---------- */
   const langBtn = $('#lang-btn');
   langBtn?.addEventListener('click', () => { store.set('ps.lang', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
-  const wanted = store.get('ps.lang', null);
-  if (wanted === 'uz' && !UZ && langBtn) location.replace(langBtn.href);
-  else if (wanted === 'ru' && UZ && langBtn) location.replace(langBtn.href);
 
   /* старт */
   if (cart.length) loadCatalog().then(save); else save();
