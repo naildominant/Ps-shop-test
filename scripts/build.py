@@ -782,26 +782,7 @@ def page_404():
 
 
 # ---------- данные для браузера ----------
-ALIASES = [
-    (r'GRAND THEFT AUTO|GTA', 'гта gta grand theft auto'), (r'\bVI\b', '6'), (r'\bV\b(?!R)', '5'),
-    (r'CALL OF DUTY', 'cod колда кол оф дьюти'), (r'SPIDER', 'человек паук спайдер spider'),
-    (r'\bFC \d|FIFA', 'фифа fifa фк'), (r'MORTAL KOMBAT', 'мортал комбат mk'), (r'RESIDENT EVIL', 'резидент ивел обитель зла re'),
-    (r'GOD OF WAR', 'год оф вар бог войны gow'), (r'MINECRAFT', 'майнкрафт'), (r'RED DEAD', 'рдр rdr ред дед'),
-    (r'LAST OF US', 'одни из нас тлоу tlou'), (r'ВЕДЬМАК', 'witcher'), (r'CYBERPUNK', 'киберпанк'), (r'ASSASSIN', 'ассасин ac'),
-    (r'NEED FOR SPEED', 'нфс nfs'), (r'UFC', 'юфс'), (r'HOGWARTS', 'хогвартс гарри поттер'), (r'NBA', 'нба баскетбол'),
-    (r'TEKKEN', 'теккен'), (r'ELDEN', 'элден'), (r'GRAN TURISMO', 'гран туризмо gt'), (r'FAR CRY', 'фар край'),
-    (r'BATTLEFIELD', 'батлфилд бф bf'), (r'HORIZON', 'хорайзон'), (r'UNCHARTED', 'анчартед'), (r'DETROIT', 'детройт'),
-    (r'SILENT HILL', 'сайлент хилл'), (r'DEATH STRANDING', 'дес стрендинг'), (r'GHOST OF', 'призрак цусимы гост'),
-    (r'NARUTO', 'наруто'), (r'LEGO', 'лего'), (r'IT TAKES TWO', 'для двоих'), (r'FORZA', 'форза'), (r'DIABLO', 'диабло'),
-    (r'STAR WARS', 'звёздные войны звездные войны'), (r'BATMAN', 'бэтмен бетмен'), (r'HITMAN', 'хитман'), (r'MAFIA', 'мафия'),
-    (r'DOOM', 'дум'), (r'METRO', 'метро'), (r'STALKER', 'сталкер'), (r'SIMS', 'симс'), (r'WWE', 'реслинг'), (r'NHL', 'нхл хоккей'),
-    (r'F1 ', 'формула 1 ф1'), (r'CRASH', 'крэш креш'), (r'SEKIRO', 'секиро'), (r'BLOODBORNE', 'бладборн'), (r'DAYS GONE', 'жизнь после'),
-]
-
-
-def search_words(title):
-    extra = ' '.join(w for rx, w in ALIASES if re.search(rx, title))
-    return f'{title} {extra}'
+from search_aliases import search_words  # noqa: E402  (русские названия, прозвища, транслит)
 
 
 def catalog_json(games):
