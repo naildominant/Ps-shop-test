@@ -224,6 +224,7 @@ UZ = {
     'Уточните у менеджера': 'Menejerdan aniqlang',
     'Геймплей': 'Geympley',
     'Популярное': 'Ommabop',
+    'Похожие игры': 'O‘xshash o‘yinlar',
     'Для игры нужен шлем PS VR / PS VR2.': 'O‘yin uchun PS VR / PS VR2 shlemi kerak.',
     'Для этой игры нужна подписка PS Plus.': 'Bu o‘yin uchun PS Plus obunasi kerak.',
     'Платформа ': 'Platforma ',

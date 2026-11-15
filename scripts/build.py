@@ -537,6 +537,58 @@ def page_catalog(games):
                   desc=f'{len(games)} игр для PlayStation 4 и 5 с ценами в сумах. Поиск, фильтры, предзаказы и хиты.', body=body)
 
 
+SERIES_STOP = {'the', 'of', 'a', 'and', 'edition', 'deluxe', 'standard', 'ultimate', 'gold', 'remastered', 'remake', 'bundle',
+               'collection', 'trilogy', 'game', 'year', 'vr', 'vr2', 'ps4', 'ps5', 'marvel', 'marvels', 'lego', 'ea', 'sports', 'disney'}
+GENRES = [  # грубые жанры по названию — для подбора похожих
+    ('football', r'\bFC \d|FIFA|NHL|NBA|MADDEN|UFC|WWE|UNDISPUTED|COLLEGE FOOTBALL|TENNIS'),
+    ('racing', r'NEED FOR SPEED|GRAN TURISMO|F1 |FORZA|CREW|WRC|DIRT|NASCAR|MOTOGP|ASSETTO|HOT WHEELS|WRECKFEST|CARX|RACER|RACING|CRASH'),
+    ('shooter', r'CALL OF DUTY|BATTLEFIELD|DOOM|FAR CRY|METRO|SNIPER|HALO|BORDERLANDS|CRYSIS|WOLFENSTEIN|SERIOUS SAM|PAINKILLER|ARC RAIDERS|HUNT|PAVLOV|HELL LET LOOSE|ATOMIC HEART|STALKER'),
+    ('horror', r'RESIDENT EVIL|SILENT HILL|DEAD SPACE|OUTLAST|LITTLE NIGHTMARES|POPPY|HALLOWEEN|ALAN WAKE|REANIMAL|DIRECTIVE|SINKING CITY|FORT SOLIS|DAYS GONE|DYING LIGHT|DAY Z|FOREST'),
+    ('fighting', r'MORTAL KOMBAT|TEKKEN|INJUSTICE|NARUTO|TOKON|INVINCIBLE VS|SIFU'),
+    ('soulslike', r'ELDEN|DARK SOULS|BLOODBORNE|SEKIRO|DEMON|LIES OF P|NIOH|MORTAL SHELL|WUKONG|PHANTOM BLADE|RONIN|ONIMUSHA|NINJA GAIDEN'),
+    ('kids', r'MINECRAFT|LEGO|SACKBOY|ASTRO|CRASH|RAYMAN|SMURFS|ТАЧКИ|WALL-E|MONOPOLY|PLANTS|SONIC|OVERCOOKED|MOVING OUT|CUPHEAD|UNRAVEL|IT TAKES TWO|SPLIT FICTION|PETS'),
+    ('openworld', r'GTA|GRAND THEFT|RED DEAD|CYBERPUNK|ASSASSIN|GHOST OF|HORIZON|SPIDER|WITCHER|ВЕДЬМАК|SKYRIM|FALLOUT|HOGWARTS|MAFIA|WATCH DOGS|KINGDOM COME|STARFIELD|AVATAR|INDIANA|WOLVERINE|GOD OF WAR|UNCHARTED|LAST OF US|DEATH STRANDING|TOMB RAIDER'),
+]
+
+
+def series_key(title):
+    words = [w for w in re.findall(r'[a-zа-я]+', title.lower()) if w not in SERIES_STOP and len(w) > 1]
+    return ' '.join(words[:2])
+
+
+def genre_of(title):
+    return {name for name, rx in GENRES if re.search(rx, title.upper())}
+
+
+def similar_games(g, games, n=12):
+    """Похожие: сначала та же серия, потом тот же жанр, потом те же признаки (VR, для компании), ближе по цене."""
+    key, gen = series_key(g['title']), genre_of(g['title'])
+    scored = []
+    for x in games:
+        if x['id'] == g['id']:
+            continue
+        sc = 0
+        if key and series_key(x['title']) == key:
+            sc += 100
+        sc += 30 * len(gen & genre_of(x['title']))
+        if g['vr'] and x['vr']:
+            sc += 25
+        if g['coop'] and x['coop']:
+            sc += 8
+        if set(g['plats']) & set(x['plats']):
+            sc += 3
+        if x.get('hit'):
+            sc += 4
+        sc -= abs(x['min'] - g['min']) / 100000
+        if sc > 5:
+            scored.append((sc, x))
+    scored.sort(key=lambda t: -t[0])
+    out = [x for _, x in scored[:n]]
+    if len(out) < 6:  # мало похожих — добираем хитами
+        out += [x for x in games if x.get('hit') and x['id'] != g['id'] and x not in out][:n - len(out)]
+    return out
+
+
 def page_game(g, games):
     o = best_opt(g)
     opts = ''.join(f'<button class="opt" role="radio" aria-checked="{"true" if x is o else "false"}" data-key="{E(x["key"])}" data-price="{x["price"]}" data-old="{x.get("old", "")}"><b>{E(x["label"])}</b><span>{f"<s>{money(x['old'])}</s> " if x.get("old") else ""}{money(x["price"])} uzs</span></button>' for x in g['opts'])
@@ -547,7 +599,7 @@ def page_game(g, games):
         notes.append('Для этой игры нужна подписка PS Plus.')
     if g['vr']:
         notes.append('Для игры нужен шлем PS VR / PS VR2.')
-    same = [x for x in games if x['id'] != g['id'] and x.get('hit')][:12]
+    same = similar_games(g, games)
     gameplay = f'<a class="link-quiet" href="{E(g["gameplay"])}" target="_blank" rel="noopener" data-track="gameplay">{icon("play")}Геймплей</a>' if g.get('gameplay') else ''
     body = f'''<div class="game">
   <div class="game-bg" style="background-image:url('/static/covers/{g['id']}.webp')"></div>
@@ -573,7 +625,7 @@ def page_game(g, games):
     </div>
   </div>
 </div>
-{shelf('Популярное', same)}'''
+{shelf('Похожие игры', same)}'''
     plat = ' и '.join(g['plats'])
     desc = f'{g["title"]} для {plat}: {"от " if len(g["opts"]) > 1 else ""}{money(g["min"])} uzs. {LANG_RU.get(g.get("lang", ""), "")}. Подключим дистанционно, гарантия, на связи 24/7.'
     ld = {'@context': 'https://schema.org', '@type': 'Product', 'name': g['title'], 'image': f'{SITE_URL}/static/covers/{g["id"]}.webp',
