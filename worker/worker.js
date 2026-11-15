@@ -12,6 +12,8 @@
  *   GH_TOKEN    секрет: ключ GitHub с правом запускать Actions в репозитории
  *   GH_REPO     naildominant/Ps-shop-test
  *   ALLOWED     адреса сайта через запятую (https://psshop.uz,https://www.psshop.uz)
+ *   SHEET_URL   адрес Google Apps Script — копия каждой заявки строкой в Google Таблицу (необязательно)
+ *   SHEET_TOKEN пароль для таблицы (тот же, что в скрипте таблицы)
  * Хранилище KV с именем STORE: ограничение частоты заявок и счётчики корзины.
  */
 
@@ -71,7 +73,16 @@ async function sendTelegram(env, text) {
   return r.ok;
 }
 
-async function handleOrder(req, env, h) {
+async function toSheet(env, o) {
+  if (!env.SHEET_URL) return;
+  const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
+  await fetch(env.SHEET_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow',
+    body: JSON.stringify({ token: env.SHEET_TOKEN || '', name: o.name, contact: o.contact, console: o.console, items, total: o.total, lang: o.lang || 'ru' }),
+  }).catch(() => {});
+}
+
+async function handleOrder(req, env, h, ctx) {
   let o;
   try { o = await req.json(); } catch { return json({ ok: false, error: 'bad json' }, 400, h); }
   if (o.website) return json({ ok: true }, 200, h); // ловушка для ботов: делаем вид, что всё хорошо
@@ -84,6 +95,7 @@ async function handleOrder(req, env, h) {
   const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
   if (await tooMany(env, ip)) return json({ ok: false, error: 'too many' }, 429, h);
   const sent = await sendTelegram(env, orderMessage({ ...o, name, contact }));
+  if (ctx) ctx.waitUntil(toSheet(env, { ...o, name, contact }));
   return json({ ok: sent }, sent ? 200 : 502, h);
 }
 
@@ -121,11 +133,11 @@ async function runCatalogUpdate(env) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const h = cors(req, env);
     const { pathname } = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
-    if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h);
+    if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
     if (req.method === 'GET' && pathname === '/hits') return handleHits(env, h);
     if (req.method === 'GET' && pathname === '/') return new Response('PS SHOP worker: ok', { headers: h });

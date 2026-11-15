@@ -148,7 +148,7 @@
     if (PS.api) {
       try {
         fetch(`${PS.api}/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
-          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, website: d.website }) })
+          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, lang: UZ ? 'uz' : 'ru', website: d.website }) })
           .catch(() => {});
       } catch { /* заявка всё равно уйдёт текстом в Telegram */ }
     }
