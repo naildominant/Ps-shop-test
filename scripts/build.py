@@ -266,7 +266,6 @@ def shelf(title, items, href=None, eager=0):
     if not items:
         return ''
     more = f'<a href="{href}">Смотреть все</a>' if href else ''
-    items = items[:8]  # в полке 8 игр, остальные — по ссылке «Смотреть все»
     cards = ''.join(card(g, lazy=i >= eager) for i, g in enumerate(items))
     return f'''<section class="sec wrap"><div class="sec-head"><h2>{title}</h2>{more}</div><div class="shelf">{cards}</div></section>'''
 

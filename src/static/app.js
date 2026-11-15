@@ -233,20 +233,6 @@
     });
   }
 
-  /* ---------- полки по кругу ----------
-     Обычная прокрутка без копий. Долистали до конца — через секунду полка плавно едет в начало. */
-  $$('.shelf:not(.revs)').forEach((row) => {
-    let idle; let back;
-    const atEnd = () => row.scrollLeft >= row.scrollWidth - row.clientWidth - 4;
-    const onStop = () => {
-      clearTimeout(back);
-      if (atEnd()) back = setTimeout(() => { if (atEnd()) row.scrollTo({ left: 0, behavior: 'smooth' }); }, 1000);
-    };
-    if ('onscrollend' in window) row.addEventListener('scrollend', onStop);
-    else row.addEventListener('scroll', () => { clearTimeout(idle); idle = setTimeout(onStop, 200); }, { passive: true });
-    row.addEventListener('touchstart', () => clearTimeout(back), { passive: true });
-  });
-
   /* ---------- таймер GTA 6 ---------- */
   const timer = $('#timer');
   if (timer) {
