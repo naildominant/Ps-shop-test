@@ -231,6 +231,7 @@
     padBtn.addEventListener('click', () => {
       if (padBtn.classList.contains('is-flying')) return;
       buzz();
+      $('#pad-hint')?.classList.add('is-gone');
       padBtn.classList.add('is-flying'); track('gamepad_toss');
       setTimeout(() => padBtn.classList.remove('is-flying'), 1300);
     });

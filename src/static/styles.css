@@ -181,6 +181,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @keyframes pad-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(2deg); } }
 .pad { transform: rotate(-12deg); }
 
+.pad-hint { position: absolute; z-index: 3; left: -66%; bottom: 40%; width: 54%; pointer-events: none; color: #ffe066;
+  transform: rotate(-8deg); transition: opacity .5s var(--ease), transform .5s var(--ease); filter: drop-shadow(0 4px 12px rgba(255, 200, 40, .35)); }
+.pad-hint span { display: block; font: 700 clamp(30px, 3.4vw, 44px)/1 "Caveat", "Segoe Print", "Comic Sans MS", cursive; letter-spacing: .01em; }
+.pad-hint svg { display: block; width: 92px; height: 80px; margin: 0 0 0 30%; fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.pad-hint.is-gone { opacity: 0; transform: rotate(-8deg) translateY(-8px); }
+@media (prefers-reduced-motion: no-preference) {
+  .pad-hint { animation: hint-in .6s var(--ease) 1.7s both, hint-bob 2.4s ease-in-out 2.4s infinite; }
+}
+@keyframes hint-in { from { opacity: 0; transform: rotate(-8deg) translateY(10px); } }
+@keyframes hint-bob { 50% { transform: rotate(-8deg) translateY(-5px); } }
+.pad-hint.is-gone { animation: none; }
+
 /* ---------- PS Plus ---------- */
 .with-plus { display: inline-flex; align-items: center; gap: 10px; }
 .plus-ic { width: 1.05em; height: 1.05em; fill: initial; stroke: none; filter: drop-shadow(0 4px 14px rgba(255, 190, 30, .45)); }
@@ -428,6 +440,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .hero-in { grid-template-columns: 1fr; gap: 20px; padding: 22px 18px 24px; }
   .hero-art { order: -1; justify-self: start; width: 140px; }
   .pad { left: auto; right: -122%; bottom: 8%; width: 108%; }
+  .pad-hint { left: auto; right: -104%; bottom: 62%; width: 84%; }
+  .pad-hint svg { width: 64px; height: 56px; margin-left: 40%; }
   .hero-sub { font-size: 15px; }
   .timer { gap: 8px; }
   .timer-cell { padding: 12px 4px 10px; border-radius: 14px; }

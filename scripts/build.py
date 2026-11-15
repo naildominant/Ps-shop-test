@@ -185,6 +185,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&text=%D0%B6%D0%BC%D1%8F%D0%BA!bos&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="/static/styles.css?v={VERSION}">
 {f'<link rel="preload" as="image" href="{lcp}" fetchpriority="high">' if lcp else ''}
 {extra_head}</head>
@@ -480,6 +481,8 @@ def page_home(games):
       </div>
       <div class="hero-art">
         <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
+        <div class="pad-hint" id="pad-hint" aria-hidden="true"><span>жмяк!</span>
+          <svg viewBox="0 0 80 70"><path d="M8 8c22-4 44 6 52 24 4 9 4 18 1 26"/><path d="M50 50l11 10 9-13"/></svg></div>
         <button class="pad" id="pad" type="button" aria-label="Подбросить геймпад"><span class="pad-fly"><span class="pad-tilt">{GAMEPAD_SVG}</span></span></button>
       </div>
     </div>

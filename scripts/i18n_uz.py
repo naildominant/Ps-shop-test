@@ -48,6 +48,7 @@ UZ = {
     'Наши клиенты заходят в игру 18 ноября в 23:30.': 'Mijozlarimiz o‘yinga 18-noyabr soat 23:30 da kirishadi.',
     'До выхода GTA 6': 'GTA 6 chiqishigacha',
     'Подбросить геймпад': 'Geympadni otish',
+    'жмяк!': 'bos!',
     'Почему PS SHOP': 'Nega PS SHOP',
     'Подключим дистанционно': 'Masofadan ulab beramiz',
     'Консоль никуда везти не нужно': 'Konsolni hech qayerga olib borish shart emas',
