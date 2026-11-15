@@ -186,10 +186,9 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <link rel="icon" href="/static/img/icon-192.png" type="image/png" sizes="192x192">
 <link rel="manifest" href="/static/manifest.json">
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap"></noscript>
+<link rel="preload" as="font" type="font/woff2" href="/static/fonts/manrope-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/static/fonts/unbounded-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/fonts.css?v={VERSION}">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&text=%D0%B6%D0%BC%D1%8F%D0%BA!bos&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="/static/styles.css?v={VERSION}">
 {f'<link rel="preload" as="image" href="{lcp}" fetchpriority="high">' if lcp else ''}
@@ -851,6 +850,8 @@ def to_uz(page):
 
 def to_ru(page):
     """Русская версия живёт в /ru/: ссылки на страницы ведём туда же, адрес страницы — /ru/..."""
+    page = page.replace('/static/fonts/manrope-latin.woff2" crossorigin', '/static/fonts/manrope-cyrillic.woff2" crossorigin')
+    page = page.replace('/static/fonts/unbounded-latin.woff2" crossorigin', '/static/fonts/unbounded-cyrillic.woff2" crossorigin')
     page = re.sub(r'(href|action)="/(?!/|static/|favicon|ru/)', r'\1="/ru/', page)
     page = page.replace('href="/ru/" data-alt=', 'href="/" data-alt=')  # кнопка UZ ведёт на узбекскую версию
     page = re.sub(r'(<a class="icon-btn lang-btn" id="lang-btn" href=")/ru(/[^"]*)(" data-alt)', r'\1\2\3', page)
