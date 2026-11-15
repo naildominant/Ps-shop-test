@@ -423,6 +423,7 @@
   langBtn?.addEventListener('click', () => { store.set('ps.lang2', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
 
   /* старт */
-  if (cart.length) loadCatalog().then(save); else save();
+  save(); // счётчик корзины сразу, не дожидаясь каталога
+  if (cart.length) loadCatalog().then(save); // потом убрать игры, которых больше нет
   $$('[data-add]').forEach(syncBtn);
 })();

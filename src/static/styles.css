@@ -520,7 +520,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .xs-grid { grid-template-columns: 1fr; }
   .chat-fab span { display: none; }
   .chat-fab { width: 56px; padding: 0; justify-content: center; }
-  .chat { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; border: 0;
+  .chat { right: 0; bottom: 0; width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; border: 0;
     padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 }
 /* ---------- акции ---------- */
@@ -554,4 +554,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* content-visibility убран: в Safari блоки мерцали при открытии и прокрутке */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* iPhone/iPad увеличивают страницу при нажатии на поле со шрифтом меньше 16px. Только для iOS, чтобы не менять вид на остальных. */
+@supports (-webkit-touch-callout: none) {
+  .search input, .select { font-size: 16px; }
 }

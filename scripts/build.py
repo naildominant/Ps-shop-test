@@ -179,6 +179,9 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <meta property="og:description" content="{E(desc)}">
 <meta property="og:url" content="{SITE_URL}{path}">
 <meta property="og:image" content="{og}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/static/img/favicon-32.png" type="image/png" sizes="32x32">
@@ -642,7 +645,7 @@ def page_game(g, games):
                      'availability': 'https://schema.org/PreOrder' if g['pre'] else 'https://schema.org/InStock'}}
     head = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
     return layout(title=f'{g["title"]} — {money(g["min"])} uzs для {plat} | PS SHOP', desc=desc, path=f'/game/{g["id"]}/',
-                  page='game', og_image=f'{SITE_URL}/static/covers/{g["id"]}.webp', og_type='product', body=body, extra_head=head,
+                  page='game', og_image=f'{SITE_URL}/static/og/{g["id"]}.jpg', og_type='product', body=body, extra_head=head,
                   lcp=f'/static/covers/{g["id"]}.webp')
 
 
@@ -817,6 +820,28 @@ def make_thumbs():
             Image.open(os.path.join(src, f)).resize((264, 352), Image.LANCZOS).save(os.path.join(dst, f), 'WEBP', quality=70, method=6)
 
 
+def make_og():
+    """Картинки для превью ссылок (Telegram, WhatsApp, iMessage): JPG 1200x630, обложка на размытом фоне.
+    WebP и вертикальные картинки показываются в мессенджерах не везде."""
+    from PIL import Image, ImageFilter, ImageEnhance
+    src = os.path.join(ROOT, 'src', 'static', 'covers')
+    dst = os.path.join(DIST, 'static', 'og')
+    os.makedirs(dst, exist_ok=True)
+    W, H = 1200, 630
+    for f in os.listdir(src):
+        if not f.endswith('.webp'):
+            continue
+        im = Image.open(os.path.join(src, f)).convert('RGB')
+        bg = im.resize((W, int(W * im.height / im.width)), Image.BILINEAR)
+        top = max(0, (bg.height - H) // 3)
+        bg = bg.crop((0, top, W, top + H)).filter(ImageFilter.GaussianBlur(28))
+        bg = ImageEnhance.Brightness(bg).enhance(0.45)
+        ch = H - 60
+        cover = im.resize((int(ch * im.width / im.height), ch), Image.LANCZOS)
+        bg.paste(cover, ((W - cover.width) // 2, 30))
+        bg.save(os.path.join(dst, f[:-5] + '.jpg'), 'JPEG', quality=80, optimize=True, progressive=True)
+
+
 def with_base(text):
     """Добавляет путь сайта к ссылкам вида /catalog/, /static/… (нужно, пока сайт живёт не в корне домена)."""
     if not BASE:
@@ -887,6 +912,7 @@ def main():
     shutil.copytree(os.path.join(ROOT, 'src', 'static'), os.path.join(DIST, 'static'))
     shutil.copy(os.path.join(ROOT, 'src', 'static', 'favicon.ico'), os.path.join(DIST, 'favicon.ico'))
     make_thumbs()
+    make_og()
     write('index.html', page_home(games))
     write('catalog/index.html', page_catalog(games))
     for g in games:
