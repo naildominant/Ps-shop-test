@@ -71,6 +71,8 @@ def main():
     tile(32, 2).save(os.path.join(IMG, 'favicon-32.png'))
     tile(180, 18).save(os.path.join(IMG, 'apple-touch-icon.png'))
     tile(512, 56).save(os.path.join(IMG, 'icon-512.png'))
+    tile(120, 12).save(os.path.join(IMG, 'favicon-120.png'))  # Яндекс берёт значок 120x120
+    tile(192, 20).save(os.path.join(IMG, 'icon-192.png'))
     tile(48, 3).save(os.path.join(ROOT, 'src', 'static', 'favicon.ico'), sizes=[(16, 16), (32, 32), (48, 48)])
 
     yy, xx = np.mgrid[0:630, 0:1200]

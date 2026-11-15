@@ -182,6 +182,9 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/static/img/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/static/img/favicon-120.png" type="image/png" sizes="120x120">
+<link rel="icon" href="/static/img/icon-192.png" type="image/png" sizes="192x192">
+<link rel="manifest" href="/static/manifest.json">
 <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
