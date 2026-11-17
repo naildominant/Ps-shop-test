@@ -54,12 +54,6 @@
     "plat": null
    },
    {
-    "id": "spider-man-miles-morales",
-    "old": 298000,
-    "new": 149000,
-    "plat": null
-   },
-   {
     "id": "elden-ring",
     "old": 329000,
     "new": 164500,
@@ -69,12 +63,6 @@
     "id": "hogwarts-legacy",
     "old": 359000,
     "new": 179500,
-    "plat": null
-   },
-   {
-    "id": "uncharted-4",
-    "old": 228000,
-    "new": 114000,
     "plat": null
    },
    {
@@ -168,27 +156,9 @@
     "plat": null
    },
    {
-    "id": "resident-evil-4",
-    "old": 289000,
-    "new": 144500,
-    "plat": null
-   },
-   {
-    "id": "resident-evil-village",
-    "old": 269000,
-    "new": 134500,
-    "plat": null
-   },
-   {
     "id": "resident-evil-2-remake",
     "old": 249000,
     "new": 124500,
-    "plat": null
-   },
-   {
-    "id": "days-gone",
-    "old": 279000,
-    "new": 139500,
     "plat": null
    },
    {
@@ -246,12 +216,6 @@
     "plat": null
    },
    {
-    "id": "black-myth-wukong",
-    "old": 279000,
-    "new": 139500,
-    "plat": null
-   },
-   {
     "id": "star-wars-jedi-survivor",
     "old": 319000,
     "new": 159500,
@@ -278,18 +242,6 @@
     "plat": null
    },
    {
-    "id": "metro-exodus",
-    "old": 259000,
-    "new": 207000,
-    "plat": null
-   },
-   {
-    "id": "days-gone",
-    "old": 279000,
-    "new": 223000,
-    "plat": null
-   },
-   {
     "id": "the-last-of-us-part-1",
     "old": 359000,
     "new": 287000,
@@ -311,12 +263,6 @@
     "id": "resident-evil-3",
     "old": 239000,
     "new": 191000,
-    "plat": null
-   },
-   {
-    "id": "resident-evil-4",
-    "old": 289000,
-    "new": 231000,
     "plat": null
    },
    {
