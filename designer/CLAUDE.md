@@ -16,7 +16,10 @@
 ## Структура папки
 - `assets/logo.png` — логотип PS SHOP (куб с P и S + надпись, тёмный фон).
 - `assets/covers/` — обложки и арты игр от владельца (`название-игры.jpg`). Брать картинки игр только отсюда или из присланных скринов.
-- `assets/fonts/` — шрифты с кириллицей (.ttf). Если пусто — Inter Display Black + FreeSerif Italic.
+- `assets/fonts/` — шрифты с кириллицей (лицензия OFL, образцы в `specimen.png`): Unbounded, Russo One, Oswald, Montserrat, Rubik Mono One (огромные слова); Playfair Display Italic, Cormorant Italic (fashion-курсив); Manrope (мелкий текст); Press Start 2P, Rubik Glitch (ретро и глитч). Плюс системные Inter / Inter Display и FreeSerif Italic.
+- `assets/shots/` — скриншоты psshop.uz (телефон `m_*.png`, компьютер `d_*.png`). Переснимать Playwright'ом, если сайт поменялся.
+- `scripts/psfx.py` — **общая библиотека приёмов, начинать любую картинку с неё**: `import sys; sys.path.insert(0,"scripts"); from psfx import *`.
+  Шрифты `font("unbounded",200)`; фон `neon_bg()`, `diagonal_split`, `retro_grid`, `sparks`, `grain`; текст `text_img` (сжатие, разрядка), `spaced`, `lined`, `highlight`, `cta_pill`, `chroma_shift`; шапка `header()` (логотип слева сверху без изменений); 3D: `Cam`, `phone3d`, `card3d`, `box3d`, `reflection`, `shadow`, `glow`, `pocket`; проверка `check({...})` и `preview()` для самопроверки.
 - `scripts/` — рабочие скрипты прошлых удачных картинок (Python, Pillow + numpy). Брать как основу техник, но композицию каждый раз делать новую:
   - `story_site_phone.py` — сторис «у нас открылся сайт»: мокап телефона, огромное слово, стеклянные плашки, ретро-сетка.
   - `post_timer_fashion.py` — пост «живой таймер до релиза»: арт игры карточкой, куб на фоне, fashion-типографика (курсив + огромное слово + тонкая строка с разрядкой). Владельцу понравился больше всего.
