@@ -9,6 +9,10 @@
     python3 designer/scripts/publish.py designer/posts/<имя> --to channel   # в канал @psshopgo
     python3 designer/scripts/publish.py designer/posts/<имя> --check        # только проверка, без отправки
     python3 designer/scripts/publish.py --whoami                            # показать chat id тех, кто писал боту
+    python3 designer/scripts/publish.py --collect-emoji                     # собрать коды премиум-эмодзи из сообщений боту
+
+Премиум-эмодзи: designer/emoji.json (обычный эмодзи → custom_emoji_id) — при отправке подставляются автоматически.
+Если Telegram их не примет, пост уйдёт с обычными эмодзи.
 
 Переменные окружения: TELEGRAM_BOT_TOKEN (обязательно), TELEGRAM_CHANNEL (по умолчанию @psshopgo),
 TELEGRAM_OWNER_CHAT_ID (для --to test). Можно положить их в designer/.env (файл не попадает в git).
@@ -18,7 +22,7 @@ from html.parser import HTMLParser
 
 CAPTION_LIMIT = 1024   # лимит подписи к фото в Telegram
 TEXT_LIMIT = 4096
-ALLOWED = {"b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "a", "code", "pre", "blockquote", "tg-spoiler", "span"}
+ALLOWED = {"b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "a", "code", "pre", "blockquote", "tg-spoiler", "span", "tg-emoji"}
 
 def load_env():
     p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
@@ -82,15 +86,58 @@ def api(token, method, fields=None, files=None):
         sys.exit(f"Telegram ответил ошибкой: {res.get('description')}")
     return res["result"]
 
+EMOJI_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "emoji.json")
+
+def premium_emoji(html):
+    """Заменяет обычные эмодзи на премиум-эмодзи владельца из designer/emoji.json (только в тексте, не в тегах)."""
+    if not os.path.exists(EMOJI_FILE): return html
+    m = json.load(open(EMOJI_FILE, encoding="utf-8"))
+    if not m: return html
+    keys = sorted(m, key=len, reverse=True)
+    pat = re.compile("|".join(re.escape(k) for k in keys))
+    parts = re.split(r"(<[^>]+>)", html); inside_emoji = False
+    for i, part in enumerate(parts):
+        if part.startswith("<"):
+            inside_emoji = part.startswith("<tg-emoji") or (inside_emoji and not part.startswith("</tg-emoji"))
+            continue
+        if not inside_emoji:
+            parts[i] = pat.sub(lambda x: f'<tg-emoji emoji-id="{m[x.group(0)]}">{x.group(0)}</tg-emoji>', part)
+    return "".join(parts)
+
+def collect_emoji(token):
+    """Читает сообщения, присланные боту, и собирает коды премиум-эмодзи: обычный эмодзи → id."""
+    found = {}
+    for u in api(token, "getUpdates", {"limit": 100}):
+        msg = u.get("message") or u.get("channel_post") or {}
+        for text_key, ent_key in (("text", "entities"), ("caption", "caption_entities")):
+            t = msg.get(text_key) or ""; b = t.encode("utf-16-le")
+            for e in msg.get(ent_key) or []:
+                if e.get("type") == "custom_emoji":
+                    ch = b[e["offset"] * 2:(e["offset"] + e["length"]) * 2].decode("utf-16-le")
+                    found[ch] = e["custom_emoji_id"]
+    if not found: print("Премиум-эмодзи не найдено. Отправьте боту сообщение с премиум-эмодзи и запустите снова."); return
+    print("EMOJI_JSON_START"); print(json.dumps(found, ensure_ascii=False, indent=1)); print("EMOJI_JSON_END")
+    print(f"Найдено эмодзи: {len(found)}")
+
 def publish(token, chat, img, html):
+    plain = html; html = premium_emoji(html)
     n, _ = visible_len(html)
+    try:
+        r = _send(token, chat, img, html, n)
+    except SystemExit as e:
+        if html == plain: raise
+        print(f"Премиум-эмодзи не приняты ({e}). Отправляю с обычными эмодзи.")
+        r = _send(token, chat, img, plain, n)
+    chat_info = r.get("chat", {}); user = chat_info.get("username")
+    print("Опубликовано:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
+
+def _send(token, chat, img, html, n):
     if n <= CAPTION_LIMIT:
         r = api(token, "sendPhoto", {"chat_id": chat, "caption": html, "parse_mode": "HTML"}, {"photo": img})
     else:  # длинный текст: картинка, затем текст отдельным сообщением
         api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})
         r = api(token, "sendMessage", {"chat_id": chat, "text": html, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}})
-    chat_info = r.get("chat", {}); user = chat_info.get("username")
-    print("Опубликовано:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
+    return r
 
 def main():
     load_env()
@@ -99,8 +146,12 @@ def main():
     ap.add_argument("--to", choices=["test", "channel"], default="test")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--whoami", action="store_true")
+    ap.add_argument("--collect-emoji", action="store_true")
     a = ap.parse_args()
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    if a.collect_emoji:
+        if not token: sys.exit("Нет TELEGRAM_BOT_TOKEN")
+        collect_emoji(token); return
     if a.whoami:
         if not token: sys.exit("Нет TELEGRAM_BOT_TOKEN")
         seen = {}
