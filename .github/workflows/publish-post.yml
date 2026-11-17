@@ -1,0 +1,46 @@
+# Публикует готовый пост (картинка + текст) из designer/posts/<папка> в Telegram.
+# Запуск вручную: GitHub → Actions → publish-post → Run workflow.
+# Сначала «превью» (пост придёт владельцу в личку от бота), потом «в канал».
+name: publish-post
+
+on:
+  workflow_dispatch:
+    inputs:
+      post:
+        description: 'Папка поста в designer/posts (например 2026-11-17-sait)'
+        required: false
+        default: ''
+      action:
+        description: 'Что сделать'
+        type: choice
+        default: 'превью мне в личку'
+        options:
+          - 'превью мне в личку'
+          - 'опубликовать в канал'
+          - 'узнать chat id'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_OWNER_CHAT_ID: ${{ secrets.TELEGRAM_OWNER_CHAT_ID }}
+      TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL || '@psshopgo' }}
+      POST: ${{ inputs.post }}
+      ACTION: ${{ inputs.action }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Отправить
+        run: |
+          case "$ACTION" in
+            'узнать chat id')        python3 designer/scripts/publish.py --whoami ;;
+            'опубликовать в канал')  python3 designer/scripts/publish.py "designer/posts/$POST" --to channel ;;
+            *)                       python3 designer/scripts/publish.py "designer/posts/$POST" --to test ;;
+          esac
