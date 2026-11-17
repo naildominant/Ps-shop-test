@@ -44,7 +44,9 @@
 ## Публикация в канал (бот)
 - Пост = папка `posts/<ГГГГ-ММ-ДД-тема>/` с `image.png` и `post.html` (HTML Telegram). Проверка: `python3 scripts/publish.py posts/<папка> --check`.
 - Публикует GitHub Actions, workflow `publish-post` (`.github/workflows/publish-post.yml` в корне репозитория), только когда владелец сам нажмёт Run workflow: сначала «превью мне в личку», потом «опубликовать в канал». Сам Claude в канал не публикует.
-- Секреты репозитория: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_CHAT_ID`. Из облачной сессии Telegram недоступен (сеть закрыта), поэтому только через Actions.
+- Бот: @psshop_postTG_bot (админ канала с правом публикации). Секреты репозитория: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OWNER_CHAT_ID` — уже добавлены.
+- **Премиум-эмодзи:** у владельца Telegram Premium. Коды лежат в `designer/emoji.json` (обычный эмодзи → custom_emoji_id) и подставляются при отправке сами; если Telegram не примет, пост уйдёт с обычными. Собрать новые: владелец пишет боту сообщение с премиум-эмодзи → Run workflow «собрать премиум-эмодзи» → Claude читает лог запуска и сохраняет `emoji.json`.
+- В `post.html` пиши обычные эмодзи: премиум подставятся автоматически. Из облачной сессии Telegram недоступен (сеть закрыта), поэтому только через Actions.
 
 ## Следующие шаги (идеи владельца)
 - Добавить шрифты в `assets/fonts/` и папку обложек `assets/covers/`.
