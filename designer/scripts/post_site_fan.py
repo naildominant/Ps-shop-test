@@ -48,11 +48,40 @@ def card(path,w,crop_h=1700,edge=((255,120,230),(90,200,255))):
     hd.polygon([(0,0),(int(w*0.55),0),(0,int(im.height*0.32))],fill=(255,255,255,22))
     hl.putalpha(ImageChops.multiply(hl.split()[3],m)); im.alpha_composite(hl)
     return im
+def persp(im,k):
+    """Поворот вокруг вертикальной оси: k<0 — левый край уходит вглубь, k>0 — правый."""
+    a=np.array(im); h,w=a.shape[:2]; out=np.zeros_like(a)
+    for x in range(w):
+        t=x/(w-1); s=1-abs(k)*((1-t) if k<0 else t)
+        nh=max(2,int(h*s)); col=Image.fromarray(a[:,x:x+1]).resize((1,nh),Image.BICUBIC)
+        y0=(h-nh)//2; out[y0:y0+nh,x:x+1]=np.array(col)
+    im2=Image.fromarray(out); return im2.resize((int(w*(1-abs(k)*0.35)),h),Image.LANCZOS)
+def slab(im,depth=14,dx=1,dy=1):
+    """Толщина стеклянной пластины: слои торца под лицевой стороной."""
+    al=im.split()[3]; L=Image.new("RGBA",(im.width+depth,im.height+depth),(0,0,0,0))
+    ox=0 if dx>0 else depth
+    for k in range(depth,0,-1):
+        t=k/depth; c=(int(40+120*(1-t)),int(20+50*(1-t)),int(110+130*(1-t)))
+        s=Image.new("RGBA",im.size,c+(255,)); s.putalpha(al); L.alpha_composite(s,(ox+k*dx,k*dy))
+    L.alpha_composite(im,(ox,0)); return L
+def cube_img(h):
+    lg=Image.open("assets/logo.png").convert("RGB").crop((300,210,960,900))
+    a=np.array(lg).astype(float); lum=a.max(axis=2)/255
+    c=Image.fromarray(np.dstack([a,np.clip((lum-0.06)*3.2,0,1)*255]).astype("uint8"),"RGBA")
+    return c.resize((int(c.width*h/c.height),h),Image.LANCZOS)
+
 shots="assets/shots/"
-fan=[("m_rent.png",-21,300,600),("m_game.png",-10,320,630),("m_catalog.png",12,330,630),("m_home.png",0,340,735)]
+# имя, угол, ширина, радиус от точки веера, перспектива, сторона торца
+fan=[("m_rent.png",-21,300,600,-0.16,1),("m_game.png",-10,320,630,-0.09,1),("m_catalog.png",12,330,630,0.10,-1),("m_home.png",0,340,735,0,1)]
+# дальний кубик слева, размыт (глубина резкости)
+cb=cube_img(120).rotate(14,resample=Image.BICUBIC,expand=True).filter(ImageFilter.GaussianBlur(3))
+ca=np.array(cb).astype(float); ca[...,3]*=0.75; cb=Image.fromarray(ca.astype("uint8"))
+glow(bg,tint(cb,(150,80,255)),(40,600),30,1); bg.alpha_composite(cb,(40,600))
 # порядок: дальние сначала, главный (главная страница) последним
-for name,ang,w,R in [fan[0],fan[2],fan[1],fan[3]]:
+for name,ang,w,R,k,side in [fan[0],fan[2],fan[1],fan[3]]:
     c=card(shots+name,w)
+    if k: c=persp(c,k)
+    c=slab(c,16 if name=="m_home.png" else 12,side,1)
     rc=c.rotate(-ang,resample=Image.BICUBIC,expand=True)
     a=math.radians(ang); cx=PX+R*math.sin(a); cy=PY-R*math.cos(a)
     x,y=int(cx-rc.width/2),int(cy-rc.height/2)
@@ -60,6 +89,14 @@ for name,ang,w,R in [fan[0],fan[2],fan[1],fan[3]]:
     bg.alpha_composite(sh.filter(ImageFilter.GaussianBlur(26)))
     if name=="m_home.png": glow(bg,tint(rc,(190,100,255)),(x,y),46,2)
     bg.alpha_composite(rc,(x,y))
+
+# парящий 3D-куб справа: выходит за край каталога, отбрасывает тень на карточку
+cu=cube_img(215).rotate(-10,resample=Image.BICUBIC,expand=True)
+ux,uy=W-cu.width-30,470
+sh=Image.new("RGBA",(W,H),(0,0,0,0)); sh.alpha_composite(tint(cu,(0,0,0)),(ux-30,uy+60))
+bg.alpha_composite(sh.filter(ImageFilter.GaussianBlur(22)))
+glow(bg,tint(cu,(120,90,255)),(ux,uy),40,2)
+bg.alpha_composite(cu,(ux,uy))
 
 # ---------- «карман»: тёмная растяжка снизу, из неё выходят карточки
 band=np.zeros((H,W,4)); y0,y1=760,1000
