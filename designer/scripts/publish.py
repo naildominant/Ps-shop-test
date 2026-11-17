@@ -131,13 +131,16 @@ def publish(token, chat, img, html, buttons=False):
     chat_info = r.get("chat", {}); user = chat_info.get("username")
     print("Опубликовано:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
 
+POST_NAME = ""  # имя папки поста, попадает в кнопки (для статуса и отзыва при отмене)
+
 def _kb(pub):
-    return json.dumps({"inline_keyboard": [[{"text": "✅ Опубликовать в канал", "callback_data": pub}], [{"text": "❌ Отмена", "callback_data": "no"}]]})
+    return json.dumps({"inline_keyboard": [[{"text": "✅ Опубликовать в канал", "callback_data": f"{pub}:{POST_NAME}"[:64]}],
+                                           [{"text": "❌ Отмена", "callback_data": f"no::{POST_NAME}"[:64]}]]})
 
 def _send(token, chat, img, html, n, buttons=False):
     if n <= CAPTION_LIMIT:
         f = {"chat_id": chat, "caption": html, "parse_mode": "HTML"}
-        if buttons: f["reply_markup"] = _kb("pub")
+        if buttons: f["reply_markup"] = _kb("pub:")
         r = api(token, "sendPhoto", f, {"photo": img})
     else:  # длинный текст: картинка, затем текст отдельным сообщением
         ph = api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})
@@ -181,6 +184,8 @@ def main():
     else:
         chat = os.environ.get("TELEGRAM_OWNER_CHAT_ID")
         if not chat: sys.exit("Нет TELEGRAM_OWNER_CHAT_ID для превью. Запустите режим «узнать chat id».")
+    global POST_NAME
+    POST_NAME = os.path.basename(os.path.normpath(a.folder))
     publish(token, chat, img, html, buttons=(a.to == "test"))
 
 if __name__ == "__main__":
