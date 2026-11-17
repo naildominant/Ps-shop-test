@@ -355,14 +355,17 @@ def load_reviews():
     return json.load(open(path, encoding='utf-8')) if os.path.exists(path) else []
 
 
-def review_card(r, clamp=True):
+def review_card(r, clamp=True, lang='ru'):
     d = parse_date(r['date'])
     when = d.strftime('%d.%m.%Y') if d else ''
-    text = E(r['text']).replace('\n', '<br>')
-    return f'''<article class="rev glass">
+    uz = lang == 'uz'
+    text = E(r.get('text_uz') if uz and r.get('text_uz') else r['text']).replace('\n', '<br>')
+    tag = r.get('tag_uz') if uz and r.get('tag_uz') else r['tag']
+    label = 'Telegram’dagi sharh' if uz else 'Отзыв в Telegram'
+    return f'''<article class="rev glass" data-rid="{r['id']}">
   <p class="rev-text{' is-clamp' if clamp else ''}">{text}</p>
-  <footer><span class="rev-ava">{E(r['name'][:1].upper())}</span><span><b>{E(r['name'])}</b><small>{E(r['tag'])} · {when}</small></span>
-  <a class="rev-src" href="{CONTACTS['reviews']}/{r['id']}" target="_blank" rel="noopener" aria-label="Отзыв в Telegram">{icon('tg')}</a></footer>
+  <footer><span class="rev-ava">{E(r['name'][:1].upper())}</span><span><b>{E(r['name'])}</b><small>{E(tag)} · {when}</small></span>
+  <a class="rev-src" href="{CONTACTS['reviews']}/{r['id']}" target="_blank" rel="noopener" aria-label="{label}">{icon('tg')}</a></footer>
 </article>'''
 
 
@@ -829,8 +832,14 @@ def to_uz(page):
     """Узбекская версия готовой русской страницы (живёт в корне сайта): переводим тексты."""
     keep = {}
 
-    def hold(m):  # отзывы клиентов и скрипты не трогаем
-        keep[f'@@K{len(keep)}@@'] = m.group(0)
+    revs = {str(r['id']): r for r in load_reviews()}
+
+    def hold(m):  # скрипты не трогаем, отзывы берём в переводе из data/reviews.json
+        block = m.group(0)
+        rid = re.match(r'<article class="rev glass" data-rid="(\d+)"', block)
+        if rid and rid.group(1) in revs:
+            block = review_card(revs[rid.group(1)], clamp='is-clamp' in block, lang='uz')
+        keep[f'@@K{len(keep)}@@'] = block
         return f'@@K{len(keep) - 1}@@'
     page = re.sub(r'<script.*?</script>|<article class="rev.*?</article>', hold, page, flags=re.S)
     # «от 229 000 uzs» -> «229 000 uzs dan»: по-узбекски «от» ставится после числа
