@@ -19,7 +19,7 @@
 
 ## Структура папки
 - `assets/logo.png` — логотип PS SHOP (куб с P и S + надпись, тёмный фон).
-- `assets/covers/` — обложки и арты игр от владельца (`название-игры.jpg`). Брать картинки игр только отсюда или из присланных скринов.
+- `assets/covers/` — обложки и арты игр (`название-игры.jpg`). **Картинки игр сначала всегда искать в канале владельца** (`https://t.me/s/psshopgo?q=<игра>`); если там нет — написать владельцу и искать вместе. Пост про игру — всегда с обложкой игры.
 - `assets/fonts/` — шрифты с кириллицей (лицензия OFL, образцы в `specimen.png`): Unbounded, Russo One, Oswald, Montserrat, Rubik Mono One (огромные слова); Playfair Display Italic, Cormorant Italic (fashion-курсив); Manrope (мелкий текст); Press Start 2P, Rubik Glitch (ретро и глитч). Плюс системные Inter / Inter Display.
 - `assets/shots/` — скриншоты psshop.uz (телефон `m_*.png`, компьютер `d_*.png`). Переснимать Playwright'ом, если сайт поменялся.
 - `scripts/psfx.py` — **общая библиотека приёмов, начинать любую картинку с неё**: `import sys; sys.path.insert(0,"scripts"); from psfx import *`.
