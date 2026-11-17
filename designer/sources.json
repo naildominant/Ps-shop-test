@@ -1,0 +1,23 @@
+{
+ "_note": "Источники для автопостов (решение владельца 17.11). Читать через https://t.me/s/<канал>. Новости — пересказывать своими словами, не копировать.",
+ "news_and_images": [
+  "playstation_game",
+  "world_playstation",
+  "PSNEWS14",
+  "psprices_ru_ps4",
+  "hps_news"
+ ],
+ "owner_channel_first_for_covers": "psshopgo",
+ "supplier_availability": "Авито hps_store (автоматическое чтение недоступно — ищем замену)",
+ "prices_only_from": [
+  "HPS (Авито hps_store, канал hps_news)",
+  "GameShop (бот @GameShopPSBot, канал playstation_game)"
+ ],
+ "_prices_note": "Цены брать ТОЛЬКО у HPS и GameShop. Остальные каналы — только новости и картинки, цены оттуда не брать. В каналах HPS/GameShop цен нет: у HPS цены на Авито, у GameShop — внутри бота.",
+ "price_formula": {
+  "rule": "цена_сум = цена_руб × 200 + 99 000",
+  "source_price": "в боте поставщика только вариант П3 и только Standard издание",
+  "example": "1800 ₽ → 1800×200+99000 = 459 000 сум",
+  "rounding": "всегда вверх до ближайшей цены, оканчивающейся на 9 000 (468 800 → 469 000; 470 500 → 479 000)"
+ }
+}
