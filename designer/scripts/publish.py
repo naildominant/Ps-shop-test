@@ -123,31 +123,44 @@ def publish(token, chat, img, html, buttons=False):
     plain = html; html = premium_emoji(html)
     n, _ = visible_len(html)
     try:
-        r = _send(token, chat, img, html, n, buttons)
+        ids, r = _send(token, chat, img, html, n)
     except SystemExit as e:
         if html == plain: raise
         print(f"Премиум-эмодзи не приняты ({e}). Отправляю с обычными эмодзи.")
-        r = _send(token, chat, img, plain, n, buttons)
+        ids, r = _send(token, chat, img, plain, n)
+    if buttons:
+        _control(token, chat, ids)
     chat_info = r.get("chat", {}); user = chat_info.get("username")
-    print("Опубликовано:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
+    print("Отправлено:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
 
 POST_NAME = ""  # имя папки поста, попадает в кнопки (для статуса и отзыва при отмене)
+WORKER_URL = os.environ.get("WORKER_URL", "https://psshop.psshop.workers.dev")
 
-def _kb(pub):
-    return json.dumps({"inline_keyboard": [[{"text": "✅ Опубликовать в канал", "callback_data": f"{pub}:{POST_NAME}"[:64]}],
-                                           [{"text": "❌ Отмена", "callback_data": f"no::{POST_NAME}"[:64]}]]})
+def _control(token, chat, ids):
+    """Под превью — подсказка «перешлите в канал» и кнопки. Бот в канале теряет премиум-эмодзи,
+    а пересылка от владельца со скрытым отправителем их сохраняет."""
+    pub = f"pub:{','.join(map(str, ids))}:{POST_NAME}"[:64]
+    text = ("👆 <b>Пост готов.</b> Чтобы выложить с премиум-эмодзи:\n"
+            "нажмите на пост → <b>Переслать</b> → канал <b>PS SHOP</b> → вверху <b>«Скрыть имя отправителя»</b> → отправить.\n\n"
+            "Я сам замечу, что пост вышел.")
+    kb = {"inline_keyboard": [[{"text": "❌ Нужны правки", "callback_data": f"no::{POST_NAME}"[:64]}],
+                              [{"text": "🤖 Выложить ботом (эмодзи станут обычными)", "callback_data": pub}]]}
+    c = api(token, "sendMessage", {"chat_id": chat, "text": text, "parse_mode": "HTML", "reply_to_message_id": ids[0], "reply_markup": kb})
+    # сообщить серверу, какой пост ждёт публикации (сервер проверяет токен бота)
+    try:
+        req = urllib.request.Request(f"{WORKER_URL}/tgpost/pending", json.dumps(
+            {"token": token, "post": POST_NAME, "chat": chat, "ctrl": c["message_id"]}).encode(), {"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r: print("Сервер:", r.read().decode()[:200])
+    except Exception as e:
+        print("Сервер не ответил (статус публикации не будет отслеживаться):", e)
 
-def _send(token, chat, img, html, n, buttons=False):
+def _send(token, chat, img, html, n):
     if n <= CAPTION_LIMIT:
-        f = {"chat_id": chat, "caption": html, "parse_mode": "HTML"}
-        if buttons: f["reply_markup"] = _kb("pub:")
-        r = api(token, "sendPhoto", f, {"photo": img})
-    else:  # длинный текст: картинка, затем текст отдельным сообщением
-        ph = api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})
-        f = {"chat_id": chat, "text": html, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}}
-        if buttons: f["reply_markup"] = {"inline_keyboard": json.loads(_kb(f"pub:{ph['message_id']}"))["inline_keyboard"]}
-        r = api(token, "sendMessage", f)
-    return r
+        r = api(token, "sendPhoto", {"chat_id": chat, "caption": html, "parse_mode": "HTML"}, {"photo": img})
+        return [r["message_id"]], r
+    ph = api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})  # длинный текст: картинка, затем текст
+    r = api(token, "sendMessage", {"chat_id": chat, "text": html, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}})
+    return [ph["message_id"], r["message_id"]], r
 
 def main():
     load_env()
