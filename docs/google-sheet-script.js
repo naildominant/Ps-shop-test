@@ -6,6 +6,11 @@ const TOKEN = '6cf56a2fe67752fb190caa88'; // должен совпадать с 
 const SHEET_ID = '17MKwvBfqCoRMtiqSskPOet4wRO1ewuvyEGjeSPIFCZc';
 const book_ = () => (SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet());
 
+// Первый запуск: нажать «Выполнить» на этой функции и разрешить доступ к таблице.
+function setup() {
+  Logger.log('Таблица: ' + book_().getName());
+}
+
 function doPost(e) {
   const d = JSON.parse(e.postData.contents);
   if (d.token !== TOKEN) return ContentService.createTextOutput('forbidden');
