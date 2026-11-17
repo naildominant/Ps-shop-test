@@ -119,24 +119,31 @@ def collect_emoji(token):
     print("EMOJI_JSON_START"); print(json.dumps(found, ensure_ascii=False, indent=1)); print("EMOJI_JSON_END")
     print(f"Найдено эмодзи: {len(found)}")
 
-def publish(token, chat, img, html):
+def publish(token, chat, img, html, buttons=False):
     plain = html; html = premium_emoji(html)
     n, _ = visible_len(html)
     try:
-        r = _send(token, chat, img, html, n)
+        r = _send(token, chat, img, html, n, buttons)
     except SystemExit as e:
         if html == plain: raise
         print(f"Премиум-эмодзи не приняты ({e}). Отправляю с обычными эмодзи.")
-        r = _send(token, chat, img, plain, n)
+        r = _send(token, chat, img, plain, n, buttons)
     chat_info = r.get("chat", {}); user = chat_info.get("username")
     print("Опубликовано:", f"https://t.me/{user}/{r['message_id']}" if user else f"сообщение {r['message_id']}")
 
-def _send(token, chat, img, html, n):
+def _kb(pub):
+    return json.dumps({"inline_keyboard": [[{"text": "✅ Опубликовать в канал", "callback_data": pub}], [{"text": "❌ Отмена", "callback_data": "no"}]]})
+
+def _send(token, chat, img, html, n, buttons=False):
     if n <= CAPTION_LIMIT:
-        r = api(token, "sendPhoto", {"chat_id": chat, "caption": html, "parse_mode": "HTML"}, {"photo": img})
+        f = {"chat_id": chat, "caption": html, "parse_mode": "HTML"}
+        if buttons: f["reply_markup"] = _kb("pub")
+        r = api(token, "sendPhoto", f, {"photo": img})
     else:  # длинный текст: картинка, затем текст отдельным сообщением
-        api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})
-        r = api(token, "sendMessage", {"chat_id": chat, "text": html, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}})
+        ph = api(token, "sendPhoto", {"chat_id": chat}, {"photo": img})
+        f = {"chat_id": chat, "text": html, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}}
+        if buttons: f["reply_markup"] = {"inline_keyboard": json.loads(_kb(f"pub:{ph['message_id']}"))["inline_keyboard"]}
+        r = api(token, "sendMessage", f)
     return r
 
 def main():
@@ -174,7 +181,7 @@ def main():
     else:
         chat = os.environ.get("TELEGRAM_OWNER_CHAT_ID")
         if not chat: sys.exit("Нет TELEGRAM_OWNER_CHAT_ID для превью. Запустите режим «узнать chat id».")
-    publish(token, chat, img, html)
+    publish(token, chat, img, html, buttons=(a.to == "test"))
 
 if __name__ == "__main__":
     main()
