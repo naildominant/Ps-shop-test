@@ -73,10 +73,6 @@ def cube_img(h):
 shots="assets/shots/"
 # имя, угол, ширина, радиус от точки веера, перспектива, сторона торца
 fan=[("m_rent.png",-21,300,600,-0.16,1),("m_game.png",-10,320,630,-0.09,1),("m_catalog.png",12,330,630,0.10,-1),("m_home.png",0,340,735,0,1)]
-# дальний кубик слева, размыт (глубина резкости)
-cb=cube_img(120).rotate(14,resample=Image.BICUBIC,expand=True).filter(ImageFilter.GaussianBlur(3))
-ca=np.array(cb).astype(float); ca[...,3]*=0.75; cb=Image.fromarray(ca.astype("uint8"))
-glow(bg,tint(cb,(150,80,255)),(40,600),30,1); bg.alpha_composite(cb,(40,600))
 # порядок: дальние сначала, главный (главная страница) последним
 for name,ang,w,R,k,side in [fan[0],fan[2],fan[1],fan[3]]:
     c=card(shots+name,w)
@@ -89,14 +85,6 @@ for name,ang,w,R,k,side in [fan[0],fan[2],fan[1],fan[3]]:
     bg.alpha_composite(sh.filter(ImageFilter.GaussianBlur(26)))
     if name=="m_home.png": glow(bg,tint(rc,(190,100,255)),(x,y),46,2)
     bg.alpha_composite(rc,(x,y))
-
-# парящий 3D-куб справа: выходит за край каталога, отбрасывает тень на карточку
-cu=cube_img(215).rotate(-10,resample=Image.BICUBIC,expand=True)
-ux,uy=W-cu.width-30,470
-sh=Image.new("RGBA",(W,H),(0,0,0,0)); sh.alpha_composite(tint(cu,(0,0,0)),(ux-30,uy+60))
-bg.alpha_composite(sh.filter(ImageFilter.GaussianBlur(22)))
-glow(bg,tint(cu,(120,90,255)),(ux,uy),40,2)
-bg.alpha_composite(cu,(ux,uy))
 
 # ---------- «карман»: тёмная растяжка снизу, из неё выходят карточки
 band=np.zeros((H,W,4)); y0,y1=760,1000
