@@ -14,7 +14,8 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* приватный режим */ } },
   };
-  const track = (name, params) => { try { window.psTrack && window.psTrack(name, params); } catch { /* */ } };
+  let vlog = null; // журнал визита (заполняется ниже, в блоке «посещения»)
+  const track = (name, params) => { try { vlog && vlog(name, params); window.psTrack && window.psTrack(name, params); } catch { /* */ } };
 
   /* ---------- уведомление ---------- */
   let toastT;
@@ -171,7 +172,7 @@
     if (!t) return;
     if (t.matches('[data-add]')) { e.preventDefault(); if (!add(t.dataset.add, t.dataset.opt)) openCart(); }
     else if (t.matches('[data-order]')) { add(t.dataset.order, t.dataset.opt, true); openCart(); track('order_click', { game: t.dataset.order }); }
-    else if (t.matches('[data-rm]')) { cart = cart.filter((i) => keyOf(i) !== t.dataset.rm); save(); renderCart(); }
+    else if (t.matches('[data-rm]')) { const it = cart.find((i) => keyOf(i) === t.dataset.rm); cart = cart.filter((i) => keyOf(i) !== t.dataset.rm); save(); renderCart(); if (it) track('remove', { game: it.id }); }
     else if (t.matches('[data-close-cart]')) closeCart();
     else if (t.matches('.opt')) {
       $$('.opt').forEach((b) => b.setAttribute('aria-checked', String(b === t)));
@@ -323,8 +324,8 @@
       history.replaceState(null, '', `${P}/catalog/${p.toString() ? `?${p}` : ''}`);
     }
     loadCatalog().then(render);
-    $('#chips').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (!c) return; f = c.dataset.f; limit = 48; render(); });
-    sortSel.addEventListener('change', () => { sort = sortSel.value; render(); });
+    $('#chips').addEventListener('click', (e) => { const c = e.target.closest('[data-f]'); if (!c) return; f = c.dataset.f; limit = 48; render(); track('filter', { f: c.textContent.trim() }); });
+    sortSel.addEventListener('change', () => { sort = sortSel.value; render(); track('sort', { s: sortSel.selectedOptions[0]?.textContent.trim() }); });
     more.addEventListener('click', () => { limit += 48; render(); });
     let st;
     $('#search-q').addEventListener('input', (e) => { clearTimeout(st); st = setTimeout(() => { q = e.target.value.trim(); limit = 48; render(); if (q) track('search', { q }); }, 250); });
@@ -426,41 +427,81 @@
 
   /* ---------- посещения (анонимно) -> CRM-таблица ---------- */
   // Один визит = одна строка в таблице «Посетители». Без имён и телефонов: случайный номер посетителя,
-  // откуда пришёл, что смотрел, клал ли в корзину и оформил ли заказ.
+  // откуда пришёл, путь по страницам, поиски, вопросы в чат, корзина, заказ.
   const visit = (() => {
     const bot = navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent);
     if (bot || !PS.api) return { mark() {} };
     const rnd = () => Math.random().toString(36).slice(2, 10);
     const now = Date.now();
     let vid = store.get('ps.vid', null);
-    const isNew = !vid;
     if (!vid) { vid = rnd(); store.set('ps.vid', vid); }
     let s = store.get('ps.sess', null);
-    if (!s || now - s.last > 30 * 60 * 1000) { // новый визит, если не заходил 30 минут
+    if (!s || !s.ev || now - s.last > 30 * 60 * 1000) { // новый визит, если не заходил 30 минут
       const n = (store.get('ps.vnum', 0) || 0) + 1; store.set('ps.vnum', n);
       const q = new URLSearchParams(location.search);
       let ref = ''; try { ref = document.referrer ? new URL(document.referrer).hostname : ''; } catch { /* */ }
       if (ref === location.hostname) ref = '';
-      s = { id: rnd(), start: now, n, isNew, land: location.pathname, ref, utm: q.get('utm_source') || '', camp: q.get('utm_campaign') || '',
-            pages: 0, games: [], adds: 0, order: false, total: 0 };
+      s = { id: rnd(), start: now, n, isNew: n === 1, land: location.pathname, ref, utm: q.get('utm_source') || '', camp: q.get('utm_campaign') || '',
+            pages: 0, games: [], adds: 0, order: false, total: 0, ev: [] };
     }
-    s.pages += 1; s.last = now;
-    if (document.body.dataset.page === 'game') { const t = $('h1')?.textContent.trim(); if (t && !s.games.includes(t)) s.games.push(t); }
     const save = () => store.set('ps.sess', s);
+    const NAMES = { home: 'Главная', catalog: 'Каталог', subs: 'Подписки', rent: 'Аренда PS5', install: 'Установка', reviews: 'Отзывы', about: 'О нас', promos: 'Акции' };
+    const pg = document.body.dataset.page || '';
+    const h1 = $('h1')?.textContent.trim() || '';
+    const title = pg === 'game' ? h1 : (NAMES[pg] || h1 || location.pathname);
+    const sec = () => Math.round((Date.now() - s.start) / 1000);
+    const log = (k, v) => {
+      const last = s.ev[s.ev.length - 1];
+      // поиск по буквам («ф», «фи», «фифа») записываем одним словом
+      if (k === 'search' && last && last.k === 'search' && (v.startsWith(last.v) || last.v.startsWith(v))) { last.v = v; return; }
+      if (s.ev.length < 120) s.ev.push({ t: sec(), k, v: String(v ?? '').slice(0, 80) });
+      save();
+    };
+    const gameTitle = (id) => {
+      const el = document.querySelector(`[data-add="${CSS.escape(id)}"],[data-order="${CSS.escape(id)}"]`);
+      const t = el?.closest('.card')?.querySelector('.card-title')?.textContent || (pg === 'game' ? h1 : '');
+      return (t || id).trim();
+    };
+    vlog = (name, p = {}) => {
+      const map = {
+        add_to_cart: () => log('add', gameTitle(p.game) + (p.option ? ` (${p.option})` : '')),
+        remove: () => log('rm', gameTitle(p.game)),
+        cart_open: () => log('cart'), form_start: () => log('form'), order_submit: () => log('order', p.total),
+        tg_click: () => log('tg', p.href), tg_redirect: () => log('tg', 'менеджер после заказа'),
+        search: () => log('search', p.q), not_found: () => log('notfound', p.q),
+        chat_open: () => log('chat_open'), chat_question: () => log('chat', p.q),
+        lang_switch: () => log('lang', p.to), gamepad_toss: () => log('pad'),
+        filter: () => log('filter', p.f), sort: () => log('sort', p.s), gameplay: () => log('video'),
+      };
+      map[name]?.();
+    };
+    s.pages += 1; s.last = now;
+    if (pg === 'game' && h1 && !s.games.includes(h1)) s.games.push(h1);
+    log('page', title);
+    const pageEv = s.ev[s.ev.length - 1];
+    let depth = 0;
+    addEventListener('scroll', () => {
+      const h = document.documentElement.scrollHeight - innerHeight;
+      const d = h > 0 ? Math.min(100, Math.round(scrollY / h * 100)) : 100;
+      if (d > depth) { depth = d; pageEv.d = d; }
+    }, { passive: true });
     save();
     let sent = '';
     const send = () => {
       s.last = Date.now(); save();
-      const body = JSON.stringify({ sid: s.id, vid, n: s.n, isNew: s.isNew, start: s.start, dur: Math.round((s.last - s.start) / 1000),
+      const ua = navigator.userAgent;
+      const body = JSON.stringify({ sid: s.id, vid, n: s.n, isNew: s.isNew, start: s.start, dur: sec(),
         land: s.land, ref: s.ref, utm: s.utm, camp: s.camp, pages: s.pages, games: s.games.slice(0, 15), adds: s.adds,
         order: s.order, total: s.total, lang: UZ ? 'uz' : 'ru', mobile: matchMedia('(pointer:coarse)').matches,
-        os: (/iPhone|iPad/.test(navigator.userAgent) && 'iOS') || (/Android/.test(navigator.userAgent) && 'Android') || (/Windows/.test(navigator.userAgent) && 'Windows') || (/Mac/.test(navigator.userAgent) && 'Mac') || 'другое' });
+        os: (/iPhone|iPad/.test(ua) && 'iOS') || (/Android/.test(ua) && 'Android') || (/Windows/.test(ua) && 'Windows') || (/Mac/.test(ua) && 'Mac') || 'другое',
+        tg: /Telegram/i.test(ua) || typeof window.TelegramWebview !== 'undefined', ig: /Instagram/i.test(ua),
+        scr: `${screen.width}x${screen.height}`, ev: s.ev });
       if (body === sent) return; sent = body;
       try { navigator.sendBeacon(`${PS.api}/visit`, new Blob([body], { type: 'text/plain' })); } catch { /* */ }
     };
     addEventListener('pagehide', send);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') send(); });
-    return { mark(k, v) { if (k === 'add') s.adds += 1; if (k === 'order') { s.order = true; s.total = v || 0; } save(); if (k === 'order') send(); } };
+    return { mark(k, v) { if (k === 'add') s.adds += 1; if (k === 'order') { s.order = true; s.total = v || 0; } save(); if (k === 'order') setTimeout(send, 50); } };
   })();
 
   /* старт */

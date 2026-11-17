@@ -76,13 +76,101 @@ async function sendTelegram(env, text) {
   return r.ok;
 }
 
-async function toSheet(env, o) {
+/* ---------- Google Таблица (CRM) ---------- */
+// Скрипт таблицы универсальный: получает имя листа, заголовки и строку. Что и как писать, решает этот сервер,
+// поэтому новые колонки добавляются здесь, без замены скрипта в Google.
+const cell = (x) => (typeof x === 'string' && /^[=+\-@]/.test(x) ? `'${x}` : x); // защита от «формул» в тексте посетителя
+
+async function sheetPost(env, payload) {
   if (!env.SHEET_URL) return;
-  const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
+  if (payload.values) payload.values = payload.values.map(cell);
   await fetch(env.SHEET_URL, {
     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow',
-    body: JSON.stringify({ token: env.SHEET_TOKEN || '', vid: String(o.vid || '').slice(0, 12), name: o.name, contact: o.contact, console: o.console, items, total: o.total, lang: o.lang || 'ru' }),
+    body: JSON.stringify({ token: env.SHEET_TOKEN || '', ...payload }),
   }).catch(() => {});
+}
+
+const ORDER_HEADER = ['Дата', 'Имя', 'Контакт', 'Консоль', 'Что заказали', 'Сумма, uzs', 'Язык сайта', 'Статус', 'Комментарий', 'Посетитель'];
+
+async function toSheet(env, o) {
+  const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
+  await sheetPost(env, { sheet: 'Заявки', header: ORDER_HEADER, dates: [0],
+    values: [Date.now(), o.name, o.contact, o.console, items, Number(o.total) || 0, o.lang || 'ru', 'Новая', '', String(o.vid || '').slice(0, 12)] });
+}
+
+const VISIT_HEADER = ['Начало визита', 'Посетитель', 'Визит №', 'Новый', 'Источник', 'Откуда пришёл', 'Метка рекламы',
+  'Первая страница', 'Страниц', 'Минут на сайте', 'Смотрел игры', 'Клал в корзину', 'Заказ', 'Сумма заказа', 'Устройство', 'Язык', 'Город', 'Код визита',
+  'Путь по сайту', 'Искал', 'Спрашивал в чате', 'Положил в корзину', 'Другие действия', 'Простыми словами'];
+
+function sourceOf(v) {
+  const ref = String(v.ref || '').toLowerCase();
+  const NAMES = { instagram: 'Instagram', ig: 'Instagram', telegram: 'Telegram', tg: 'Telegram', google: 'Google', yandex: 'Яндекс', youtube: 'YouTube', tiktok: 'TikTok', facebook: 'Facebook' };
+  if (v.utm) return NAMES[String(v.utm).toLowerCase()] || String(v.utm);
+  if (/t\.me|telegram/.test(ref) || (!ref && v.tg)) return 'Telegram';
+  if (/instagram/.test(ref) || (!ref && v.ig)) return 'Instagram';
+  if (!ref) return 'Прямой заход';
+  if (/google/.test(ref)) return 'Google';
+  if (/yandex|ya\.ru/.test(ref)) return 'Яндекс';
+  if (/facebook|fb\./.test(ref)) return 'Facebook';
+  if (/youtube/.test(ref)) return 'YouTube';
+  if (/tiktok/.test(ref)) return 'TikTok';
+  return 'Другой сайт';
+}
+
+const fmtSec = (s) => (s < 60 ? `${s} с` : `${Math.floor(s / 60)} мин${s % 60 ? ` ${s % 60} с` : ''}`);
+const quote = (a) => a.map((x) => `«${x}»`).join(', ');
+const uniq = (a) => [...new Set(a.filter(Boolean))];
+const TG_NAMES = { gaynullin_nail: 'менеджеру', psshopgo: 'в канал', xpsshopotziv: 'в отзывы' };
+
+function visitRow(v, cf) {
+  const str = (x, n) => String(x ?? '').slice(0, n);
+  const ev = (Array.isArray(v.ev) ? v.ev : []).slice(0, 120).map((e) => ({ t: Number(e.t) || 0, k: str(e.k, 12), v: str(e.v, 80), d: Number(e.d) || 0 }));
+  const dur = Math.min(Number(v.dur) || 0, 86400);
+  const of = (k) => ev.filter((e) => e.k === k).map((e) => e.v);
+  const pages = ev.filter((e) => e.k === 'page');
+  const path = pages.map((p, i) => {
+    const next = pages[i + 1] ? pages[i + 1].t : dur;
+    return `${p.v} (${fmtSec(Math.max(0, next - p.t))}${p.d >= 90 ? ', до конца' : p.d >= 30 ? `, долистал ${p.d}%` : ''})`;
+  }).join(' → ');
+  const searches = uniq(of('search')), notFound = uniq(of('notfound')), chat = uniq(of('chat'));
+  const adds = uniq(of('add')), removed = uniq(of('rm'));
+  const tgs = uniq(of('tg').map((h) => TG_NAMES[(h.split('t.me/')[1] || '').split(/[/?]/)[0].toLowerCase()] || h));
+  const other = [];
+  const cnt = (k) => ev.filter((e) => e.k === k).length;
+  if (cnt('cart')) other.push(`открывал корзину${cnt('cart') > 1 ? ` (${cnt('cart')} раза)` : ''}`);
+  if (cnt('form')) other.push('начал заполнять заявку');
+  if (removed.length) other.push(`убрал из корзины: ${removed.join(', ')}`);
+  uniq(of('filter')).forEach((f) => other.push(`фильтр «${f}»`));
+  uniq(of('sort')).forEach((s) => other.push(`сортировка «${s}»`));
+  if (cnt('chat_open')) other.push('открывал чат');
+  if (cnt('video')) other.push('смотрел видео');
+  if (cnt('pad')) other.push(`подбросил геймпад${cnt('pad') > 1 ? ` ${cnt('pad')} раза` : ''}`);
+  uniq(of('lang')).forEach((l) => other.push(`сменил язык на ${l === 'uz' ? 'узбекский' : 'русский'}`));
+  if (tgs.length) other.push(`перешёл в Telegram: ${tgs.join(', ')}`);
+
+  const src = sourceOf(v);
+  const device = (v.mobile ? 'телефон' : 'компьютер') + (v.os ? `, ${str(v.os, 20)}` : '');
+  const city = [str(cf.city, 40), str(cf.country, 4)].filter(Boolean).join(', ');
+  const n = Number(v.n) || 1;
+  const order = !!v.order, total = Number(v.total) || 0;
+  const story = [
+    `${n === 1 ? 'Новый посетитель' : `Вернулся (${n}-й визит)`}, ${src === 'Прямой заход' ? 'зашёл напрямую' : `пришёл из: ${src}`}; ${device}${city ? `; ${str(cf.city, 40) || city}` : ''}; ${v.lang === 'uz' ? 'узбекская' : 'русская'} версия.`,
+    `Был на сайте ${fmtSec(dur)}, открыл ${pages.length || Number(v.pages) || 1} стр.: ${pages.slice(0, 10).map((p) => p.v).join(' → ')}${pages.length > 10 ? ' → …' : ''}.`,
+    searches.length ? `Искал: ${quote(searches)}.` : '',
+    notFound.length ? `Не нашёл на сайте: ${quote(notFound)}.` : '',
+    chat.length ? `Спрашивал в чате: ${quote(chat)}.` : '',
+    adds.length ? `Положил в корзину: ${adds.join(', ')}.` : '',
+    tgs.length ? `Перешёл в Telegram ${tgs.join(', ')}.` : '',
+    order ? `✅ Оформил заказ на ${money(total)} сум.`
+      : cnt('form') ? '⚠️ Начал оформлять заказ, но не отправил.'
+        : adds.length ? '⚠️ Положил в корзину, но не заказал.' : 'Ушёл без заказа.',
+  ].filter(Boolean).join(' ');
+
+  return [Number(v.start) || Date.now(), v.vid, n, n === 1 ? 'новый' : 'вернулся', src, str(v.ref, 80), str(v.camp, 60),
+    str(v.land, 120), Number(v.pages) || pages.length || 1, Math.round(dur / 6) / 10,
+    (Array.isArray(v.games) ? v.games : []).slice(0, 15).map((g) => str(g, 80)).join('; '), Math.min(Number(v.adds) || 0, 999),
+    order ? 'да' : '', order ? total : '', device, v.lang === 'uz' ? 'uz' : 'ru', city, v.sid,
+    path, searches.join('; '), chat.join('; '), adds.join('; '), other.join('; '), story];
 }
 
 // Визит с сайта (анонимно) -> строка в листе «Посетители» Google Таблицы.
@@ -91,19 +179,9 @@ async function handleVisit(req, env, h, ctx) {
   const allowed = (env.ALLOWED || '').split(',').map((x) => x.trim()).filter(Boolean);
   if (!allowed.includes(origin) || !env.SHEET_URL) return new Response(null, { status: 204, headers: h });
   let v;
-  try { const t = await req.text(); if (t.length > 4000) throw 0; v = JSON.parse(t); } catch { return new Response(null, { status: 400, headers: h }); }
-  const str = (x, n) => String(x ?? '').slice(0, n);
+  try { const t = await req.text(); if (t.length > 24000) throw 0; v = JSON.parse(t); } catch { return new Response(null, { status: 400, headers: h }); }
   if (!/^[a-z0-9]{4,12}$/.test(v.sid || '') || !/^[a-z0-9]{4,12}$/.test(v.vid || '')) return new Response(null, { status: 400, headers: h });
-  const cf = req.cf || {};
-  const row = {
-    token: env.SHEET_TOKEN || '', type: 'visit', sid: v.sid, vid: v.vid, n: Number(v.n) || 1, isNew: !!v.isNew,
-    start: Number(v.start) || Date.now(), dur: Math.min(Number(v.dur) || 0, 86400), land: str(v.land, 120), ref: str(v.ref, 80),
-    utm: str(v.utm, 60), camp: str(v.camp, 60), pages: Math.min(Number(v.pages) || 1, 999),
-    games: (Array.isArray(v.games) ? v.games : []).slice(0, 15).map((g) => str(g, 80)).join(', '),
-    adds: Math.min(Number(v.adds) || 0, 999), order: !!v.order, total: Number(v.total) || 0,
-    lang: v.lang === 'uz' ? 'uz' : 'ru', mobile: !!v.mobile, os: str(v.os, 20), city: str(cf.city, 40), country: str(cf.country, 4),
-  };
-  const send = fetch(env.SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', body: JSON.stringify(row) }).catch(() => {});
+  const send = sheetPost(env, { sheet: 'Посетители', header: VISIT_HEADER, dates: [0], key: v.sid, keyCol: 'Код визита', values: visitRow(v, req.cf || {}) });
   if (ctx) ctx.waitUntil(send); else await send;
   return new Response(null, { status: 204, headers: h });
 }
