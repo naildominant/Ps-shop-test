@@ -1,6 +1,8 @@
 # Публикует готовый пост (картинка + текст) из designer/posts/<папка> в Telegram.
 # Запуск вручную: GitHub → Actions → publish-post → Run workflow.
-# Сначала «превью» (пост придёт владельцу в личку от бота), потом «в канал».
+# «превью мне в личку» — пост приходит владельцу с кнопками «✅ Опубликовать / ❌ Отмена»
+# (кнопки обрабатывает Cloudflare Worker, см. worker/worker.js, раздел 4).
+# «подключить кнопки» — один раз: передать токен бота серверу и включить webhook.
 name: publish-post
 
 on:
@@ -17,8 +19,7 @@ on:
         options:
           - 'превью мне в личку'
           - 'опубликовать в канал'
-          - 'узнать chat id'
-          - 'собрать премиум-эмодзи'
+          - 'подключить кнопки'
 
 permissions:
   contents: read
@@ -31,6 +32,7 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_OWNER_CHAT_ID: ${{ secrets.TELEGRAM_OWNER_CHAT_ID }}
       TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL || '@psshopgo' }}
+      WORKER_URL: ${{ vars.WORKER_URL || 'https://psshop.psshop.workers.dev' }}
       POST: ${{ inputs.post }}
       ACTION: ${{ inputs.action }}
     steps:
@@ -41,8 +43,11 @@ jobs:
       - name: Отправить
         run: |
           case "$ACTION" in
-            'узнать chat id')        python3 designer/scripts/publish.py --whoami ;;
-            'собрать премиум-эмодзи') python3 designer/scripts/publish.py --collect-emoji ;;
+            'подключить кнопки')
+              # передаём токен бота серверу Cloudflare; сервер сам проверит его у Telegram (getMe)
+              python3 -c 'import json,os;print(json.dumps({"token":os.environ["TELEGRAM_BOT_TOKEN"]}))' > /tmp/t.json
+              curl -sS --fail-with-body -X POST "$WORKER_URL/tgpost/register" -H 'Content-Type: application/json' --data @/tmp/t.json; echo
+              rm -f /tmp/t.json ;;
             'опубликовать в канал')  python3 designer/scripts/publish.py "designer/posts/$POST" --to channel ;;
             *)                       python3 designer/scripts/publish.py "designer/posts/$POST" --to test ;;
           esac
