@@ -1,6 +1,17 @@
 {
-  "_note": "Источники для автопостов (решение владельца 17.11). Читать через https://t.me/s/<канал>. Новости — пересказывать своими словами, не копировать.",
-  "news_and_images": ["playstation_game", "world_playstation", "PSNEWS14", "psprices_ru_ps4", "hps_news"],
-  "owner_channel_first_for_covers": "psshopgo",
-  "supplier_availability": "Авито hps_store (автоматическое чтение недоступно — ищем замену)"
+ "_note": "Источники для автопостов (решение владельца 17.11). Читать через https://t.me/s/<канал>. Новости — пересказывать своими словами, не копировать.",
+ "news_and_images": [
+  "playstation_game",
+  "world_playstation",
+  "PSNEWS14",
+  "psprices_ru_ps4",
+  "hps_news"
+ ],
+ "owner_channel_first_for_covers": "psshopgo",
+ "supplier_availability": "Авито hps_store (автоматическое чтение недоступно — ищем замену)",
+ "prices_only_from": [
+  "HPS (Авито hps_store, канал hps_news)",
+  "GameShop (бот @GameShopPSBot, канал playstation_game)"
+ ],
+ "_prices_note": "Цены брать ТОЛЬКО у HPS и GameShop. Остальные каналы — только новости и картинки, цены оттуда не брать. В каналах HPS/GameShop цен нет: у HPS цены на Авито, у GameShop — внутри бота."
 }
