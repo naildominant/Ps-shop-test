@@ -194,10 +194,10 @@ def logo(height=132, path=None):
     lg = Image.fromarray(np.dstack([a, np.clip((lum - 0.05) * 3.5, 0, 1) * 255]).astype("uint8"), "RGBA")
     return lg.resize((int(lg.width * height / lg.height), height), Image.LANCZOS)
 
-def header(base, right_top="NEW", right_sub="ОНЛАЙН-МАГАЗИН", logo_h=132):
+def header(base, right_top="NEW", right_sub="ОНЛАЙН-МАГАЗИН", logo_h=132, top_color=(255, 150, 230)):
     """Логотип слева сверху + две строки справа."""
     W = base.size[0]; base.alpha_composite(logo(logo_h), (44, 34)); d = ImageDraw.Draw(base)
-    if right_top: spaced(d, (W - 56, 58), right_top, font("black", 24), (255, 150, 230), 8, "r")
+    if right_top: spaced(d, (W - 56, 58), right_top, font("black", 24), top_color, 8, "r")
     if right_sub: spaced(d, (W - 56, 94), right_sub, font("text", 18), (190, 180, 235), 5, "r")
 
 # ---------------------------------------------------------------- 3D
