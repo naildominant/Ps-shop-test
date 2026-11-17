@@ -139,6 +139,8 @@ async function runCatalogUpdate(env) {
  *    Превью приходит владельцу с кнопками «✅ Опубликовать» / «❌ Отмена».
  *    POST /tgpost          — webhook Telegram (проверка заголовка секрета).
  *    GET  /tgpost/setup    — подключить webhook (?key=TGPOST_SECRET).
+ *    GET  /tgpost/status   — статус поста ?post=<папка>&key=…: pending / published (+link) / cancelled (+feedback).
+ *    После «Отмены» бот спрашивает «Что поменять?», ответ владельца сохраняется в feedback.
  *    GET  /tgpost/emoji    — премиум-эмодзи, присланные владельцем боту (?key=TGPOST_SECRET).
  *    POST /tgpost/register — GitHub Actions передаёт токен бота {"token": "..."}; сервер проверяет через getMe,
  *                            что это именно наш бот (TGPOST_BOT_USERNAME, по умолчанию psshop_postTG_bot),
@@ -156,17 +158,30 @@ async function tg(env, method, body, token) {
   return r.json();
 }
 const kb = (rows) => ({ inline_keyboard: rows });
+async function setStatus(env, post, patch) {
+  if (!env.STORE || !post) return;
+  const key = `tgpost:post:${post}`;
+  const cur = JSON.parse(await env.STORE.get(key) || '{}');
+  await env.STORE.put(key, JSON.stringify({ ...cur, ...patch, post, updated: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 60 });
+}
 
 async function handleTgPost(req, env, ctx) {
   if (!env.TGPOST_SECRET || req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== env.TGPOST_SECRET) return new Response('forbidden', { status: 403 });
   const u = await req.json().catch(() => ({}));
   const owner = String(env.TGPOST_OWNER || '');
 
-  // Сообщение владельца боту: запоминаем премиум-эмодзи
+  // Сообщение владельца боту: премиум-эмодзи или ответ «что поменять» после отмены
   const m = u.message;
   if (m && String(m.from?.id) === owner) {
     const t = m.text || m.caption || '';
     const ents = (m.entities || m.caption_entities || []).filter((e) => e.type === 'custom_emoji');
+    const waiting = env.STORE ? await env.STORE.get('tgpost:await') : null;
+    if (waiting && t && !t.startsWith('/')) {
+      const key = `tgpost:post:${waiting}`;
+      const cur = JSON.parse(await env.STORE.get(key) || '{}');
+      await setStatus(env, waiting, { feedback: [...(cur.feedback || []), t] });
+      return json({ method: 'sendMessage', chat_id: m.chat.id, text: 'Принял ✅ Передал дизайнеру, он пришлёт новую версию.' }, 200);
+    }
     let saved = 0;
     for (const e of ents) {
       const ch = t.slice(e.offset, e.offset + e.length); // в JS строки уже в UTF-16
@@ -180,10 +195,13 @@ async function handleTgPost(req, env, ctx) {
   if (!q) return new Response('ok');
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
-  const [action, photoId] = String(q.data || '').split(':');
+  const [action, photoId, post] = String(q.data || '').split(':');
 
   if (action === 'no') {
     await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '❌ Отменено', callback_data: 'x' }]]) });
+    await setStatus(env, post, { status: 'cancelled', feedback: [] });
+    if (env.STORE && post) await env.STORE.put('tgpost:await', post, { expirationTtl: 60 * 60 * 24 * 3 });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '❌ Пост отменён. Что поменять? Напишите ответом одним сообщением: картинка, текст, цены…' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
   if (action !== 'pub') return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
@@ -204,10 +222,12 @@ async function handleTgPost(req, env, ctx) {
   }
   if (!last?.ok) {
     if (env.STORE) await env.STORE.delete(lock);
-    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: q.data }], [{ text: '❌ Отмена', callback_data: 'no' }]]) });
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: q.data }], [{ text: '❌ Отмена', callback_data: `no::${post || ''}` }]]) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: `Ошибка: ${last?.description || 'не удалось'}`, show_alert: true }, 200);
   }
   const link = `https://t.me/${channel.replace('@', '')}/${last.result.message_id}`;
+  await setStatus(env, post, { status: 'published', link });
+  if (env.STORE && post && (await env.STORE.get('tgpost:await')) === post) await env.STORE.delete('tgpost:await');
   await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовано — открыть', url: link }]]) });
   return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Опубликовано в канале ✅' }, 200);
 }
@@ -228,6 +248,11 @@ async function handleTgPostRegister(req, env) {
 async function handleTgPostSetup(req, env) {
   const url = new URL(req.url);
   if (!env.TGPOST_SECRET || url.searchParams.get('key') !== env.TGPOST_SECRET) return new Response('forbidden', { status: 403 });
+  if (url.pathname.endsWith('/status')) {
+    const post = url.searchParams.get('post') || '';
+    const st = env.STORE ? JSON.parse(await env.STORE.get(`tgpost:post:${post}`) || 'null') : null;
+    return json(st || { post, status: 'pending' }, 200);
+  }
   if (url.pathname.endsWith('/emoji')) {
     const out = {};
     if (env.STORE) {
@@ -253,7 +278,7 @@ export default {
     const { pathname } = new URL(req.url);
     if (req.method === 'POST' && pathname === '/tgpost') return handleTgPost(req, env, ctx);
     if (req.method === 'POST' && pathname === '/tgpost/register') return handleTgPostRegister(req, env);
-    if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji')) return handleTgPostSetup(req, env);
+    if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
