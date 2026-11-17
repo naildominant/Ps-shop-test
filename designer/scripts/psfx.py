@@ -25,8 +25,7 @@ FONTS = {
     "oswald":    ("Oswald[wght].ttf", "Bold"),
     "montserrat":("Montserrat[wght].ttf", "Black"),
     # fashion-курсив
-    "serif":     ("/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf", None),
-    "playfair":  ("PlayfairDisplay-Italic[wght].ttf", "Italic"),
+        "playfair":  ("PlayfairDisplay-Italic[wght].ttf", "Italic"),
     "cormorant": ("Cormorant-Italic[wght].ttf", "Medium Italic"),
     # мелкие строки с разрядкой, кнопки
     "text":      (INTER + "Inter-Medium.otf", None),
