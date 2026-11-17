@@ -137,14 +137,10 @@ POST_NAME = ""  # имя папки поста, попадает в кнопки
 WORKER_URL = os.environ.get("WORKER_URL", "https://psshop.psshop.workers.dev")
 
 def _control(token, chat, ids):
-    """Под превью — подсказка «перешлите в канал» и кнопки. Бот в канале теряет премиум-эмодзи,
-    а пересылка от владельца со скрытым отправителем их сохраняет."""
-    pub = f"pub:{','.join(map(str, ids))}:{POST_NAME}"[:64]
-    text = ("👆 <b>Пост готов.</b> Чтобы выложить с премиум-эмодзи:\n"
-            "нажмите на пост → <b>Переслать</b> → канал <b>PS SHOP</b> → вверху <b>«Скрыть имя отправителя»</b> → отправить.\n\n"
-            "Я сам замечу, что пост вышел.")
-    kb = {"inline_keyboard": [[{"text": "❌ Нужны правки", "callback_data": f"no::{POST_NAME}"[:64]}],
-                              [{"text": "🤖 Выложить ботом (эмодзи станут обычными)", "callback_data": pub}]]}
+    """Под превью — кнопки. «✅ Опубликовать» публикует от аккаунта владельца (премиум-эмодзи сохраняются)."""
+    text = "👆 <b>Пост готов.</b> Опубликовать в канал?"
+    kb = {"inline_keyboard": [[{"text": "✅ Опубликовать", "callback_data": f"go::{POST_NAME}"[:64]}],
+                              [{"text": "❌ Нужна доработка", "callback_data": f"no::{POST_NAME}"[:64]}]]}
     c = api(token, "sendMessage", {"chat_id": chat, "text": text, "parse_mode": "HTML", "reply_to_message_id": ids[0], "reply_markup": kb})
     # сообщить серверу, какой пост ждёт публикации (сервер проверяет токен бота)
     try:
