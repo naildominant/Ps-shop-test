@@ -325,6 +325,7 @@ async function handleTgPost(req, env, ctx) {
     await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '❌ Пост отменён. Что поменять? Напишите ответом одним сообщением: картинка, текст, цены…' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
+  if (action === 'go') return publishAsOwner(env, q, chat, mid, post);
   if (action !== 'pub') return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
 
   const lock = `pub:${chat}:${mid}`;
@@ -354,6 +355,45 @@ async function handleTgPost(req, env, ctx) {
   if (env.STORE && post && (await env.STORE.get('tgpost:await')) === post) await env.STORE.delete('tgpost:await');
   await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовано — открыть', url: link }]]) });
   return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Опубликовано в канале ✅' }, 200);
+}
+
+// «✅ Опубликовать»: запускает публикацию от аккаунта владельца (закрытый репозиторий, премиум-эмодзи сохраняются).
+const AUTOPOST_REPO = 'naildominant/ps-shop-autopost';
+function ghHeaders(token) {
+  return { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'psshop-worker', 'X-GitHub-Api-Version': '2022-11-28' };
+}
+async function publishAsOwner(env, q, chat, mid, post) {
+  const answer = (text, alert) => json({ method: 'answerCallbackQuery', callback_query_id: q.id, text, show_alert: !!alert }, 200);
+  const gh = env.STORE ? await env.STORE.get('tgpost:gh') : '';
+  if (!gh || !/^[\w.-]{1,80}$/.test(post || '')) return answer('Публикация не настроена', true);
+  const lock = `go:${post}`;
+  if (await env.STORE.get(lock)) return answer('Уже публикуется');
+  await env.STORE.put(lock, '1', { expirationTtl: 60 * 10 });
+  await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '⏳ Публикую от вашего аккаунта…', callback_data: 'x' }]]) });
+  const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/post.yml/dispatches`, {
+    method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ref: 'main', inputs: { post, target: 'psshopgo' } }),
+  });
+  if (r.status !== 204) {
+    await env.STORE.delete(lock);
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}` }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}` }]]) });
+    return answer(`Не получилось запустить публикацию (GitHub ${r.status})`, true);
+  }
+  // pending остаётся: когда пост появится в канале, обработчик channel_post сменит кнопки на «✅ Пост вышел»
+  await setStatus(env, post, { status: 'publishing' });
+  return answer('Публикую, через ~30 секунд пост будет в канале');
+}
+
+// Токен GitHub для запуска публикации передаётся из закрытого репозитория; принимаем только токен с доступом к нему.
+async function handleTgPostRegisterGh(req, env) {
+  if (!env.STORE) return json({ ok: false }, 500);
+  const { token } = await req.json().catch(() => ({}));
+  if (!/^[\w]{20,255}$/.test(token || '')) return json({ ok: false }, 400);
+  const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}`, { headers: ghHeaders(token) });
+  const repo = r.ok ? await r.json() : null;
+  if (!repo || !repo.private || repo.full_name?.toLowerCase() !== AUTOPOST_REPO) return json({ ok: false, error: 'no access' }, 403);
+  await env.STORE.put('tgpost:gh', token);
+  return json({ ok: true }, 200);
 }
 
 async function handleTgPostPending(req, env) {
@@ -412,6 +452,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost') return handleTgPost(req, env, ctx);
     if (req.method === 'POST' && pathname === '/tgpost/pending') return handleTgPostPending(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/register') return handleTgPostRegister(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/register-gh') return handleTgPostRegisterGh(req, env);
     if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
