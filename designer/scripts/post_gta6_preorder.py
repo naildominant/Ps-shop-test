@@ -1,62 +1,48 @@
-# GTA VI: предзаказ до 20 ноября. Ретро-сцена 80-х (схема H): закатное солнце, сетка пола, объёмная «20» на горизонте.
+# GTA VI: предзаказ до 20 ноября (v2). Эстетика заката Vice City: размытый арт на фоне, официальная обложка 3D-пластиной, плоский текст.
 import sys; sys.path.insert(0, "scripts")
 from psfx import *
 
 W, H = POST
-HZ = 905  # линия горизонта
-bg = neon_bg((W, H), blobs=[((60, 380, 1020, 1000), (150, 30, 110), 200), ((-200, 900, 1300, 1500), (50, 16, 120), 230)], base=(8, 4, 16))
+# ---------- фон: арт Джейсона и Люсии, сильно размыт и затемнён
+art = Image.open("assets/covers/gta6-jason-lucia.jpg").convert("RGB")
+k = max(W / art.width, H / art.height); art = art.resize((int(art.width * k) + 1, int(art.height * k) + 1), Image.LANCZOS)
+art = art.crop(((art.width - W) // 2, (art.height - H) // 2, (art.width - W) // 2 + W, (art.height - H) // 2 + H))
+bg = art.filter(ImageFilter.GaussianBlur(38)).convert("RGBA")
+shade = np.zeros((H, W, 4)); t = np.linspace(0, 1, H)[:, None]
+shade[..., 0], shade[..., 1], shade[..., 2] = 14, 6, 26
+shade[..., 3] = (0.42 + 0.5 * np.clip((t - 0.45) / 0.4, 0, 1) + 0.35 * np.clip(1 - t / 0.16, 0, 1)) * 255
+bg.alpha_composite(Image.fromarray(shade.astype("uint8")))
 
-# ---------- солнце с полосами
-R, sc = 330, (W // 2, HZ - 70)
-sun = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-s = grad(Image.new("RGBA", (2 * R, 2 * R), (255, 255, 255, 255)), (255, 214, 90), (255, 60, 150), axis=1)
-m = Image.new("L", (2 * R, 2 * R), 0); md = ImageDraw.Draw(m); md.ellipse((0, 0, 2 * R - 1, 2 * R - 1), fill=255)
-for k in range(7):  # прорези снизу
-    y = int(R * 1.05 + k * k * 4.2 + k * 26); md.rectangle((0, y, 2 * R, y + 6 + k * 3), fill=0)
-s.putalpha(m); sun.alpha_composite(s, (sc[0] - R, sc[1] - R))
-cut = Image.new("L", (W, H), 255); ImageDraw.Draw(cut).rectangle((0, HZ, W, H), fill=0)
-sun.putalpha(ImageChops.multiply(sun.split()[3], cut))
-glow(bg, sun, (0, 0), 90, 1, (255, 80, 140)); bg.alpha_composite(sun)
-
-# ---------- пол
-floor = Image.new("RGBA", (W, H), (0, 0, 0, 0)); ImageDraw.Draw(floor).rectangle((0, HZ, W, H), fill=(10, 4, 26, 235))
-bg.alpha_composite(floor)
-retro_grid(bg, HZ, color=(255, 70, 200), alpha=110, step=210)
-ImageDraw.Draw(bg).line((0, HZ, W, HZ), fill=(255, 150, 220), width=3)
-
-# ---------- 3D «20»
-F = font("russo", 400)
-d0 = ImageDraw.Draw(Image.new("L", (1, 1))); bb = d0.textbbox((0, 0), "20", font=F)
-TW, TH = bb[2] - bb[0] + 20, bb[3] - bb[1] + 20
-m = Image.new("L", (TW * SS, TH * SS), 0)
-ImageDraw.Draw(m).text(((10 - bb[0]) * SS, (10 - bb[1]) * SS), "20", font=font("russo", 400 * SS), fill=255)
-face = grad(Image.new("RGBA", m.size, (255, 255, 255, 255)), (255, 255, 255), (120, 235, 255), axis=1)
-face.putalpha(m)
-edge = m.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(5))
-e = Image.new("RGBA", m.size, (255, 255, 255, 255)); e.putalpha(edge); face.alpha_composite(e)
-cam = Cam(W / 2, HZ - 150, yaw=-22, pitch=12, roll=-4, focal=1500, scale=1.0)
-num = box3d(face, m, cam, (W, H), depth=80, w=TW, h=TH, side=((40, 10, 90), (255, 60, 170)), rim=(255, 170, 230), layers=40)
-shadow(bg, num, (0, 0), (20, 40), 30, 0.8)
-glow(bg, num, (0, 0), 50, 1, (80, 200, 255))
-bg.alpha_composite(num)
-reflection(bg, num, num.getbbox()[3] - 4, strength=0.25, fade=0.25, blur=5)
+# ---------- герой: обложка игры 3D-пластиной
+cover = Image.open("assets/covers/gta6-cover.jpg")
+cam = Cam(W / 2, 520, yaw=-18, pitch=8, roll=-5, focal=1700, scale=1.0)
+card = card3d(cover, 560, cam, (W, H), depth=18, rad=30, edge=((255, 200, 120), (255, 90, 170)))
+shadow(bg, card, (0, 0), (24, 50), 40, 0.9)
+glow(bg, card, (0, 0), 70, 1, (255, 110, 160))
+bg.alpha_composite(card)
+sparks(bg, 40, area=(60, 170, W - 60, 820), seed=11)
 
 # ---------- плоский текст
-tag_f = font("montserrat", 26, "Bold")
 d = ImageDraw.Draw(bg)
-tw = spaced(d, (W / 2, 205), "GTA VI  ·  ULTIMATE EDITION", tag_f, (255, 200, 120), 7, "c")
-title = text_img("ПРЕДЗАКАЗ", font("russo", 132), pad=8)
-tx, ty = (W - title.width) // 2, 245
+title = text_img("ПРЕДЗАКАЗ", font("oswald", 150, "Bold"), pad=8)
+tx, ty = (W - title.width) // 2, 860
 bg.alpha_composite(title, (tx, ty))
 d = ImageDraw.Draw(bg)
-sub_y = 1010
-sw = spaced(d, (W / 2, sub_y), "УСПЕЙ ДО 20 НОЯБРЯ", font("montserrat", 46, "ExtraBold"), (255, 255, 255), 4, "c")
-ly = sub_y + 78
-lw = lined(d, ly, "БОНУСЫ ПРЕДЗАКАЗА + ПОДАРКИ ОТ PS SHOP", font("montserrat", 20, "Bold"), fill=(255, 210, 235), sp=4, line=(255, 120, 200), length=50)
-cta = cta_pill(bg, W / 2, H - 140, "Оформить: @Gaynullin_Nail", font("montserrat", 28, "Bold"), fill=(255, 210, 90), color=(40, 10, 30))
+sy = ty + title.height + 6
+sw = spaced(d, (W / 2, sy), "УСПЕЙ ДО 20 НОЯБРЯ", font("manrope", 34, "Bold"), (255, 205, 120), 8, "c")
+# три плашки-бонуса (стекло)
+chips = ["Vintage Vice City", "1 месяц GTA+", "Подарки от PS SHOP"]
+cf = font("manrope", 23, "SemiBold"); gap = 14
+ws = [d.textlength(c, font=cf) + 44 for c in chips]; x = (W - sum(ws) - gap * 2) / 2; cy = sy + 66
+for c, w in zip(chips, ws):
+    g = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(g).rounded_rectangle((x, cy, x + w, cy + 50), 25, fill=(255, 255, 255, 30), outline=(255, 255, 255, 110), width=2)
+    bg.alpha_composite(g); ImageDraw.Draw(bg).text((x + 22, cy + 11), c, font=cf, fill=(255, 255, 255)); x += w + gap
+chips_box = ((W - sum(ws) - gap * 2) / 2, cy, (W + sum(ws) + gap * 2) / 2, cy + 50)
+cta = cta_pill(bg, W / 2, H - 128, "Оформить: @Gaynullin_Nail", font("manrope", 28, "Bold"), fill=(255, 205, 110), color=(40, 12, 30))
 
-header(bg, right_top="GTA VI", right_sub="ТОЛЬКО ДО 20.11", top_color=(255, 190, 110))
-check({"tag": ((W - tw) / 2, 205, (W + tw) / 2, 235), "title": (tx, ty, tx + title.width, ty + title.height),
-       "sub": ((W - sw) / 2, sub_y, (W + sw) / 2, sub_y + 56), "line": ((W - lw) / 2 - 76, ly, (W + lw) / 2 + 76, ly + 22), "cta": cta})
-out = grain(bg, 5, seed=6); out.save("output/ps_shop_gta6_preorder.png")
+header(bg, right_top="GTA VI", right_sub="ULTIMATE EDITION · PS5", top_color=(255, 200, 120))
+check({"title": (tx, ty, tx + title.width, ty + title.height), "sub": ((W - sw) / 2, sy, (W + sw) / 2, sy + 40),
+       "chips": chips_box, "cta": cta})
+out = grain(bg, 4, seed=7); out.save("output/ps_shop_gta6_preorder.png")
 preview(out, sys.argv[1] if len(sys.argv) > 1 else "output/_preview.png")
