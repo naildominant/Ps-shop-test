@@ -4,6 +4,7 @@
  * 1. POST /order  — принимает заявку с сайта и отправляет её Наилю в Telegram-бота.
  * 2. POST /event  — считает, какие игры чаще кладут в корзину (для полки «Хиты»).
  *    GET  /hits   — отдаёт эти счётчики сборщику сайта.
+ *    POST /visit  — анонимная сводка визита (источник, страницы, корзина, заказ) в лист «Посетители» таблицы.
  * 3. По расписанию (каждые 10 минут) запускает в GitHub обновление каталога из канала.
  * 4. POST /tgpost — кнопки «Опубликовать / Отмена» бота публикации постов (см. раздел 4 ниже).
  *
@@ -80,8 +81,31 @@ async function toSheet(env, o) {
   const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
   await fetch(env.SHEET_URL, {
     method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow',
-    body: JSON.stringify({ token: env.SHEET_TOKEN || '', name: o.name, contact: o.contact, console: o.console, items, total: o.total, lang: o.lang || 'ru' }),
+    body: JSON.stringify({ token: env.SHEET_TOKEN || '', vid: String(o.vid || '').slice(0, 12), name: o.name, contact: o.contact, console: o.console, items, total: o.total, lang: o.lang || 'ru' }),
   }).catch(() => {});
+}
+
+// Визит с сайта (анонимно) -> строка в листе «Посетители» Google Таблицы.
+async function handleVisit(req, env, h, ctx) {
+  const origin = req.headers.get('Origin') || '';
+  const allowed = (env.ALLOWED || '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (!allowed.includes(origin) || !env.SHEET_URL) return new Response(null, { status: 204, headers: h });
+  let v;
+  try { const t = await req.text(); if (t.length > 4000) throw 0; v = JSON.parse(t); } catch { return new Response(null, { status: 400, headers: h }); }
+  const str = (x, n) => String(x ?? '').slice(0, n);
+  if (!/^[a-z0-9]{4,12}$/.test(v.sid || '') || !/^[a-z0-9]{4,12}$/.test(v.vid || '')) return new Response(null, { status: 400, headers: h });
+  const cf = req.cf || {};
+  const row = {
+    token: env.SHEET_TOKEN || '', type: 'visit', sid: v.sid, vid: v.vid, n: Number(v.n) || 1, isNew: !!v.isNew,
+    start: Number(v.start) || Date.now(), dur: Math.min(Number(v.dur) || 0, 86400), land: str(v.land, 120), ref: str(v.ref, 80),
+    utm: str(v.utm, 60), camp: str(v.camp, 60), pages: Math.min(Number(v.pages) || 1, 999),
+    games: (Array.isArray(v.games) ? v.games : []).slice(0, 15).map((g) => str(g, 80)).join(', '),
+    adds: Math.min(Number(v.adds) || 0, 999), order: !!v.order, total: Number(v.total) || 0,
+    lang: v.lang === 'uz' ? 'uz' : 'ru', mobile: !!v.mobile, os: str(v.os, 20), city: str(cf.city, 40), country: str(cf.country, 4),
+  };
+  const send = fetch(env.SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', body: JSON.stringify(row) }).catch(() => {});
+  if (ctx) ctx.waitUntil(send); else await send;
+  return new Response(null, { status: 204, headers: h });
 }
 
 async function handleOrder(req, env, h, ctx) {
@@ -314,6 +338,7 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
+    if (req.method === 'POST' && pathname === '/visit') return handleVisit(req, env, h, ctx);
     if (req.method === 'GET' && pathname === '/hits') return handleHits(env, h);
     if (req.method === 'GET' && pathname === '/') return new Response('PS SHOP worker: ok', { headers: h });
     return json({ ok: false }, 404, h);

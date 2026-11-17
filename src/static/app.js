@@ -64,6 +64,7 @@
     if (has(id, opt)) return false;
     cart.push({ id, opt }); save();
     track('add_to_cart', { game: id, option: opt });
+    visit.mark('add');
     if (PS.api) { try { fetch(`${PS.api}/event`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({ type: 'add', id }) }).catch(() => {}); } catch { /* */ } }
     if (!quiet) loadCatalog().then(() => { const x = info({ id, opt }); toast(x ? T(`${x.title} в корзине`, `${x.title} savatda`) : T('Добавлено в корзину', 'Savatga qo‘shildi')); });
     return true;
@@ -145,10 +146,11 @@
     const text = orderText(d);
     const items = cart.map((i) => { const x = info(i); return { id: i.id, title: x.title, option: x.opt, price: x.price }; });
     track('order_submit', { total: total(), items: items.length });
+    visit.mark('order', total());
     if (PS.api) {
       try {
         fetch(`${PS.api}/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
-          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, lang: UZ ? 'uz' : 'ru', website: d.website }) })
+          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, lang: UZ ? 'uz' : 'ru', vid: store.get('ps.vid', ''), website: d.website }) })
           .catch(() => {});
       } catch { /* заявка всё равно уйдёт текстом в Telegram */ }
     }
@@ -421,6 +423,45 @@
   /* ---------- язык ---------- */
   const langBtn = $('#lang-btn');
   langBtn?.addEventListener('click', () => { store.set('ps.lang2', UZ ? 'ru' : 'uz'); track('lang_switch', { to: UZ ? 'ru' : 'uz' }); });
+
+  /* ---------- посещения (анонимно) -> CRM-таблица ---------- */
+  // Один визит = одна строка в таблице «Посетители». Без имён и телефонов: случайный номер посетителя,
+  // откуда пришёл, что смотрел, клал ли в корзину и оформил ли заказ.
+  const visit = (() => {
+    const bot = navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|headless|preview/i.test(navigator.userAgent);
+    if (bot || !PS.api) return { mark() {} };
+    const rnd = () => Math.random().toString(36).slice(2, 10);
+    const now = Date.now();
+    let vid = store.get('ps.vid', null);
+    const isNew = !vid;
+    if (!vid) { vid = rnd(); store.set('ps.vid', vid); }
+    let s = store.get('ps.sess', null);
+    if (!s || now - s.last > 30 * 60 * 1000) { // новый визит, если не заходил 30 минут
+      const n = (store.get('ps.vnum', 0) || 0) + 1; store.set('ps.vnum', n);
+      const q = new URLSearchParams(location.search);
+      let ref = ''; try { ref = document.referrer ? new URL(document.referrer).hostname : ''; } catch { /* */ }
+      if (ref === location.hostname) ref = '';
+      s = { id: rnd(), start: now, n, isNew, land: location.pathname, ref, utm: q.get('utm_source') || '', camp: q.get('utm_campaign') || '',
+            pages: 0, games: [], adds: 0, order: false, total: 0 };
+    }
+    s.pages += 1; s.last = now;
+    if (document.body.dataset.page === 'game') { const t = $('h1')?.textContent.trim(); if (t && !s.games.includes(t)) s.games.push(t); }
+    const save = () => store.set('ps.sess', s);
+    save();
+    let sent = '';
+    const send = () => {
+      s.last = Date.now(); save();
+      const body = JSON.stringify({ sid: s.id, vid, n: s.n, isNew: s.isNew, start: s.start, dur: Math.round((s.last - s.start) / 1000),
+        land: s.land, ref: s.ref, utm: s.utm, camp: s.camp, pages: s.pages, games: s.games.slice(0, 15), adds: s.adds,
+        order: s.order, total: s.total, lang: UZ ? 'uz' : 'ru', mobile: matchMedia('(pointer:coarse)').matches,
+        os: (/iPhone|iPad/.test(navigator.userAgent) && 'iOS') || (/Android/.test(navigator.userAgent) && 'Android') || (/Windows/.test(navigator.userAgent) && 'Windows') || (/Mac/.test(navigator.userAgent) && 'Mac') || 'другое' });
+      if (body === sent) return; sent = body;
+      try { navigator.sendBeacon(`${PS.api}/visit`, new Blob([body], { type: 'text/plain' })); } catch { /* */ }
+    };
+    addEventListener('pagehide', send);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') send(); });
+    return { mark(k, v) { if (k === 'add') s.adds += 1; if (k === 'order') { s.order = true; s.total = v || 0; } save(); if (k === 'order') send(); } };
+  })();
 
   /* старт */
   if (cart.length) loadCatalog().then(save); else save();
