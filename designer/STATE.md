@@ -12,3 +12,4 @@
 - Автопосты: Claude в GitHub Actions (claude-code-action, токен подписки `claude setup-token`), запуск по расписанию/сигналу из бота.
 - У владельца есть Mac — разовая настройка (ключ Claude + вход в Telegram) на нём.
 - Открытый вопрос: откуда брать игры для автопостов и как часто.
+- 17.11: формула цены в sources.json. Начали настройку на Mac: шаг 1 — my.telegram.org → api_id/api_hash (в чат НЕ присылать, только в секреты). Дальше: закрытый репозиторий для автопостинга, вход Telethon на Mac → StringSession в секреты; `claude setup-token` → секрет.
