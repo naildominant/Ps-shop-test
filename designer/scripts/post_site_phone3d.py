@@ -112,7 +112,12 @@ big=grad(big,(255,150,235),(110,170,255))
 bx=(W-big.width)//2; by=800
 glow(bg,tint(big,(170,80,255)),(bx,by),30,1)
 bg.alpha_composite(big,(bx,by))
-ser=cond_text("у нас открылся",ImageFont.truetype(SERIF,92),1.0,(255,255,255,255))
+import os, sys; sys.path.insert(0,"scripts"); from psfx import font as pfont
+_k=os.environ.get("TOP_FONT","unbounded")  # шрифт строки «у нас открылся»
+_f={"freeserif":lambda:ImageFont.truetype(SERIF,92),"playfair":lambda:pfont("playfair",86,"SemiBold Italic"),
+    "cormorant":lambda:pfont("cormorant",100,"SemiBold Italic"),"unbounded":lambda:pfont("unbounded",62,"Medium"),
+    "manrope":lambda:pfont("manrope",72,"Bold")}[_k]()
+ser=cond_text("у нас открылся",_f,1.0,(255,255,255,255))
 sx,sy=W-56-ser.width,150
 glow(bg,tint(ser,(255,80,210)),(sx,sy),14,2); bg.alpha_composite(ser,(sx,sy))
 d=ImageDraw.Draw(bg)
@@ -141,4 +146,4 @@ for _ in range(45):
     if 300<x<780: continue
     d.ellipse((x-rr,y-rr,x+rr,y+rr),fill=random.choice([(255,160,240),(140,190,255),(255,255,255)])+(random.randint(60,190),))
 n=np.random.normal(0,6,(H,W,1)); out=np.clip(np.array(bg.convert("RGB")).astype(float)+n,0,255)
-Image.fromarray(out.astype("uint8")).save("output/ps_shop_site_phone3d.png"); print(by,yl)
+Image.fromarray(out.astype("uint8")).save(os.environ.get("OUT","output/ps_shop_site_phone3d.png")); print(by,yl)

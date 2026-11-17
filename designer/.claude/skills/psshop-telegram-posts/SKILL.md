@@ -103,7 +103,7 @@ PNG 1080×1350 (пост) или 1080×1920 (сторис). Собираются
 - **Тонкая строка с разрядкой** и линиями по бокам для спокойного подзаголовка («У НАС НА САЙТЕ», «ЗАХОДИ ПЕРВЫМ»).
 - **Плашки-выделения:** фраза в цветном прямоугольнике, ключевое слово жирное.
 - **Разбитое слово** стопкой, глитч/рваные края, кистевой ретро-шрифт для 80-х.
-- Максимум 2 шрифта на картинку. Нужна кириллица. Шрифты — в `assets/fonts/` (Unbounded, Russo One, Oswald, Montserrat, Rubik Mono One, Playfair/Cormorant Italic, Manrope, Press Start 2P, Rubik Glitch) и системные Inter Display + FreeSerif Italic. Образцы: `assets/fonts/specimen.png`.
+- Максимум 2 шрифта на картинку. Нужна кириллица. Шрифты — в `assets/fonts/` (Unbounded, Russo One, Oswald, Montserrat, Rubik Mono One, Playfair/Cormorant Italic, Manrope, Press Start 2P, Rubik Glitch) и системный Inter Display. FreeSerif Italic владельцу не нравится — не использовать. Образцы: `assets/fonts/specimen.png`.
 
 ## Техника
 - Начинать с библиотеки `scripts/psfx.py` (фон, текст, 3D-телефон и карточки, проверка наложений).
