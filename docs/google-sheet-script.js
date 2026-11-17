@@ -2,6 +2,9 @@
 // Вставляется в Google Таблице: Расширения -> Apps Script. Подробности: README, раздел «Заявки в Google Таблицу».
 // Листы создаются сами: «Заявки», «Посетители» (каждый визит на сайт, анонимно), «Сводка» (цифры для анализа).
 const TOKEN = '6cf56a2fe67752fb190caa88'; // должен совпадать с SHEET_TOKEN в настройках Cloudflare
+// Таблица «PS SHOP CRM». Скрипт можно создать отдельно на script.google.com: он сам откроет таблицу по этому номеру.
+const SHEET_ID = '17MKwvBfqCoRMtiqSskPOet4wRO1ewuvyEGjeSPIFCZc';
+const book_ = () => (SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet());
 
 function doPost(e) {
   const d = JSON.parse(e.postData.contents);
@@ -17,7 +20,7 @@ function doPost(e) {
 }
 
 function sheetWithHeader(name, header) {
-  const book = SpreadsheetApp.getActiveSpreadsheet();
+  const book = book_();
   const sheet = book.getSheetByName(name) || book.insertSheet(name);
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(header);
@@ -70,12 +73,12 @@ function saveVisit(d) {
   if (row) sheet.getRange(row, 1, 1, values.length).setValues([values]);
   else { sheet.appendRow(values); row = sheet.getLastRow(); }
   cache.put('v:' + d.sid, String(row), 21600);
-  if (!SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Сводка')) makeSummary();
+  if (!book_().getSheetByName('Сводка')) makeSummary();
 }
 
 /* ---------- сводка для анализа ---------- */
 function makeSummary() {
-  const book = SpreadsheetApp.getActiveSpreadsheet();
+  const book = book_();
   const s = book.getSheetByName('Сводка') || book.insertSheet('Сводка');
   s.clear();
   const V = "'Посетители'";
