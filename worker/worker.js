@@ -263,7 +263,7 @@ async function tg(env, method, body, token) {
   return r.json();
 }
 const kb = (rows) => ({ inline_keyboard: rows });
-const ctrlKb = (post) => kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}`.slice(0, 64) }], [{ text: '🕒 Отправить позже', callback_data: `later::${post}`.slice(0, 64) }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}`.slice(0, 64) }]]);
+const ctrlKb = (post) => kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}`.slice(0, 64) }], [{ text: '🕒 Отправить позже', callback_data: `later::${post}`.slice(0, 64) }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}`.slice(0, 64) }], [{ text: '🗑 Отменить пост', callback_data: `del::${post}`.slice(0, 64) }]]);
 async function setStatus(env, post, patch) {
   if (!env.STORE || !post) return;
   const key = `tgpost:post:${post}`;
@@ -337,6 +337,22 @@ async function handleTgPost(req, env, ctx) {
     const link = `https://t.me/${(env.TGPOST_CHANNEL || '@psshopgo').replace('@', '')}/${idsPart}`;
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '✅ Пост вышел в канале. ⏳ Выкладываю в историю…', reply_markup: kb([[{ text: 'Открыть пост', url: link }]]) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Выкладываю в историю' }, 200);
+  }
+  if (action === 'nolater') {
+    await env.STORE.delete('tgpost:awaittime');
+    await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '↩️ Отложенную отправку отменил. Кнопки поста выше остались.' });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+  }
+  if (action === 'del') {
+    const ids = JSON.parse(await env.STORE.get(`tgpost:ids:${post}`) || '[]');
+    for (const id of ids) await tg(env, 'deleteMessage', { chat_id: chat, message_id: id });
+    const pend = JSON.parse(await env.STORE.get('tgpost:pending') || 'null');
+    if (pend?.post === post) await env.STORE.delete('tgpost:pending');
+    if ((await env.STORE.get('tgpost:await')) === post) await env.STORE.delete('tgpost:await');
+    if ((await env.STORE.get('tgpost:awaittime')) === post) await env.STORE.delete('tgpost:awaittime');
+    await setStatus(env, post, { status: 'deleted' });
+    await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
   if (action === 'keep') {
     await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '👌 Оставили как есть', callback_data: 'x' }]]) });
@@ -426,8 +442,8 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены';
-const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё';
+const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true };
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
 const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
 
@@ -486,8 +502,9 @@ async function ownerMessage(env, m) {
   const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
+  if (t === BTN_CANCEL || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
   const waitTime = await env.STORE.get('tgpost:awaittime');
-  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES].includes(t) && !t.startsWith('/')) {
+  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL].includes(t) && !t.startsWith('/')) {
     const ms = parseTime(t);
     if (!ms) return say(env, chat, 'Не понял время 🤔 Напишите, например: «19:30», «завтра 10:00» или «25.11 18:00».');
     const r = await scheduleAt(env, chat, waitTime, Math.floor(ms / 1000));
@@ -560,6 +577,26 @@ async function ownerMessage(env, m) {
   return startTask(env, chat, describeMessage(m), photo ? [photo] : []);
 }
 
+// «🛑 Отменить всё»: останавливает работу агента и сбрасывает ожидания (правки, время)
+async function cancelAll(env, chat) {
+  const gh = await env.STORE.get('tgpost:gh');
+  let stopped = 0;
+  for (const st of ['in_progress', 'queued']) {
+    const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/agent.yml/runs?status=${st}&per_page=20`, { headers: ghHeaders(gh) });
+    const runs = r.ok ? (await r.json()).workflow_runs || [] : [];
+    for (const run of runs) {
+      const c = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/runs/${run.id}/cancel`, { method: 'POST', headers: ghHeaders(gh) });
+      if (c.status === 202) stopped++;
+    }
+  }
+  await env.STORE.delete('tgpost:await');
+  await env.STORE.delete('tgpost:awaittime');
+  const list = JSON.parse(await env.STORE.get('tgpost:waitmsgs') || '[]');
+  await env.STORE.delete('tgpost:waitmsgs');
+  for (const [c, id] of list) await tg(env, 'deleteMessage', { chat_id: c, message_id: id });
+  return say(env, chat, stopped ? `🛑 Остановил задач: ${stopped}. Ничего не публикую.` : '🛑 Всё отменено. Сейчас ничего не делается.');
+}
+
 async function startTask(env, chat, text, files) {
   const waiting = await env.STORE.get('tgpost:await');
   if (waiting) {
@@ -628,7 +665,8 @@ async function handleAgentPreview(req, env) {
     chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?' + plainNote,
     reply_markup: ctrlKb(post),
   });
-  await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
+  await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ids: res.ids, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
+  await env.STORE.put(`tgpost:ids:${post}`, JSON.stringify(res.ids), { expirationTtl: 60 * 60 * 24 * 7 });
   await setStatus(env, post, { status: 'pending' });
   return json({ ok: true }, 200);
 }
@@ -677,6 +715,7 @@ function timeOptions(post) {
   for (const h of [10, 12, 18, 20]) add(1, h, 'Завтра');
   const out = [];
   for (let i = 0; i < rows.length; i += 2) out.push(rows.slice(i, i + 2));
+  out.push([{ text: '↩️ Не откладывать', callback_data: `nolater::${post}`.slice(0, 64) }]);
   return out;
 }
 function parseTime(text) {
