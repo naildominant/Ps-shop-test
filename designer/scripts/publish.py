@@ -90,17 +90,19 @@ EMOJI_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "emo
 
 def premium_emoji(html):
     """Заменяет обычные эмодзи на премиум-эмодзи владельца из designer/emoji.json (только в тексте, не в тегах)."""
-    if not os.path.exists(EMOJI_FILE): return html
+    if not os.path.exists(EMOJI_FILE): return re.sub(r"</?plain>", "", html)
     m = json.load(open(EMOJI_FILE, encoding="utf-8"))
-    if not m: return html
+    if not m: return re.sub(r"</?plain>", "", html)
     keys = sorted(m, key=len, reverse=True)
     pat = re.compile("|".join(re.escape(k) for k in keys))
-    parts = re.split(r"(<[^>]+>)", html); inside_emoji = False
+    parts = re.split(r"(<[^>]+>)", html); inside_emoji = False; plain = False
     for i, part in enumerate(parts):
+        if part in ("<plain>", "</plain>"):  # <plain>…</plain>: оставить обычный эмоджи как есть (тематический)
+            plain = part == "<plain>"; parts[i] = ""; continue
         if part.startswith("<"):
             inside_emoji = part.startswith("<tg-emoji") or (inside_emoji and not part.startswith("</tg-emoji"))
             continue
-        if not inside_emoji:
+        if not inside_emoji and not plain:
             parts[i] = pat.sub(lambda x: f'<tg-emoji emoji-id="{m[x.group(0)]}">{x.group(0)}</tg-emoji>', part)
     return "".join(parts)
 
