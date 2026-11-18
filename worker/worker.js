@@ -707,6 +707,24 @@ async function handleAgentEmoji(req, env) {
   return json(out, 200);
 }
 
+// Картинки премиум-эмоджи по их id (для проверки, что значок совпадает со смыслом)
+async function handleAgentEmojiInfo(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const { ids } = await req.json().catch(() => ({}));
+  const list = (ids || []).map(String).filter((x) => /^\d+$/.test(x)).slice(0, 200);
+  const out = {};
+  for (let i = 0; i < list.length; i += 50) {
+    const r = await tg(env, 'getCustomEmojiStickers', { custom_emoji_ids: list.slice(i, i + 50) });
+    for (const st of r.result || []) {
+      const f = st.thumbnail?.file_id || (!st.is_animated && !st.is_video ? st.file_id : '');
+      let path = '';
+      if (f) { const g = await tg(env, 'getFile', { file_id: f }); path = g.result?.file_path || ''; }
+      out[st.custom_emoji_id] = { emoji: st.emoji, set: st.set_name, animated: st.is_animated, video: st.is_video, file: path ? `/tgpost/file-path?p=${encodeURIComponent(path)}` : '' };
+    }
+  }
+  return json(out, 200);
+}
+
 async function handleAgentFile(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const id = new URL(req.url).searchParams.get('id') || '';
@@ -845,7 +863,14 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
+    if (req.method === 'GET' && pathname === '/tgpost/file-path') {
+      if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+      const fp = new URL(req.url).searchParams.get('p') || '';
+      if (!/^[\w./-]{3,200}$/.test(fp)) return json({ ok: false }, 400);
+      return fetch(`https://api.telegram.org/file/bot${await botToken(env)}/${fp}`);
+    }
     if (req.method === 'GET' && pathname === '/tgpost/emoji-map') return handleAgentEmoji(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/emoji-info') return handleAgentEmojiInfo(req, env);
     if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
