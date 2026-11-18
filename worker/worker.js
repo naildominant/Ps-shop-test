@@ -275,25 +275,12 @@ async function handleTgPost(req, env, ctx) {
   const u = await req.json().catch(() => ({}));
   const owner = String(env.TGPOST_OWNER || '');
 
-  // Сообщение владельца боту: премиум-эмодзи или ответ «что поменять» после отмены
+  // Сообщение владельца боту: кнопки меню, задача агенту, правки к посту, премиум-эмодзи
   const m = u.message;
   if (m && String(m.from?.id) === owner) {
-    const t = m.text || m.caption || '';
-    const ents = (m.entities || m.caption_entities || []).filter((e) => e.type === 'custom_emoji');
-    const waiting = env.STORE ? await env.STORE.get('tgpost:await') : null;
-    if (waiting && t && !t.startsWith('/')) {
-      const key = `tgpost:post:${waiting}`;
-      const cur = JSON.parse(await env.STORE.get(key) || '{}');
-      await setStatus(env, waiting, { feedback: [...(cur.feedback || []), t] });
-      return json({ method: 'sendMessage', chat_id: m.chat.id, text: 'Принял ✅ Передал дизайнеру, он пришлёт новую версию.' }, 200);
-    }
-    let saved = 0;
-    for (const e of ents) {
-      const ch = t.slice(e.offset, e.offset + e.length); // в JS строки уже в UTF-16
-      if (env.STORE) { await env.STORE.put(`emoji:${ch}`, e.custom_emoji_id); saved++; }
-    }
-    const text = saved ? `Запомнил премиум-эмодзи: ${saved} ✅` : 'Пришлите премиум-эмодзи, я их запомню для постов.';
-    return json({ method: 'sendMessage', chat_id: m.chat.id, text }, 200);
+    if (ctx) ctx.waitUntil(ownerMessage(env, m).catch((e) => tg(env, 'sendMessage', { chat_id: m.chat.id, text: `⚠️ Ошибка: ${e.message}` })));
+    else await ownerMessage(env, m);
+    return new Response('ok');
   }
 
   // Пост появился в канале (владелец переслал со скрытым отправителем) — отмечаем опубликованным
@@ -322,7 +309,7 @@ async function handleTgPost(req, env, ctx) {
     await setStatus(env, post, { status: 'cancelled', feedback: [] });
     if (env.STORE) await env.STORE.delete('tgpost:pending');
     if (env.STORE && post) await env.STORE.put('tgpost:await', post, { expirationTtl: 60 * 60 * 24 * 3 });
-    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '❌ Пост отменён. Что поменять? Напишите ответом одним сообщением: картинка, текст, цены…' });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '❌ Что поменять? Напишите одним сообщением (картинка, текст, цены…), я переделаю и пришлю новое превью.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
   if (action === 'go') return publishAsOwner(env, q, chat, mid, post);
@@ -382,6 +369,151 @@ async function publishAsOwner(env, q, chat, mid, post) {
   // pending остаётся: когда пост появится в канале, обработчик channel_post сменит кнопки на «✅ Пост вышел»
   await setStatus(env, post, { status: 'publishing' });
   return answer('Публикую, через ~30 секунд пост будет в канале');
+}
+
+// ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены';
+const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
+const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
+
+async function dispatchAgent(env, inputs) {
+  const gh = env.STORE ? await env.STORE.get('tgpost:gh') : '';
+  if (!gh) return 'нет доступа к GitHub';
+  const clean = Object.fromEntries(Object.entries(inputs).map(([k, v]) => [k, String(v || '').slice(0, 6000)]));
+  const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/agent.yml/dispatches`, {
+    method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ref: 'main', inputs: clean }),
+  });
+  return r.status === 204 ? '' : `GitHub ${r.status}`;
+}
+
+function describeMessage(m) {
+  let t = m.text || m.caption || '';
+  const fo = m.forward_origin;
+  if (fo) {
+    const from = fo.chat ? `${fo.chat.title || ''}${fo.chat.username ? ' @' + fo.chat.username : ''}` : (fo.sender_user?.first_name || fo.sender_user_name || 'неизвестно');
+    const link = fo.chat?.username && fo.message_id ? ` https://t.me/${fo.chat.username}/${fo.message_id}` : '';
+    t = `[Переслано из: ${from}${link}]\n${t}`;
+  }
+  return t;
+}
+
+async function ownerMessage(env, m) {
+  const chat = m.chat.id;
+  const t = (m.text || m.caption || '').trim();
+  const ents = (m.entities || m.caption_entities || []).filter((e) => e.type === 'custom_emoji');
+  const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
+
+  if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
+  if (t === BTN_PRICES) return say(env, chat, `💰 Таблица сверки цен канала с поставщиком:\n${PRICE_TABLE}\n\nЦены поставщика обновляются каждый день. Чтобы поменять цены в канале, напишите сюда, например: «меняй всё из „Цена меняется“».`);
+  if (t === BTN_NEW_POST) return say(env, chat, '✍️ Напишите одним сообщением, какой пост нужен. Например: «пост про игру Hogwarts Legacy» или «новость: скидки на PS Plus до конца недели». Можно приложить фото или переслать пост из другого канала.');
+
+  // только премиум-эмодзи без текста — запоминаем для постов
+  if (ents.length && !photo) {
+    let rest = t;
+    for (const e of [...ents].sort((a, b) => b.offset - a.offset)) rest = rest.slice(0, e.offset) + rest.slice(e.offset + e.length);
+    if (!rest.trim()) {
+      for (const e of ents) await env.STORE.put(`emoji:${t.slice(e.offset, e.offset + e.length)}`, e.custom_emoji_id);
+      return say(env, chat, `Запомнил премиум-эмодзи: ${ents.length} ✅`);
+    }
+  }
+
+  // альбом из нескольких фото приходит отдельными сообщениями — собираем их в одну задачу
+  if (m.media_group_id) {
+    const key = `tgpost:mg:${m.media_group_id}`;
+    const cur = JSON.parse(await env.STORE.get(key) || 'null');
+    const next = { files: [...(cur?.files || []), photo].filter(Boolean), text: [cur?.text, describeMessage(m)].filter(Boolean).join('\n') };
+    await env.STORE.put(key, JSON.stringify(next), { expirationTtl: 600 });
+    if (cur) return;
+    await new Promise((r) => setTimeout(r, 4000));
+    const all = JSON.parse(await env.STORE.get(key) || 'null') || next;
+    return startTask(env, chat, all.text, all.files);
+  }
+  if (!t && !photo) return say(env, chat, 'Напишите задачу текстом или выберите кнопку в меню 👇');
+  if (t === BTN_NEW_GAME) {
+    const err = await dispatchAgent(env, { mode: 'new_game', task: 'Найди у поставщика новую игру, которой нет в канале, и сделай пост.' });
+    return say(env, chat, err ? `⚠️ Не получилось запустить: ${err}` : '🔎 Ищу у поставщика новую игру, которой нет в канале. Превью пришлю через 5–10 минут.');
+  }
+  return startTask(env, chat, describeMessage(m), photo ? [photo] : []);
+}
+
+async function startTask(env, chat, text, files) {
+  const waiting = await env.STORE.get('tgpost:await');
+  if (waiting) {
+    await setStatus(env, waiting, { feedback: [...(JSON.parse(await env.STORE.get(`tgpost:post:${waiting}`) || '{}').feedback || []), text] });
+    await env.STORE.delete('tgpost:await');
+    const err = await dispatchAgent(env, { mode: 'edit', post: waiting, task: text, files: files.join(',') });
+    return say(env, chat, err ? `⚠️ Не получилось запустить правки: ${err}` : '✏️ Принял правки, переделываю. Новое превью пришлю через 5–10 минут.');
+  }
+  const err = await dispatchAgent(env, { mode: 'task', task: text, files: files.join(',') });
+  return say(env, chat, err ? `⚠️ Не получилось запустить: ${err}` : '✅ Принял, делаю. Пришлю результат через 5–10 минут.');
+}
+
+// Агент (GitHub Actions закрытого репозитория) входит по тому же токену GitHub, что сохранён в KV.
+async function agentAuth(req, env) {
+  const saved = env.STORE ? await env.STORE.get('tgpost:gh') : '';
+  const got = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  return !!saved && got.length === saved.length && got === saved;
+}
+
+function visibleLen(html) {
+  return html.replace(/<[^>]+>/g, '').replace(/&(lt|gt|amp|quot|#\d+);/g, 'x').length;
+}
+
+async function tgForm(env, method, form) {
+  const r = await fetch(`https://api.telegram.org/bot${await botToken(env)}/${method}`, { method: 'POST', body: form });
+  return r.json();
+}
+
+async function handleAgentPreview(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const fd = await req.formData();
+  const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image');
+  if (!/^[\w.-]{1,80}$/.test(post) || !html) return json({ ok: false, error: 'bad input' }, 400);
+  const chat = env.TGPOST_OWNER;
+  const send = async (body) => {
+    const ids = [];
+    const short = visibleLen(body) <= 1024;
+    if (image && typeof image !== 'string') {
+      const f = new FormData();
+      f.append('chat_id', chat); f.append('photo', image, image.name || 'image.jpg');
+      if (short) { f.append('caption', body); f.append('parse_mode', 'HTML'); }
+      const r = await tgForm(env, 'sendPhoto', f);
+      if (!r.ok) return { r };
+      ids.push(r.result.message_id);
+      if (short) return { r, ids };
+    }
+    const r = await tg(env, 'sendMessage', { chat_id: chat, text: body, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+    if (r.ok) ids.push(r.result.message_id);
+    return { r, ids };
+  };
+  let res = await send(html);
+  if (!res.r.ok) res = await send(html.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1')); // запасной вариант: обычные эмодзи
+  if (!res.r.ok) return json({ ok: false, error: res.r.description }, 502);
+  const c = await tg(env, 'sendMessage', {
+    chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?',
+    reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}`.slice(0, 64) }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}`.slice(0, 64) }]]),
+  });
+  await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
+  await setStatus(env, post, { status: 'pending' });
+  return json({ ok: true }, 200);
+}
+
+async function handleAgentSay(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const { text } = await req.json().catch(() => ({}));
+  if (!text) return json({ ok: false }, 400);
+  const r = await say(env, env.TGPOST_OWNER, String(text).slice(0, 4000));
+  return json({ ok: !!r.ok }, 200);
+}
+
+async function handleAgentFile(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const id = new URL(req.url).searchParams.get('id') || '';
+  const f = await tg(env, 'getFile', { file_id: id });
+  if (!f.ok) return json({ ok: false, error: f.description }, 404);
+  return fetch(`https://api.telegram.org/file/bot${await botToken(env)}/${f.result.file_path}`);
 }
 
 // Токен GitHub для запуска публикации передаётся из закрытого репозитория; принимаем только токен с доступом к нему.
@@ -453,6 +585,9 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/pending') return handleTgPostPending(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/register') return handleTgPostRegister(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/register-gh') return handleTgPostRegisterGh(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
+    if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
