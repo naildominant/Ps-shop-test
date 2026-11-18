@@ -328,6 +328,25 @@ async function handleTgPost(req, env, ctx) {
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '✅ Пост вышел в канале. ⏳ Выкладываю в историю…', reply_markup: kb([[{ text: 'Открыть пост', url: link }]]) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Выкладываю в историю' }, 200);
   }
+  if (action === 'keep') {
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '👌 Оставили как есть', callback_data: 'x' }]]) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Оставили' }, 200);
+  }
+  if (action === 'upd') {
+    if (!/^\d+$/.test(idsPart)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+    const lock = `upd:${idsPart}:${mid}`;
+    if (await env.STORE.get(lock)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Уже меняю' }, 200);
+    await env.STORE.put(lock, '1', { expirationTtl: 60 * 60 * 24 });
+    const gh = await env.STORE.get('tgpost:gh');
+    const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/channel.yml/dispatches`, {
+      method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main', inputs: { cmd: 'edit', arg: idsPart } }),
+    });
+    if (r.status !== 204) { await env.STORE.delete(lock); return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: `Не получилось (GitHub ${r.status})`, show_alert: true }, 200); }
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '⏳ Меняю пост в канале…', callback_data: 'x' }]]) });
+    await waitMark(env, chat);
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Меняю, около минуты' }, 200);
+  }
   if (action === 'later') {
     await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 3 });
     await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '🕒 Когда опубликовать? Выберите кнопку или напишите время (Ташкент), например: «19:30», «завтра 10:00», «25.11 18:00».', reply_markup: kb(timeOptions(post)) });
@@ -561,7 +580,7 @@ async function tgForm(env, method, form) {
 async function handleAgentPreview(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const fd = await req.formData();
-  const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image'), plain = String(fd.get('plain') || '').slice(0, 100);
+  const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image'), plain = String(fd.get('plain') || '').slice(0, 100), update = String(fd.get('update') || '').replace(/\D/g, '');
   if (!/^[\w.-]{1,80}$/.test(post) || !html) return json({ ok: false, error: 'bad input' }, 400);
   const chat = env.TGPOST_OWNER;
   await clearWait(env);
@@ -584,8 +603,18 @@ async function handleAgentPreview(req, env) {
   let res = await send(html);
   if (!res.r.ok) res = await send(html.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1')); // запасной вариант: обычные эмодзи
   if (!res.r.ok) return json({ ok: false, error: res.r.description }, 502);
+  const plainNote = plain ? `\n\nОбычные (не премиум) эмоджи: ${plain}\nЧтобы заменить, пришлите: ${[...plain.matchAll(/\S+/gu)][0]?.[0] || ''} -> премиум-эмоджи` : '';
+  if (update) {
+    const link = `https://t.me/${(env.TGPOST_CHANNEL || '@psshopgo').replace('@', '')}/${update}`;
+    await tg(env, 'sendMessage', {
+      chat_id: chat, reply_to_message_id: res.ids[0], link_preview_options: { is_disabled: true },
+      text: `👆 Так станет пост в канале (картинка останется прежней):\n${link}\n\nМеняем?${plainNote}`,
+      reply_markup: kb([[{ text: '✅ Да, меняем', callback_data: `upd:${update}:` }], [{ text: '❌ Нет, оставь', callback_data: `keep:${update}:` }]]),
+    });
+    return json({ ok: true }, 200);
+  }
   const c = await tg(env, 'sendMessage', {
-    chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?' + (plain ? `\n\nОбычные (не премиум) эмоджи: ${plain}\nЧтобы заменить, пришлите: ${[...plain.matchAll(/\S+/gu)][0]?.[0] || ''} -> премиум-эмоджи` : ''),
+    chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?' + plainNote,
     reply_markup: ctrlKb(post),
   });
   await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
