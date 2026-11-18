@@ -586,6 +586,13 @@ async function ownerMessage(env, m) {
     const err = await dispatchAgent(env, { mode: 'new_game', task: 'Найди у поставщика новую игру, которой нет в канале, и сделай пост.' });
     return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
   }
+  // текст сразу после пересланного поста/фото — это комментарий к нему
+  const pend = !photo && !m.forward_origin ? JSON.parse(await env.STORE.get('tgpost:pendtask') || 'null') : null;
+  if (pend) {
+    pend.text += `\n[Комментарий владельца к этому посту]: ${t}`;
+    await env.STORE.put('tgpost:pendtask', JSON.stringify(pend), { expirationTtl: 300 });
+    return;
+  }
   return startTask(env, chat, describeMessage(m), photo ? [photo] : []);
 }
 
@@ -609,16 +616,28 @@ async function cancelAll(env, chat) {
   return say(env, chat, stopped ? `🛑 Остановил задач: ${stopped}. Ничего не публикую.` : '🛑 Всё отменено. Сейчас ничего не делается.');
 }
 
-async function startTask(env, chat, text, files) {
+// Пересланный пост / фото ждут ~15 с: следующее текстовое сообщение владельца — комментарий к ним (одна задача).
+async function startTask(env, chat, text, files, opts = {}) {
+  if (!opts.now && (files.length || text.startsWith('[Переслано'))) {
+    const id = String(Date.now());
+    await env.STORE.put('tgpost:pendtask', JSON.stringify({ id, text, files }), { expirationTtl: 300 });
+    await waitMark(env, chat);
+    await new Promise((r) => setTimeout(r, 15000));
+    const p = JSON.parse(await env.STORE.get('tgpost:pendtask') || 'null');
+    if (!p || p.id !== id) return;
+    await env.STORE.delete('tgpost:pendtask');
+    return startTask(env, chat, p.text, p.files, { now: true, marked: true });
+  }
+  const mark = () => (opts.marked ? null : waitMark(env, chat));
   const waiting = await env.STORE.get('tgpost:await');
   if (waiting) {
     await setStatus(env, waiting, { feedback: [...(JSON.parse(await env.STORE.get(`tgpost:post:${waiting}`) || '{}').feedback || []), text] });
     await env.STORE.delete('tgpost:await');
     const err = await dispatchAgent(env, { mode: 'edit', post: waiting, task: text, files: files.join(',') });
-    return err ? say(env, chat, `⚠️ Не получилось запустить правки: ${err}`) : waitMark(env, chat);
+    return err ? say(env, chat, `⚠️ Не получилось запустить правки: ${err}`) : mark();
   }
   const err = await dispatchAgent(env, { mode: 'task', task: text, files: files.join(',') });
-  return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
+  return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : mark();
 }
 
 // Агент (GitHub Actions закрытого репозитория) входит по тому же токену GitHub, что сохранён в KV.
