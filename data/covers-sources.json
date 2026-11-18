@@ -1317,6 +1317,12 @@
   "source": "wikipedia",
   "url": "https://upload.wikimedia.org/wikipedia/en/f/f8/Shadow_of_the_Colossus_%282005%29_cover.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
  },
+ "shrek-2-remastered": {
+  "match": "Shrek 2 (video game)",
+  "score": 1.0,
+  "source": "wikipedia",
+  "url": "https://upload.wikimedia.org/wikipedia/en/8/82/Shrek2gc.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+ },
  "sifu": {
   "appid": 2138710,
   "match": "Sifu",
