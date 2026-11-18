@@ -294,7 +294,7 @@ async function handleTgPost(req, env, ctx) {
       await setStatus(env, pend.post, { status: 'published', link });
       await env.STORE.delete('tgpost:pending');
       if ((await env.STORE.get('tgpost:await')) === pend.post) await env.STORE.delete('tgpost:await');
-      await tg(env, 'editMessageText', { chat_id: pend.chat, message_id: pend.ctrl, text: '✅ Пост вышел в канале', reply_markup: kb([[{ text: 'Открыть пост', url: link }]]) });
+      await tg(env, 'editMessageText', { chat_id: pend.chat, message_id: pend.ctrl, text: '✅ Пост вышел в канале. Выложить его в историю канала?', reply_markup: kb([[{ text: 'Открыть пост', url: link }], [{ text: '📲 Выложить в историю', callback_data: `story:${cp.message_id}:${pend.post}`.slice(0, 64) }]]) });
     }
     return new Response('ok');
   }
@@ -314,6 +314,20 @@ async function handleTgPost(req, env, ctx) {
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
   if (action === 'go') return publishAsOwner(env, q, chat, mid, post);
+  if (action === 'story') {
+    const gh = await env.STORE.get('tgpost:gh');
+    const lock = `story:${idsPart}`;
+    if (await env.STORE.get(lock)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Уже выкладываю' }, 200);
+    await env.STORE.put(lock, '1', { expirationTtl: 60 * 60 * 24 * 7 });
+    const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/story.yml/dispatches`, {
+      method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: 'main', inputs: { post, msg: idsPart, target: 'psshopgo' } }),
+    });
+    if (r.status !== 204) { await env.STORE.delete(lock); return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: `Не получилось (GitHub ${r.status})`, show_alert: true }, 200); }
+    const link = `https://t.me/${(env.TGPOST_CHANNEL || '@psshopgo').replace('@', '')}/${idsPart}`;
+    await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '✅ Пост вышел в канале. ⏳ Выкладываю в историю…', reply_markup: kb([[{ text: 'Открыть пост', url: link }]]) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Выкладываю в историю' }, 200);
+  }
   if (action === 'later') {
     await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 3 });
     await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '🕒 Когда опубликовать? Выберите кнопку или напишите время (Ташкент), например: «19:30», «завтра 10:00», «25.11 18:00».', reply_markup: kb(timeOptions(post)) });
