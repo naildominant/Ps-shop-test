@@ -314,6 +314,8 @@ async function handleTgPost(req, env, ctx) {
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
   const [action, idsPart, post] = String(q.data || '').split(':');
+  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', later: 'отправить позже', story: 'выложить в историю' }[action];
+  if (said && env.STORE) await remember(env, { result: `владелец нажал: ${said}${post ? ' (' + post + ')' : ''}` });
 
   if (action === 'no') {
     await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '❌ Отменено', callback_data: 'x' }]]) });
@@ -443,7 +445,7 @@ async function publishAsOwner(env, q, chat, mid, post) {
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
 const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё';
-const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true };
+const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
 const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
 
@@ -473,10 +475,20 @@ async function sendDone(env, chat) {
   if (!r.ok) await tg(env, 'sendMessage', { chat_id: chat, text: done.text });
 }
 
+// Память бота: последние 5 задач владельца и что бот ответил/прислал
+async function remember(env, patch) {
+  const h = JSON.parse(await env.STORE.get('tgpost:history') || '[]');
+  if (patch.task !== undefined) h.push({ at: new Date().toISOString().slice(0, 16), task: String(patch.task).slice(0, 400), mode: patch.mode || '', post: patch.post || '' });
+  else if (h.length) { const last = h[h.length - 1]; last.result = [last.result, String(patch.result).slice(0, 400)].filter(Boolean).join(' | '); }
+  await env.STORE.put('tgpost:history', JSON.stringify(h.slice(-5)));
+}
+
 async function dispatchAgent(env, inputs) {
   const gh = env.STORE ? await env.STORE.get('tgpost:gh') : '';
   if (!gh) return 'нет доступа к GitHub';
-  const clean = Object.fromEntries(Object.entries(inputs).map(([k, v]) => [k, String(v || '').slice(0, 6000)]));
+  const history = await env.STORE.get('tgpost:history') || '[]';
+  await remember(env, { task: inputs.task, mode: inputs.mode, post: inputs.post });
+  const clean = Object.fromEntries(Object.entries({ ...inputs, history }).map(([k, v]) => [k, String(v || '').slice(0, 6000)]));
   const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/agent.yml/dispatches`, {
     method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
     body: JSON.stringify({ ref: 'main', inputs: clean }),
@@ -653,6 +665,7 @@ async function handleAgentPreview(req, env) {
   if (!res.r.ok) return json({ ok: false, error: res.r.description }, 502);
   const plainNote = plain ? `\n\nОбычные (не премиум) эмоджи: ${plain}\nЧтобы заменить, пришлите: ${[...plain.matchAll(/\S+/gu)][0]?.[0] || ''} -> премиум-эмоджи` : '';
   if (update) {
+    await remember(env, { result: `предложил обновить пост канала ${update}` });
     const link = `https://t.me/${(env.TGPOST_CHANNEL || '@psshopgo').replace('@', '')}/${update}`;
     await tg(env, 'sendMessage', {
       chat_id: chat, reply_to_message_id: res.ids[0], link_preview_options: { is_disabled: true },
@@ -667,6 +680,7 @@ async function handleAgentPreview(req, env) {
   });
   await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ids: res.ids, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
   await env.STORE.put(`tgpost:ids:${post}`, JSON.stringify(res.ids), { expirationTtl: 60 * 60 * 24 * 7 });
+  await remember(env, { result: `прислал превью поста ${post}` });
   await setStatus(env, post, { status: 'pending' });
   return json({ ok: true }, 200);
 }
@@ -676,6 +690,7 @@ async function handleAgentSay(req, env) {
   const { text } = await req.json().catch(() => ({}));
   if (!text) return json({ ok: false }, 400);
   await clearWait(env);
+  await remember(env, { result: `ответил: ${text}` });
   const r = await say(env, env.TGPOST_OWNER, String(text).slice(0, 4000));
   return json({ ok: !!r.ok }, 200);
 }
