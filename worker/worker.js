@@ -489,6 +489,18 @@ async function ownerMessage(env, m) {
     }
   }
 
+  // «🇺🇸 -> [премиум]»: какой премиум-эмоджи ставить вместо обычного
+  const arrow = t.match(/^(\S{1,8})\s*(?:->|→|=>|=|—>|–>|-)\s*(\S{1,8})$/u);
+  if (arrow && ents.length) {
+    const e = ents[ents.length - 1];
+    const left = arrow[1];
+    if (!ents.some((x) => x.offset === 0)) {
+      await env.STORE.put(`emoji:${left}`, e.custom_emoji_id);
+      const head = `Запомнил: ${left} → `, prem = t.slice(e.offset, e.offset + e.length);
+      return tg(env, 'sendMessage', { chat_id: chat, text: `${head}${prem} ✅ Теперь в постах вместо ${left} будет этот премиум.`, entities: [{ type: 'custom_emoji', offset: head.length, length: e.length, custom_emoji_id: e.custom_emoji_id }], reply_markup: MENU });
+    }
+  }
+
   // только премиум-эмодзи без текста — запоминаем для постов
   if (ents.length && !photo) {
     let rest = t;
@@ -549,7 +561,7 @@ async function tgForm(env, method, form) {
 async function handleAgentPreview(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const fd = await req.formData();
-  const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image');
+  const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image'), plain = String(fd.get('plain') || '').slice(0, 100);
   if (!/^[\w.-]{1,80}$/.test(post) || !html) return json({ ok: false, error: 'bad input' }, 400);
   const chat = env.TGPOST_OWNER;
   await clearWait(env);
@@ -573,7 +585,7 @@ async function handleAgentPreview(req, env) {
   if (!res.r.ok) res = await send(html.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1')); // запасной вариант: обычные эмодзи
   if (!res.r.ok) return json({ ok: false, error: res.r.description }, 502);
   const c = await tg(env, 'sendMessage', {
-    chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?',
+    chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?' + (plain ? `\n\nОбычные (не премиум) эмоджи: ${plain}\nЧтобы заменить, пришлите: ${[...plain.matchAll(/\S+/gu)][0]?.[0] || ''} -> премиум-эмоджи` : ''),
     reply_markup: ctrlKb(post),
   });
   await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
@@ -588,6 +600,18 @@ async function handleAgentSay(req, env) {
   await clearWait(env);
   const r = await say(env, env.TGPOST_OWNER, String(text).slice(0, 4000));
   return json({ ok: !!r.ok }, 200);
+}
+
+async function handleAgentEmoji(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const out = {};
+  let cursor;
+  do {
+    const page = await env.STORE.list({ prefix: 'emoji:', cursor });
+    for (const k of page.keys) out[k.name.slice(6)] = await env.STORE.get(k.name);
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor);
+  return json(out, 200);
 }
 
 async function handleAgentFile(req, env) {
@@ -727,6 +751,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
+    if (req.method === 'GET' && pathname === '/tgpost/emoji-map') return handleAgentEmoji(req, env);
     if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
