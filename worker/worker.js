@@ -263,6 +263,7 @@ async function tg(env, method, body, token) {
   return r.json();
 }
 const kb = (rows) => ({ inline_keyboard: rows });
+const ctrlKb = (post) => kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}`.slice(0, 64) }], [{ text: '🕒 Отправить позже', callback_data: `later::${post}`.slice(0, 64) }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}`.slice(0, 64) }]]);
 async function setStatus(env, post, patch) {
   if (!env.STORE || !post) return;
   const key = `tgpost:post:${post}`;
@@ -313,6 +314,16 @@ async function handleTgPost(req, env, ctx) {
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
   if (action === 'go') return publishAsOwner(env, q, chat, mid, post);
+  if (action === 'later') {
+    await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 3 });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '🕒 Когда опубликовать? Выберите кнопку или напишите время (Ташкент), например: «19:30», «завтра 10:00», «25.11 18:00».', reply_markup: kb(timeOptions(post)) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+  }
+  if (action === 'at') {
+    const r = await scheduleAt(env, chat, post, Number(idsPart));
+    if (r.ok) await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: r.text });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: r.ok ? 'Запланировано ✅' : r.text, show_alert: !r.ok }, 200);
+  }
   if (action !== 'pub') return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
 
   const lock = `pub:${chat}:${mid}`;
@@ -363,7 +374,7 @@ async function publishAsOwner(env, q, chat, mid, post) {
   });
   if (r.status !== 204) {
     await env.STORE.delete(lock);
-    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}` }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}` }]]) });
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: ctrlKb(post) });
     return answer(`Не получилось запустить публикацию (GitHub ${r.status})`, true);
   }
   // pending остаётся: когда пост появится в канале, обработчик channel_post сменит кнопки на «✅ Пост вышел»
@@ -432,6 +443,13 @@ async function ownerMessage(env, m) {
   const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
+  const waitTime = await env.STORE.get('tgpost:awaittime');
+  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES].includes(t) && !t.startsWith('/')) {
+    const ms = parseTime(t);
+    if (!ms) return say(env, chat, 'Не понял время 🤔 Напишите, например: «19:30», «завтра 10:00» или «25.11 18:00».');
+    const r = await scheduleAt(env, chat, waitTime, Math.floor(ms / 1000));
+    return say(env, chat, r.text);
+  }
   if (t === BTN_PRICES) return say(env, chat, `💰 Таблица сверки цен канала с поставщиком:\n${PRICE_TABLE}\n\nЦены поставщика обновляются каждый день. Чтобы поменять цены в канале, напишите сюда, например: «меняй всё из „Цена меняется“».`);
   if (t === BTN_NEW_POST) return say(env, chat, '✍️ Напишите одним сообщением, какой пост нужен. Например: «пост про игру Hogwarts Legacy» или «новость: скидки на PS Plus до конца недели». Можно приложить фото или переслать пост из другого канала.');
 
@@ -542,7 +560,7 @@ async function handleAgentPreview(req, env) {
   if (!res.r.ok) return json({ ok: false, error: res.r.description }, 502);
   const c = await tg(env, 'sendMessage', {
     chat_id: chat, reply_to_message_id: res.ids[0], text: '👆 Пост готов. Опубликовать в канал?',
-    reply_markup: kb([[{ text: '✅ Опубликовать', callback_data: `go::${post}`.slice(0, 64) }], [{ text: '❌ Нужна доработка', callback_data: `no::${post}`.slice(0, 64) }]]),
+    reply_markup: ctrlKb(post),
   });
   await env.STORE.put('tgpost:pending', JSON.stringify({ post, chat, ctrl: c.result?.message_id, ts: Date.now() }), { expirationTtl: 60 * 60 * 48 });
   await setStatus(env, post, { status: 'pending' });
@@ -564,6 +582,63 @@ async function handleAgentFile(req, env) {
   const f = await tg(env, 'getFile', { file_id: id });
   if (!f.ok) return json({ ok: false, error: f.description }, 404);
   return fetch(`https://api.telegram.org/file/bot${await botToken(env)}/${f.result.file_path}`);
+}
+
+// ── Отложенная публикация: пост уходит в «Отложенные» канала от аккаунта владельца (Telethon schedule) ──
+const TZ_SHIFT = 5 * 3600 * 1000; // Ташкент UTC+5
+function tashkentParts(ms) { const d = new Date(ms + TZ_SHIFT); return { y: d.getUTCFullYear(), mo: d.getUTCMonth(), d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes() }; }
+function fromTashkent(y, mo, d, h, mi) { return Date.UTC(y, mo, d, h, mi) - TZ_SHIFT; }
+function fmtTashkent(ms) { const p = tashkentParts(ms); const z = (n) => String(n).padStart(2, '0'); return `${z(p.d)}.${z(p.mo + 1)} в ${z(p.h)}:${z(p.mi)}`; }
+function timeOptions(post) {
+  const now = Date.now(), t = tashkentParts(now), rows = [];
+  const add = (dayShift, h, label) => {
+    const ms = fromTashkent(t.y, t.mo, t.d + dayShift, h, 0);
+    if (ms > now + 10 * 60 * 1000) rows.push({ text: `${label} ${h}:00`, callback_data: `at:${Math.floor(ms / 1000)}:${post}`.slice(0, 64) });
+  };
+  for (const h of [12, 15, 18, 20, 22]) add(0, h, 'Сегодня');
+  for (const h of [10, 12, 18, 20]) add(1, h, 'Завтра');
+  const out = [];
+  for (let i = 0; i < rows.length; i += 2) out.push(rows.slice(i, i + 2));
+  return out;
+}
+function parseTime(text) {
+  const s = text.toLowerCase().replace(/\s+/g, ' ').trim();
+  const tm = s.match(/(\d{1,2})[:.\s-](\d{2})\s*$/) || s.match(/^(?:в\s*)?(\d{1,2})\s*$/);
+  if (!tm) return null;
+  const h = Number(tm[1]), mi = Number(tm[2] || 0);
+  if (h > 23 || mi > 59) return null;
+  const now = Date.now(), t = tashkentParts(now);
+  const date = s.match(/(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?\s/);
+  let ms;
+  if (date) {
+    const y = date[3] ? (Number(date[3]) < 100 ? 2000 + Number(date[3]) : Number(date[3])) : t.y;
+    ms = fromTashkent(y, Number(date[2]) - 1, Number(date[1]), h, mi);
+    if (!date[3] && ms < now) ms = fromTashkent(y + 1, Number(date[2]) - 1, Number(date[1]), h, mi);
+  } else {
+    const shift = /послезавтра/.test(s) ? 2 : /завтра/.test(s) ? 1 : 0;
+    ms = fromTashkent(t.y, t.mo, t.d + shift, h, mi);
+    if (!shift && ms < now) ms += 24 * 3600 * 1000; // время уже прошло — значит завтра
+  }
+  return ms;
+}
+async function scheduleAt(env, chat, post, sec) {
+  const ms = sec * 1000;
+  if (!/^[\w.-]{1,80}$/.test(post || '') || !ms) return { ok: false, text: 'Не понял, какой пост' };
+  if (ms < Date.now() + 2 * 60 * 1000) return { ok: false, text: 'Это время уже прошло, выберите позже' };
+  if (ms > Date.now() + 360 * 24 * 3600 * 1000) return { ok: false, text: 'Слишком далеко, максимум год' };
+  const gh = await env.STORE.get('tgpost:gh');
+  const at = new Date(ms).toISOString().slice(0, 16) + 'Z';
+  const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/post.yml/dispatches`, {
+    method: 'POST', headers: { ...ghHeaders(gh), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ref: 'main', inputs: { post, target: 'psshopgo', at } }),
+  });
+  if (r.status !== 204) return { ok: false, text: `Не получилось (GitHub ${r.status})` };
+  await env.STORE.delete('tgpost:awaittime');
+  await setStatus(env, post, { status: 'scheduled', at });
+  const text = `🕒 Пост запланирован на ${fmtTashkent(ms)}. Он появится в канале сам. Изменить или отменить можно в канале: «Отложенные сообщения».`;
+  const pend = JSON.parse(await env.STORE.get('tgpost:pending') || 'null');
+  if (pend?.post === post && pend.ctrl) await tg(env, 'editMessageReplyMarkup', { chat_id: pend.chat, message_id: pend.ctrl, reply_markup: kb([[{ text: `🕒 Запланирован на ${fmtTashkent(ms)}`, callback_data: 'x' }]]) });
+  return { ok: true, text };
 }
 
 // Токен GitHub для запуска публикации передаётся из закрытого репозитория; принимаем только токен с доступом к нему.

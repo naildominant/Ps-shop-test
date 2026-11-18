@@ -140,7 +140,8 @@ def _control(token, chat, ids):
     """Под превью — кнопки. «✅ Опубликовать» публикует от аккаунта владельца (премиум-эмодзи сохраняются)."""
     text = "👆 <b>Пост готов.</b> Опубликовать в канал?"
     kb = {"inline_keyboard": [[{"text": "✅ Опубликовать", "callback_data": f"go::{POST_NAME}"[:64]}],
-                              [{"text": "❌ Нужна доработка", "callback_data": f"no::{POST_NAME}"[:64]}]]}
+                              [{"text": "🕒 Отправить позже", "callback_data": f"later::{POST_NAME}"[:64]}],
+                                  [{"text": "❌ Нужна доработка", "callback_data": f"no::{POST_NAME}"[:64]}]]}
     c = api(token, "sendMessage", {"chat_id": chat, "text": text, "parse_mode": "HTML", "reply_to_message_id": ids[0], "reply_markup": kb})
     # сообщить серверу, какой пост ждёт публикации (сервер проверяет токен бота)
     try:
