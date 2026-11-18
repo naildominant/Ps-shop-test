@@ -394,6 +394,13 @@ async function clearWait(env) {
   if (!list.length) return;
   await env.STORE.delete('tgpost:waitmsgs');
   for (const [chat, id] of list) await tg(env, 'deleteMessage', { chat_id: chat, message_id: id });
+  await sendDone(env, list[list.length - 1][0]);
+}
+async function sendDone(env, chat) {
+  const done = JSON.parse(await env.STORE.get('tgpost:donemsg') || 'null');
+  if (!done?.text) return;
+  const r = await tg(env, 'sendMessage', { chat_id: chat, text: done.text, entities: done.entities });
+  if (!r.ok) await tg(env, 'sendMessage', { chat_id: chat, text: done.text });
 }
 
 async function dispatchAgent(env, inputs) {
@@ -427,6 +434,14 @@ async function ownerMessage(env, m) {
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
   if (t === BTN_PRICES) return say(env, chat, `💰 Таблица сверки цен канала с поставщиком:\n${PRICE_TABLE}\n\nЦены поставщика обновляются каждый день. Чтобы поменять цены в канале, напишите сюда, например: «меняй всё из „Цена меняется“».`);
   if (t === BTN_NEW_POST) return say(env, chat, '✍️ Напишите одним сообщением, какой пост нужен. Например: «пост про игру Hogwarts Legacy» или «новость: скидки на PS Plus до конца недели». Можно приложить фото или переслать пост из другого канала.');
+
+  // сообщение, которое выходит вместо эмоджи ожидания, когда работа готова
+  if (await env.STORE.get('tgpost:askdone') && /[\p{L}\p{N}]/u.test(t)) {
+    await env.STORE.put('tgpost:donemsg', JSON.stringify({ text: m.text || m.caption, entities: m.entities || m.caption_entities || [] }));
+    await env.STORE.delete('tgpost:askdone');
+    await tg(env, 'sendMessage', { chat_id: chat, text: 'Запомнил ✅ Так будет выглядеть ответ, когда работа готова:', reply_markup: MENU });
+    return sendDone(env, chat);
+  }
 
   // ответ на вопрос «какой ваш любимый эмоджи?»
   if (await env.STORE.get('tgpost:askfav')) {
