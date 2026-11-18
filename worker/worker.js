@@ -279,6 +279,16 @@ async function handleTgPost(req, env, ctx) {
   // Сообщение владельца боту: кнопки меню, задача агенту, правки к посту, премиум-эмодзи
   const m = u.message;
   if (m && String(m.from?.id) === owner) {
+    // сообщения альбома запоминаем сразу (до ответа Telegram), каждое под своим ключом
+    if (m.media_group_id) {
+      const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.file_id || '');
+      await env.STORE.put(`tgpost:mg:${m.media_group_id}:${String(m.message_id).padStart(12, '0')}`, JSON.stringify({ photo, text: describeMessage(m) }), { expirationTtl: 600 });
+    }
+    // один раз: Telegram шлёт обновления по одному (иначе альбом приходит параллельно)
+    if (!(await env.STORE.get('tgpost:wh1'))) {
+      await env.STORE.put('tgpost:wh1', '1');
+      await tg(env, 'setWebhook', { url: `${new URL(req.url).origin}/tgpost?u=2`, secret_token: env.TGPOST_SECRET, allowed_updates: ['message', 'callback_query', 'channel_post'], max_connections: 1 });
+    }
     if (ctx) ctx.waitUntil(ownerMessage(env, m).catch((e) => tg(env, 'sendMessage', { chat_id: m.chat.id, text: `⚠️ Ошибка: ${e.message}` })));
     else await ownerMessage(env, m);
     return new Response('ok');
@@ -530,16 +540,17 @@ async function ownerMessage(env, m) {
     }
   }
 
-  // альбом из нескольких фото приходит отдельными сообщениями — собираем их в одну задачу
+  // альбом: задачу запускает только первое сообщение альбома, собрав все фото и подписи
   if (m.media_group_id) {
-    const key = `tgpost:mg:${m.media_group_id}`;
-    const cur = JSON.parse(await env.STORE.get(key) || 'null');
-    const next = { files: [...(cur?.files || []), photo].filter(Boolean), text: [cur?.text, describeMessage(m)].filter(Boolean).join('\n') };
-    await env.STORE.put(key, JSON.stringify(next), { expirationTtl: 600 });
-    if (cur) return;
-    await new Promise((r) => setTimeout(r, 4000));
-    const all = JSON.parse(await env.STORE.get(key) || 'null') || next;
-    return startTask(env, chat, all.text, all.files);
+    await new Promise((r) => setTimeout(r, 6000));
+    const prefix = `tgpost:mg:${m.media_group_id}:`;
+    const keys = (await env.STORE.list({ prefix })).keys.map((k) => k.name).filter((k) => !k.endsWith('done')).sort();
+    if (!keys.length || keys[0] !== prefix + String(m.message_id).padStart(12, '0')) return;
+    if (await env.STORE.get(`${prefix}done`)) return;
+    await env.STORE.put(`${prefix}done`, '1', { expirationTtl: 600 });
+    const parts = (await Promise.all(keys.map((k) => env.STORE.get(k)))).map((v) => JSON.parse(v || '{}'));
+    const text = [...new Set(parts.map((x) => x.text).filter(Boolean))].join('\n');
+    return startTask(env, chat, text || '[Альбом без подписи]', parts.map((x) => x.photo).filter(Boolean));
   }
   if (!t && !photo) return say(env, chat, 'Напишите задачу текстом или выберите кнопку в меню 👇');
   if (t === BTN_NEW_GAME) {
