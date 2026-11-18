@@ -377,6 +377,25 @@ const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { t
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
 const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
 
+// Пока агент работает, в чате висит только любимый эмоджи владельца; с ответом агента он удаляется.
+async function waitMark(env, chat) {
+  const fav = JSON.parse(await env.STORE.get('tgpost:fav') || 'null') || { text: '⏳' };
+  const body = { chat_id: chat, text: fav.text };
+  if (fav.id) body.entities = [{ type: 'custom_emoji', offset: 0, length: fav.text.length, custom_emoji_id: fav.id }];
+  let r = await tg(env, 'sendMessage', body);
+  if (!r.ok && fav.id) r = await tg(env, 'sendMessage', { chat_id: chat, text: fav.text });
+  if (!r.ok) return;
+  const list = JSON.parse(await env.STORE.get('tgpost:waitmsgs') || '[]');
+  list.push([chat, r.result.message_id]);
+  await env.STORE.put('tgpost:waitmsgs', JSON.stringify(list.slice(-20)), { expirationTtl: 60 * 60 * 24 * 2 });
+}
+async function clearWait(env) {
+  const list = JSON.parse(await env.STORE.get('tgpost:waitmsgs') || '[]');
+  if (!list.length) return;
+  await env.STORE.delete('tgpost:waitmsgs');
+  for (const [chat, id] of list) await tg(env, 'deleteMessage', { chat_id: chat, message_id: id });
+}
+
 async function dispatchAgent(env, inputs) {
   const gh = env.STORE ? await env.STORE.get('tgpost:gh') : '';
   if (!gh) return 'нет доступа к GitHub';
@@ -409,6 +428,20 @@ async function ownerMessage(env, m) {
   if (t === BTN_PRICES) return say(env, chat, `💰 Таблица сверки цен канала с поставщиком:\n${PRICE_TABLE}\n\nЦены поставщика обновляются каждый день. Чтобы поменять цены в канале, напишите сюда, например: «меняй всё из „Цена меняется“».`);
   if (t === BTN_NEW_POST) return say(env, chat, '✍️ Напишите одним сообщением, какой пост нужен. Например: «пост про игру Hogwarts Legacy» или «новость: скидки на PS Plus до конца недели». Можно приложить фото или переслать пост из другого канала.');
 
+  // ответ на вопрос «какой ваш любимый эмоджи?»
+  if (await env.STORE.get('tgpost:askfav')) {
+    const onlyEmoji = t && t.length <= 16 && !/[\p{L}\p{N}]/u.test(t);
+    if (onlyEmoji) {
+      const e = ents[0];
+      const fav = e ? { text: t.slice(e.offset, e.offset + e.length), id: e.custom_emoji_id } : { text: t };
+      await env.STORE.put('tgpost:fav', JSON.stringify(fav));
+      await env.STORE.delete('tgpost:askfav');
+      const body = { chat_id: chat, text: `Запомнил ${fav.text} Теперь, пока я работаю над задачей, в чате будет только он, а с ответом он исчезнет.`, reply_markup: MENU };
+      if (fav.id) body.entities = [{ type: 'custom_emoji', offset: 9, length: fav.text.length, custom_emoji_id: fav.id }];
+      return tg(env, 'sendMessage', body);
+    }
+  }
+
   // только премиум-эмодзи без текста — запоминаем для постов
   if (ents.length && !photo) {
     let rest = t;
@@ -433,7 +466,7 @@ async function ownerMessage(env, m) {
   if (!t && !photo) return say(env, chat, 'Напишите задачу текстом или выберите кнопку в меню 👇');
   if (t === BTN_NEW_GAME) {
     const err = await dispatchAgent(env, { mode: 'new_game', task: 'Найди у поставщика новую игру, которой нет в канале, и сделай пост.' });
-    return say(env, chat, err ? `⚠️ Не получилось запустить: ${err}` : '🔎 Ищу у поставщика новую игру, которой нет в канале. Превью пришлю через 5–10 минут.');
+    return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
   }
   return startTask(env, chat, describeMessage(m), photo ? [photo] : []);
 }
@@ -444,10 +477,10 @@ async function startTask(env, chat, text, files) {
     await setStatus(env, waiting, { feedback: [...(JSON.parse(await env.STORE.get(`tgpost:post:${waiting}`) || '{}').feedback || []), text] });
     await env.STORE.delete('tgpost:await');
     const err = await dispatchAgent(env, { mode: 'edit', post: waiting, task: text, files: files.join(',') });
-    return say(env, chat, err ? `⚠️ Не получилось запустить правки: ${err}` : '✏️ Принял правки, переделываю. Новое превью пришлю через 5–10 минут.');
+    return err ? say(env, chat, `⚠️ Не получилось запустить правки: ${err}`) : waitMark(env, chat);
   }
   const err = await dispatchAgent(env, { mode: 'task', task: text, files: files.join(',') });
-  return say(env, chat, err ? `⚠️ Не получилось запустить: ${err}` : '✅ Принял, делаю. Пришлю результат через 5–10 минут.');
+  return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
 }
 
 // Агент (GitHub Actions закрытого репозитория) входит по тому же токену GitHub, что сохранён в KV.
@@ -472,6 +505,7 @@ async function handleAgentPreview(req, env) {
   const post = String(fd.get('post') || ''), html = String(fd.get('html') || ''), image = fd.get('image');
   if (!/^[\w.-]{1,80}$/.test(post) || !html) return json({ ok: false, error: 'bad input' }, 400);
   const chat = env.TGPOST_OWNER;
+  await clearWait(env);
   const send = async (body) => {
     const ids = [];
     const short = visibleLen(body) <= 1024;
@@ -504,6 +538,7 @@ async function handleAgentSay(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const { text } = await req.json().catch(() => ({}));
   if (!text) return json({ ok: false }, 400);
+  await clearWait(env);
   const r = await say(env, env.TGPOST_OWNER, String(text).slice(0, 4000));
   return json({ ok: !!r.ok }, 200);
 }
