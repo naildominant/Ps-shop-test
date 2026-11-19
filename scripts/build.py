@@ -462,6 +462,8 @@ def page_home(games):
     cheap = sorted([g for g in games if g['min'] <= 200000], key=lambda g: g['min'])
     vr = [g for g in games if g['vr']]
     hero = ''
+    # на главной показываем Ultimate-издание GTA VI (если его нет, самое дорогое)
+    ult = max(gta.get('editions') or [{'name': 'Standard', 'price': gta['min']}], key=lambda e: (e['name'].lower() == 'ultimate', e['price'])) if gta else None
     if gta:
         o = best_opt(gta)
         hero = f'''<section class="wrap">
@@ -480,8 +482,8 @@ def page_home(games):
         </div>
         <p class="timer-done" id="timer-done" hidden>GTA 6 уже вышла</p>
         <div class="hero-buy">
-          <a class="btn btn-main" href="/game/{gta['id']}/">Оформить</a>
-          <div class="hero-price"><small>Standard / Ultimate</small><span class="num">от {money(gta['min'])}</span> <small style="display:inline">uzs</small></div>
+          <button class="btn btn-main" type="button" data-order="{gta['id']}" data-opt="{ult['name']}">Оформить</button>
+          <div class="hero-price"><small>{ult['name']} Edition</small><span class="num">{money(ult['price'])}</span> <small style="display:inline">uzs</small></div>
         </div>
         <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>
       </div>
