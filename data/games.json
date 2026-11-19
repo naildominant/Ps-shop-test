@@ -1,6 +1,6 @@
 [
  {
-  "title": "GRAND THEFT AUTO VI",
+  "title": "GTA VI ВЫШЛА",
   "post": 1276,
   "date": "2026-11-19",
   "ps4": null,
@@ -22,7 +22,7 @@
   "players": null,
   "notes": [],
   "gameplay": "https://www.youtube.com/watch?v=tJbzMqJGH4k",
-  "id": "grand-theft-auto-vi"
+  "id": "gta-vi-vyshla"
  },
  {
   "title": "SHREK 2 REMASTERED",
@@ -39,6 +39,31 @@
   "notes": [],
   "gameplay": null,
   "id": "shrek-2-remastered"
+ },
+ {
+  "title": "GRAND THEFT AUTO VI",
+  "post": 1225,
+  "date": "2026-11-09",
+  "ps4": null,
+  "ps5": 890000,
+  "editions": [
+   {
+    "name": "Standard",
+    "price": 890000
+   },
+   {
+    "name": "Ultimate",
+    "price": 1090000
+   }
+  ],
+  "preorder": true,
+  "release_post": "19.11.2026",
+  "lang": "subs",
+  "edition": null,
+  "players": "1",
+  "notes": [],
+  "gameplay": null,
+  "id": "grand-theft-auto-vi"
  },
  {
   "title": "FAR CRY 3",
