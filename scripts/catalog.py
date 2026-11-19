@@ -39,13 +39,14 @@ TITLE_FIX = {
     402: 'DOOM: THE DARK AGES',
     1055: 'RATCHET & CLANK: RIFT APART',
     1225: 'GRAND THEFT AUTO VI',
+    1276: 'GRAND THEFT AUTO VI',  # пост «GTA VI ВЫШЛА»: заголовок не название игры
 }
 # Дополнения к постам особого формата (post id -> поля)
 POST_EXTRA = {
     1225: {'preorder': True, 'release_post': '19.11.2026', 'lang': 'subs', 'players': '1'},
 }
 # Посты, которые не надо показывать (дубли со старой ценой и т. п.)
-SKIP_POSTS = {416, 472}
+SKIP_POSTS = {416, 472, 1225}  # 1225: предзаказ GTA VI по старой цене 890 000 / 1 090 000
 # Пост «Black Friday 11.11 / −50% на топ-50 игр» — источник хитов
 HITS_POST = 1228
 
@@ -115,7 +116,7 @@ def num(s):
 
 
 PRICE = r'([\d][\d .,]*\d)\s*(?:uzs|сум|sum)'
-STOP_TITLE = re.compile(r'(АКЦИЯ|СКИДКА|ИГРЫ СРАЗУ|ИГР СРАЗУ|BLACK FRIDAY|ИГРА ДНЯ|РАСПРОДАЖ)', re.I)
+STOP_TITLE = re.compile(r'(АКЦИЯ|СКИДКА|ИГРЫ СРАЗУ|ИГР СРАЗУ|BLACK FRIDAY|ИГРА ДНЯ|РАСПРОДАЖ|ВЫШЛА|ВЫШЕЛ|УЖЕ В ПРОДАЖЕ)', re.I)
 
 
 def title_of(lines):
