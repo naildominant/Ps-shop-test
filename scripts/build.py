@@ -466,27 +466,18 @@ def page_home(games):
     ult = max(gta.get('editions') or [{'name': 'Standard', 'price': gta['min']}], key=lambda e: (e['name'].lower() == 'ultimate', e['price'])) if gta else None
     if gta:
         o = best_opt(gta)
+        hero_top = ('        <div class="hero-tags"><span class="tag tag-pre">Предзаказ</span><span class="tag">PS5</span><span class="tag">Выход 19 ноября</span></div>\n        <h1>GTA VI</h1>\n        <p class="hero-sub">Джейсон, Люсия и Вайс-Сити. Оформите заранее, и в день релиза игра уже будет на вашей консоли.</p>\n        <div class="timer" id="timer" data-to="{GTA_RELEASE}" role="timer" aria-label="До выхода GTA 6">\n          <div class="timer-cell glass"><b data-u="d">--</b><span>дней</span></div>\n          <div class="timer-cell glass"><b data-u="h">--</b><span>часов</span></div>\n          <div class="timer-cell glass"><b data-u="m">--</b><span>минут</span></div>\n          <div class="timer-cell glass"><b data-u="s">--</b><span>секунд</span></div>\n        </div>\n        <p class="timer-done" id="timer-done" hidden>GTA 6 уже вышла</p>\n' if gta['pre'] else '        <div class="hero-tags"><span class="tag tag-hit">Уже вышла</span><span class="tag">PS5</span><span class="tag tag-sale">Количество ограничено</span></div>\n        <h1>GTA VI</h1>\n        <p class="hero-sub">Джейсон, Люсия и Вайс-Сити. GTA 6 уже вышла. Количество ограничено, успейте оформить.</p>\n').replace('{GTA_RELEASE}', GTA_RELEASE)
+        hero_note = '        <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>\n' if gta['pre'] else ''
         hero = f'''<section class="wrap">
   <div class="hero" id="gta">
     <div class="hero-bg" style="background-image:url('/static/covers/{gta['id']}.webp')"></div>
     <div class="hero-in">
       <div>
-        <div class="hero-tags"><span class="tag tag-pre">Предзаказ</span><span class="tag">PS5</span><span class="tag">Выход 19 ноября</span></div>
-        <h1>GTA VI</h1>
-        <p class="hero-sub">Джейсон, Люсия и Вайс-Сити. Оформите заранее, и в день релиза игра уже будет на вашей консоли.</p>
-        <div class="timer" id="timer" data-to="{GTA_RELEASE}" role="timer" aria-label="До выхода GTA 6">
-          <div class="timer-cell glass"><b data-u="d">--</b><span>дней</span></div>
-          <div class="timer-cell glass"><b data-u="h">--</b><span>часов</span></div>
-          <div class="timer-cell glass"><b data-u="m">--</b><span>минут</span></div>
-          <div class="timer-cell glass"><b data-u="s">--</b><span>секунд</span></div>
-        </div>
-        <p class="timer-done" id="timer-done" hidden>GTA 6 уже вышла</p>
-        <div class="hero-buy">
+{hero_top}        <div class="hero-buy">
           <button class="btn btn-main" type="button" data-order="{gta['id']}" data-opt="{ult['name']}">Оформить</button>
           <div class="hero-price"><small>{ult['name']} Edition</small><span class="num">{money(ult['price'])}</span> <small style="display:inline">uzs</small></div>
         </div>
-        <p class="hero-note">Наши клиенты заходят в игру 18 ноября в 23:30.</p>
-      </div>
+{hero_note}      </div>
       <div class="hero-art">
         <a class="hero-cover" href="/game/{gta['id']}/"><img src="/static/covers/{gta['id']}.webp" alt="GTA VI" width="330" height="440" fetchpriority="high"></a>
         <div class="pad-hint" id="pad-hint" aria-hidden="true"><span>жмяк!</span>
