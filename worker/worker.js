@@ -658,7 +658,7 @@ const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }]], resiz
 // Индексы в KV: tgpost:chindex [{id,t}] (посты канала с ценой), tgpost:supindex [название] (каталог поставщика).
 const ROMAN = { i: '1', ii: '2', iii: '3', iv: '4', v: '5', vi: '6', vii: '7', viii: '8', ix: '9', x: '10' };
 const STOP = new Set(['ea', 'sports', 'the', 'marvels', 'marvel', 'tom', 'clancys', 'sid', 'meiers', 'edition', 'standard', 'game', 'of', 'and', 'игра', 'издание']);
-const gnorm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/\bfifa (2[4-9])\b/g, 'fc $1').replace(/[^a-z0-9а-я]+/g, ' ').trim()
+const gnorm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/\bfifa\b/g, 'fc').replace(/[^a-z0-9а-я]+/g, ' ').trim()
   .split(' ').map((w) => ROMAN[w] || w).filter((w) => w && !STOP.has(w)).join(' ');
 function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
 function dice(a, b) {
@@ -675,7 +675,7 @@ function matchTitles(q, titles, opt = {}) {
   const hits = [];
   titles.forEach((t, i) => {
     const tn = gnorm(t), tw = tn.split(' ');
-    if (tn.replace(/ /g, '').includes(qs) || words.every((w) => tw.some((x) => x === w || (w.length >= 3 && x.startsWith(w))))) hits.push(i);
+    if ((qs.length >= 4 && tn.replace(/ /g, '').includes(qs)) || words.every((w) => tw.some((x) => x === w || (w.length >= 3 && x.startsWith(w))))) hits.push(i);
   });
   if (hits.length) return hits;
   titles.forEach((t, i) => { // название поста целиком внутри запроса: «Witcher 3» для «The Witcher 3 Wild Hunt»
@@ -719,6 +719,34 @@ function partOk(official, title) {
   return want.every((n) => have.includes(n));
 }
 
+// Лишнее убираем: конкретная игра → только её объявление (точное название, иначе самое короткое);
+// серия → по одному объявлению на каждую часть, сборники («+», bundle, trilogy) — только если части нет отдельно.
+const EDITION = new Set(['ultimate', 'deluxe', 'gold', 'complete', 'remastered', 'remaster', 'definitive', 'goty', 'premium', 'digital', 'ps4', 'ps5', 'version', 'director', 'cut', 'directors', 'enhanced', 'special', 'collectors', 'launch', 'cross', 'gen', 'bundle', 'vr', 'vr2', 'remake']);
+const extraWords = (q, t) => gnorm(t).split(' ').filter((w) => w && !gnorm(q).split(' ').includes(w)).length;
+const isBundle = (t) => /\+|bundle|trilogy|collection|сборник|части сразу|игры сразу/i.test(t);
+function pickMain(it, posts) {
+  if (posts.length <= 1) return posts;
+  if (!it.series && /\d/.test(gnorm(it.official))) {
+    const exact = posts.filter((p) => gnorm(p.t) === gnorm(it.official) || (it.ru && gnorm(p.t) === gnorm(it.ru)));
+    if (exact.length) return exact.slice(0, 1);
+    const plain = posts.filter((p) => !isBundle(p.t));
+    const pool = plain.length ? plain : posts;
+    const min = Math.min(...pool.map((p) => extraWords(it.official, p.t)));
+    return pool.filter((p) => extraWords(it.official, p.t) === min).slice(0, 1);
+  }
+  // серия: разные игры оставляем, издания одной игры («MK 11» и «MK 11 Ultimate») схлопываем в одно
+  const words = (t) => gnorm(t).split(' ').filter(Boolean);
+  const nums = (t) => (gnorm(t).match(/\b\d{1,4}\b/g) || []).join(' ');
+  const sorted = [...posts].sort((a, b) => isBundle(a.t) - isBundle(b.t) || words(a.t).length - words(b.t).length || b.id - a.id);
+  const out = [];
+  for (const p of sorted) {
+    if (out.some((q) => nums(q.t) === nums(p.t) && words(q.t).every((w) => words(p.t).includes(w)) && words(p.t).every((w) => words(q.t).includes(w) || EDITION.has(w)))) continue;
+    if (isBundle(p.t) && out.length) continue;
+    out.push(p);
+  }
+  return out;
+}
+
 async function resolveGames(env, text) {
   const idx = uniqueCatalog(JSON.parse(await env.STORE.get('tgpost:chindex') || '[]'));
   const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
@@ -743,7 +771,8 @@ ${HINTS}
       if (it.posts.length || !q) continue;
       it.posts = matchTitles(q, idx.map((x) => x.t), { strict: true }).map((i) => idx[i].id);
     }
-    if (!it.series) it.posts = it.posts.filter((id) => partOk(it.official, byId.get(id).t));
+    if (!it.series) it.posts = it.posts.filter((id) => partOk(it.official, byId.get(id).t)); // без номера — как серия (pickMain)
+    it.posts = pickMain(it, it.posts.map((id) => byId.get(id))).map((x) => x.id);
   }
   // нет в канале → каталог поставщика: кандидаты по буквам, выбор — нейросетью
   for (const it of items) {
@@ -767,6 +796,18 @@ ${list.map((t, i) => `${i + 1}. ${t}`).join('\n')}
     } else if (list.length && matchTitles(it.official, sup).length) it.supplier = sup[matchTitles(it.official, sup)[0]];
   }
   return items.map((it) => ({ ...it, posts: it.posts.map((id) => byId.get(id)) }));
+}
+
+// Без кнопки: «скинь/отправь мне GTA 6, FIFA» — это поиск готовых объявлений, а не новый пост.
+async function isFindRequest(env, text) {
+  if (!env.AI || text.length > 400) return false;
+  if (/(сделай|создай|напиши|подготовь|нужен|нужна)\s+(пост|новост|объявлен|картинк|истори)/i.test(text)) return false;
+  try {
+    const r = await env.AI.run(LLM, { max_tokens: 5, temperature: 0, messages: [{ role: 'user', content: `Владелец магазина игр пишет боту. Бот умеет: FIND — прислать УЖЕ ГОТОВЫЕ объявления игр из канала (владелец просит «отправь/скинь/пришли/покажи/есть ли» игры или просто перечисляет названия игр); POST — сделать НОВЫЙ пост/новость/картинку/правку для канала.
+Сообщение: «${text}»
+Ответь одним словом: FIND или POST.` }] });
+    return /FIND/i.test(String(r?.choices?.[0]?.message?.content ?? r?.response ?? ''));
+  } catch { return false; }
 }
 
 async function findGames(env, chat, text) {
@@ -804,6 +845,7 @@ async function handleFindTest(req, env) {
   const u = new URL(req.url);
   const key = await env.STORE.get('tgpost:testkey');
   if (!key || u.searchParams.get('key') !== key) return json({ ok: false }, 403);
+  if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
   const items = await resolveGames(env, u.searchParams.get('q') || '');
   return json(items.map((x) => ({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null })), 200);
 }
@@ -1048,6 +1090,7 @@ async function startTask(env, chat, text, files, opts = {}) {
     const err = await dispatchAgent(env, { mode: 'edit', post: waiting, task: text, files: files.join(',') });
     return err ? say(env, chat, `⚠️ Не получилось запустить правки: ${err}`) : mark();
   }
+  if (!files.length && !text.startsWith('[Переслано') && await isFindRequest(env, text)) return findGames(env, chat, text);
   const err = await dispatchAgent(env, { mode: 'task', task: text, files: files.join(',') });
   return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : mark();
 }
@@ -1395,6 +1438,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
