@@ -911,6 +911,7 @@ def main():
           + ''.join(f'<url><loc>{SITE_URL}{u}</loc></url>\n<url><loc>{SITE_URL}/ru{u}</loc></url>\n' for u in urls) + '</urlset>\n')
     # подтверждение прав в Яндекс Вебмастере (файл в корне сайта)
     write('yandex_14c1c6187466aca3.html', '<html>\n    <head>\n        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">\n    </head>\n    <body>Verification: 14c1c6187466aca3</body>\n</html>\n')
+    write('sw.js', open(os.path.join(ROOT, 'src', 'static', 'sw.js'), encoding='utf-8').read())
     write('robots.txt', f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
     if SITE_URL.startswith('https://psshop.uz'):
         open(os.path.join(DIST, 'CNAME'), 'w').write('psshop.uz\n')
