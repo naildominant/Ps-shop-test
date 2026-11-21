@@ -46,7 +46,7 @@ async function tooMany(env, ip) {
   return false;
 }
 
-function orderMessage(o) {
+function orderMessage(o, n) {
   const items = (o.items || []).slice(0, 30).map((i, n) => `${n + 1}. ${esc(i.title)} (${esc(i.option)}) — ${money(i.price)} uzs`).join('\n');
   const contact = String(o.contact || '').trim();
   const tgUser = contact.match(/^@?([a-zA-Z][a-zA-Z0-9_]{4,31})$/);
@@ -54,7 +54,7 @@ function orderMessage(o) {
   const link = tgUser ? `https://t.me/${tgUser[1]}` : (phone.length >= 9 ? `tel:${phone}` : '');
   const time = new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   return [
-    '🛒 <b>Новая заявка с сайта</b>',
+    `🛒 <b>Новая заявка с сайта${n ? ` №${n}` : ''}</b>`,
     '',
     `👤 ${esc(o.name)}`,
     `📞 ${esc(contact)}${link ? `  ${link}` : ''}`,
@@ -67,13 +67,9 @@ function orderMessage(o) {
   ].join('\n');
 }
 
-async function sendTelegram(env, text) {
-  const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: env.CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true }),
-  });
-  return r.ok;
+async function sendTelegram(env, text, extra) {
+  const r = await ordTg(env, 'sendMessage', { chat_id: env.CHAT_ID, text, parse_mode: 'HTML', disable_web_page_preview: true, ...extra });
+  return r.ok ? r.result.message_id : 0;
 }
 
 /* ---------- Google Таблица (CRM) ---------- */
@@ -90,12 +86,16 @@ async function sheetPost(env, payload) {
   }).catch(() => {});
 }
 
-const ORDER_HEADER = ['Дата', 'Имя', 'Контакт', 'Консоль', 'Что заказали', 'Сумма, uzs', 'Язык сайта', 'Статус', 'Комментарий', 'Посетитель'];
+const ORDER_HEADER = ['Дата', 'Имя', 'Контакт', 'Консоль', 'Что заказали', 'Сумма, uzs', 'Язык сайта', 'Статус', 'Комментарий', 'Посетитель', '№ заявки', 'Оплачено, uzs', 'Статус изменён'];
 
-async function toSheet(env, o) {
+function orderRow(o, n) {
   const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
-  await sheetPost(env, { sheet: 'Заявки', header: ORDER_HEADER, dates: [0],
-    values: [Date.now(), o.name, o.contact, o.console, items, Number(o.total) || 0, o.lang || 'ru', 'Новая', '', String(o.vid || '').slice(0, 12)] });
+  return [Date.now(), o.name, o.contact, o.console, items, Number(o.total) || 0, o.lang || 'ru', 'Новая', '', String(o.vid || '').slice(0, 12), n ? String(n) : '', '', ''];
+}
+
+async function toSheet(env, row) {
+  const n = row[10];
+  await sheetPost(env, { sheet: 'Заявки', header: ORDER_HEADER, dates: [0, 12].filter((i) => row[i] !== ''), values: row, ...(n ? { key: n, keyCol: '№ заявки' } : {}) });
 }
 
 const VISIT_HEADER = ['Начало визита', 'Посетитель', 'Визит №', 'Новый', 'Источник', 'Откуда пришёл', 'Метка рекламы',
@@ -198,9 +198,13 @@ async function handleOrder(req, env, h, ctx) {
   }
   const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
   if (await tooMany(env, ip)) return json({ ok: false, error: 'too many' }, 429, h);
-  const sent = await sendTelegram(env, orderMessage({ ...o, name, contact }));
-  if (ctx) ctx.waitUntil(toSheet(env, { ...o, name, contact }));
-  return json({ ok: sent }, sent ? 200 : 502, h);
+  const n = await nextOrderNo(env);
+  const html = orderMessage({ ...o, name, contact }, n);
+  const row = orderRow({ ...o, name, contact }, n);
+  const mid = await sendTelegram(env, html, n ? { reply_markup: ordKb(n) } : {});
+  if (n && env.STORE) await env.STORE.put(`order:${n}`, JSON.stringify({ html, row, mid }), { expirationTtl: 60 * 60 * 24 * 180 });
+  if (ctx) ctx.waitUntil(toSheet(env, row));
+  return json({ ok: !!mid, n }, mid ? 200 : 502, h);
 }
 
 async function handleEvent(req, env, h) {
@@ -256,6 +260,104 @@ async function runCatalogUpdate(env) {
 async function botToken(env) {
   return env.TGPOST_BOT_TOKEN || (env.STORE ? await env.STORE.get('tgpost:token') : '') || '';
 }
+/* ---------- Бот заявок (@psshop_zayavki_bot): статус заявки кнопками ---------- */
+// Кнопки под заявкой меняют «Статус» и «Оплачено» в листе «Заявки». «Со скидкой» — бот спрашивает сумму.
+// Webhook: POST /orderbot (заголовок-секрет = KV orderbot:secret). Подключение: GET /orderbot/setup?key=<секрет>&set=1
+const ORD_ST = {
+  buy: { label: 'Купил', icon: '✅' },
+  disc: { label: 'Купил со скидкой', icon: '💸' },
+  wait: { label: 'В обработке', icon: '⏳' },
+  no: { label: 'Отказался', icon: '❌' },
+};
+async function ordTg(env, method, body) {
+  const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  return r.json().catch(() => ({ ok: false }));
+}
+async function nextOrderNo(env) {
+  if (!env.STORE) return 0;
+  const n = (Number(await env.STORE.get('order:seq')) || 14) + 1;
+  await env.STORE.put('order:seq', String(n));
+  return n;
+}
+function ordKb(n, cur) {
+  const b = (k) => ({ text: `${cur === k ? '• ' : ''}${ORD_ST[k].icon} ${ORD_ST[k].label}`, callback_data: `ord:${n}:${k}` });
+  return { inline_keyboard: [[b('buy'), b('disc')], [b('wait'), b('no')]] };
+}
+const parseSum = (t) => {
+  const s = String(t || '').toLowerCase().replace(/сум|uzs|so'm|сўм/g, '').trim();
+  const k = /(к|k|тыс)\s*$/.test(s);
+  const d = Number(s.replace(/[^\d]/g, ''));
+  if (!d) return 0;
+  return k || d < 10000 ? d * 1000 : d;
+};
+async function setOrderStatus(env, n, key, paid) {
+  const raw = await env.STORE.get(`order:${n}`);
+  if (!raw) return { ok: false, text: `Заявка №${n} не найдена` };
+  const o = JSON.parse(raw);
+  const st = ORD_ST[key];
+  const sum = key === 'buy' ? Number(o.row[5]) || 0 : key === 'disc' ? paid : '';
+  o.row[7] = st.label; o.row[11] = sum; o.row[12] = Date.now(); o.status = key;
+  await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 });
+  const line = `\n\n<b>Статус: ${st.icon} ${st.label}</b>${sum ? ` — ${money(sum)} uzs` : ''}`;
+  if (o.mid) await ordTg(env, 'editMessageText', { chat_id: env.CHAT_ID, message_id: o.mid, text: o.html + line, parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: ordKb(n, key) });
+  await toSheet(env, o.row);
+  return { ok: true, text: `${st.icon} ${st.label}` };
+}
+async function handleOrderBot(req, env, ctx) {
+  const secret = env.STORE && await env.STORE.get('orderbot:secret');
+  if (!secret || req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== secret) return new Response('forbidden', { status: 403 });
+  const u = await req.json().catch(() => ({}));
+  const owner = String(env.CHAT_ID);
+  const q = u.callback_query;
+  if (q) {
+    const ans = (text, alert) => json({ method: 'answerCallbackQuery', callback_query_id: q.id, text, show_alert: !!alert }, 200);
+    if (String(q.from?.id) !== owner) return ans('Нет доступа');
+    const m = /^ord:(\d+):(buy|disc|wait|no)$/.exec(q.data || '');
+    if (!m) return ans('');
+    const [, n, key] = m;
+    if (key === 'disc') {
+      await env.STORE.put('orderbot:await', n, { expirationTtl: 3600 });
+      await ordTg(env, 'sendMessage', { chat_id: owner, reply_to_message_id: q.message?.message_id, text: `💸 Заявка №${n}: на какую сумму купили со скидкой? Напишите число, например 950000 или 950к.`, reply_markup: { force_reply: true, input_field_placeholder: 'Сумма, например 950000' } });
+      return ans('Напишите сумму');
+    }
+    const r = await setOrderStatus(env, n, key);
+    return ans(r.text, !r.ok);
+  }
+  const msg = u.message;
+  if (msg && String(msg.chat?.id) === owner && msg.text) {
+    const n = await env.STORE.get('orderbot:await');
+    if (n) {
+      if (/^(отмена|стоп|cancel)$/i.test(msg.text.trim())) {
+        await env.STORE.delete('orderbot:await');
+        await ordTg(env, 'sendMessage', { chat_id: owner, text: 'Хорошо, скидку не записываю.' });
+      } else {
+        const sum = parseSum(msg.text);
+        if (!sum) await ordTg(env, 'sendMessage', { chat_id: owner, text: `Не понял сумму. Напишите число для заявки №${n}, например 950000. Или «отмена».`, reply_markup: { force_reply: true } });
+        else {
+          await env.STORE.delete('orderbot:await');
+          const r = await setOrderStatus(env, n, 'disc', sum);
+          await ordTg(env, 'sendMessage', { chat_id: owner, text: r.ok ? `💸 Записал: заявка №${n} куплена со скидкой за ${money(sum)} сум.` : r.text });
+        }
+      }
+    }
+  }
+  return new Response('ok');
+}
+async function handleOrderBotSetup(req, env) {
+  const url = new URL(req.url);
+  const secret = env.STORE && await env.STORE.get('orderbot:secret');
+  if (!secret || url.searchParams.get('key') !== secret) return new Response('forbidden', { status: 403 });
+  const before = await ordTg(env, 'getWebhookInfo', {});
+  const me = await ordTg(env, 'getMe', {});
+  let set = null;
+  if (url.searchParams.get('set') === '1') {
+    set = await ordTg(env, 'setWebhook', { url: `${url.origin}/orderbot`, secret_token: secret, allowed_updates: ['message', 'callback_query'], max_connections: 5 });
+  }
+  return json({ me: me.result?.username, before: before.result, set }, 200);
+}
+
 async function tg(env, method, body, token) {
   const r = await fetch(`https://api.telegram.org/bot${token || await botToken(env)}/${method}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -892,6 +994,8 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/emoji-info') return handleAgentEmojiInfo(req, env);
     if (req.method === 'GET' && (pathname === '/tgpost/setup' || pathname === '/tgpost/emoji' || pathname === '/tgpost/status')) return handleTgPostSetup(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
+    if (req.method === 'POST' && pathname === '/orderbot') return handleOrderBot(req, env, ctx);
+    if (req.method === 'GET' && pathname === '/orderbot/setup') return handleOrderBotSetup(req, env);
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
     if (req.method === 'POST' && pathname === '/visit') return handleVisit(req, env, h, ctx);
