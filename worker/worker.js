@@ -691,7 +691,7 @@ async function gameNames(env, text) {
   if (!env.AI) return null;
   try {
     const r = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { max_tokens: 600, messages: [{ role: 'user', content:
-      'Владелец магазина игр PlayStation перечислил игры (возможно голосом, по-русски, с ошибками распознавания). Для КАЖДОЙ упомянутой игры, по порядку, дай официальное название на английском (как в PlayStation Store, номер части цифрой) и как её обычно называют по-русски. Не добавляй игр, которых нет в тексте. Ответ — только JSON-массив объектов {"en": "...", "ru": "...", "said": "как сказал владелец"}.\nТекст: ' + text.slice(0, 800) }] });
+      'Владелец магазина игр PlayStation перечислил игры (возможно голосом, по-русски, с ошибками распознавания). Для КАЖДОЙ упомянутой игры, по порядку, дай официальное название на английском (как в PlayStation Store, номер части цифрой) и как её обычно называют по-русски. Не добавляй игр, которых нет в тексте. НЕ добавляй год, номер части, издание или подзаголовок, если владелец их не назвал (сказал «эф один» — пиши «F1», а не «F1 2022»). Ответ — только JSON-массив объектов {"en": "...", "ru": "...", "said": "как сказал владелец"}.\nТекст: ' + text.slice(0, 800) }] });
     const out = String(r?.choices?.[0]?.message?.content ?? r?.response ?? '');
     const arr = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1));
     return Array.isArray(arr) && arr.length ? arr.slice(0, 15).map((x) => ({ en: String(x.en || ''), ru: String(x.ru || ''), said: String(x.said || x.en || '') })) : null;
@@ -716,6 +716,9 @@ async function findGames(env, chat, text) {
     let hits = matchTitles(q, idx.map((x) => x.t));
     for (const a of alt[qi]) if (!hits.length) hits = matchTitles(a, idx.map((x) => x.t));
     if (hits.length) {
+      // одно и то же название + русские слова сверху («GTA 6 выходит через 10 дней») — старый анонс, не шлём, если есть точное объявление
+      const qn = gnorm(q), exact = hits.some((i) => gnorm(idx[i].t) === qn);
+      if (exact) hits = hits.filter((i) => { const tn = gnorm(idx[i].t); return tn === qn || !(tn.startsWith(qn + ' ') && /[а-я]/.test(tn.slice(qn.length))); });
       const best = new Map();
       for (const i of hits) { const k = gnorm(idx[i].t); if (!best.has(k) || idx[i].id > best.get(k).id) best.set(k, idx[i]); }
       for (const x of [...best.values()].sort((a, b) => b.id - a.id).slice(0, 8)) {
@@ -726,6 +729,12 @@ async function findGames(env, chat, text) {
     }
     let sh = matchTitles(q, sup);
     for (const a of alt[qi]) if (!sh.length) sh = matchTitles(a, sup);
+    const noYear = q.replace(/\b(19|20)\d{2}\b/g, '').trim(); // «F1 2022» → «F1»: год мог придумать распознаватель
+    if (!sh.length && noYear && noYear !== q) {
+      const h2 = matchTitles(noYear, idx.map((x) => x.t));
+      if (h2.length) { for (const i of h2.slice(0, 4)) { const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: idx[i].id }); if (r.ok) sent++; } continue; }
+      sh = matchTitles(noYear, sup);
+    }
     if (sh.length) make.push({ q, sup: sh.slice(0, 3).map((i) => sup[i]) }); else none.push(q);
   }
   const notes = [];
@@ -1322,6 +1331,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
