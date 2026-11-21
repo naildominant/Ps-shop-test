@@ -215,7 +215,7 @@ def layout(*, title, desc, body, path, page='', og_image=None, og_type='website'
 {cart_drawer()}
 {chat_widget()}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>window.PS={{base:{json.dumps(BASE)},api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])}}};</script>
+<script>window.PS={{base:{json.dumps(BASE)},api:{json.dumps(ORDER_API.rstrip('/'))},manager:{json.dumps(CONTACTS["manager"])},bot:"https://t.me/psshop_zayavki_bot"}};</script>
 <script src="/static/app.js?v={VERSION}" defer></script>
 </body>
 </html>
