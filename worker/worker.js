@@ -862,6 +862,13 @@ async function handleAgentReview(req, env) {
   const link = `https://t.me/${ch.replace('@', '')}/${id}`;
   const strip = (x) => x.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1');
   await clearWait(env);
+  const btns = kb([[{ text: '✅ Да', callback_data: `upd:${id}:` }], [{ text: '❌ Нет', callback_data: `keep:${id}:` }], [{ text: '✏️ Правки', callback_data: `fixp:${id}:` }]]);
+  if (b.short) { // цены: одно короткое сообщение «игра: было → стало» без постов
+    const r = await tg(env, 'sendMessage', { chat_id: chat, text: `${note}\n\nПост: ${link}`, link_preview_options: { is_disabled: true }, reply_markup: btns });
+    if (!r.ok) return json({ ok: false, error: r.description }, 502);
+    await remember(env, { result: `прислал изменение цены поста канала ${id}: ${note}` });
+    return json({ ok: true }, 200);
+  }
   await tg(env, 'sendMessage', { chat_id: chat, text: '⬇️ БЫЛО' });
   const fw = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: id });
   if (!fw.ok) await tg(env, 'sendMessage', { chat_id: chat, text: `(не смог показать пост: ${link})` });
@@ -1136,4 +1143,5 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
