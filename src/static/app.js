@@ -112,7 +112,7 @@
         <div class="hp" aria-hidden="true"><label for="o-site">Сайт</label><input id="o-site" name="website" tabindex="-1" autocomplete="off"></div>
         <p class="err" id="o-err" hidden></p>
         <button class="btn btn-main btn-block" type="submit">${T('Оформить заказ', 'Buyurtma berish')}</button>
-        <p class="hint">${T('Заявка сразу придёт нам, а вы перейдёте в Telegram к менеджеру с готовым текстом заказа. Оплату обсудим там.', 'Ariza darhol bizga keladi, siz esa tayyor buyurtma matni bilan Telegramda menejerga o‘tasiz. To‘lovni o‘sha yerda kelishamiz.')}</p>
+        <p class="hint">${T('Заявка сразу придёт нам, а наш Telegram-бот пришлёт вам подтверждение. Менеджер свяжется с вами, оплату обсудим с ним.', 'Ariza darhol bizga keladi, Telegram-botimiz esa sizga tasdiq yuboradi. Menejer siz bilan bog‘lanadi, to‘lovni u bilan kelishamiz.')}</p>
       </form>`;
     const f = $('#order');
     f.addEventListener('focusin', () => track('form_start'), { once: true });
@@ -123,9 +123,23 @@
     return [T('Здравствуйте! Хочу оформить заказ с сайта PS SHOP:', 'Assalomu alaykum! PS SHOP saytidan buyurtma bermoqchiman:'), '', ...lines, '', `${T('Итого', 'Jami')}: ${money(total())} uzs`,
       `${T('Консоль', 'Konsol')}: ${d.console}`, `${T('Имя', 'Ism')}: ${d.name}`, `${T('Контакт', 'Aloqa')}: ${d.contact}`].join('\n');
   }
-  function validContact(s) {
-    const digits = s.replace(/\D/g, '');
-    return /^@?[a-zA-Z][a-zA-Z0-9_]{4,31}$/.test(s.trim()) || digits.length >= 9;
+  // Контакт: Telegram @username или телефон. Узбекский номер: +998 и ровно 9 цифр (можно без +998 или с 8 в начале).
+  // Возвращает { ok, value, why }: value — номер в виде +998 90 123 45 67.
+  function checkContact(raw) {
+    const s = raw.trim();
+    const tg = s.replace(/^(https?:\/\/)?(t\.me\/)/i, '');
+    if (/^@?[a-zA-Z][a-zA-Z0-9_]{4,31}$/.test(tg)) return { ok: true, value: tg.startsWith('@') ? tg : `@${tg}` };
+    if (/[a-zA-Zа-яА-Я]/.test(s)) return { ok: false, why: 'contact' };
+    let d = s.replace(/\D/g, '');
+    const plus = s.startsWith('+');
+    if (!plus && d.length === 10 && d.startsWith('8')) d = d.slice(1);
+    if (!plus && d.length === 9) d = `998${d}`;
+    if (d.startsWith('998')) {
+      if (d.length !== 12) return { ok: false, why: d.length < 12 ? 'short' : 'long' };
+      return { ok: true, value: `+998 ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10)}` };
+    }
+    if (plus && d.length >= 10 && d.length <= 15) return { ok: true, value: `+${d}` }; // номер другой страны
+    return { ok: false, why: d.length < 9 ? 'short' : 'contact' };
   }
   async function submitOrder(f) {
     const d = Object.fromEntries(new FormData(f).entries());
@@ -133,7 +147,11 @@
     const err = $('#o-err'); const bad = [];
     $$('input', f).forEach((i) => i.removeAttribute('aria-invalid'));
     if (d.name.length < 2) bad.push(['#o-name', T('Напишите имя', 'Ismingizni yozing')]);
-    if (!validContact(d.contact)) bad.push(['#o-contact', T('Укажите телефон или Telegram @username', 'Telefon yoki Telegram @username kiriting')]);
+    const c = checkContact(d.contact);
+    if (c.ok) { d.contact = c.value; $('#o-contact').value = c.value; }
+    else if (c.why === 'short') bad.push(['#o-contact', T('Номер неполный: после +998 нужно 9 цифр, например +998 90 123 45 67', 'Raqam to‘liq emas: +998 dan keyin 9 ta raqam kerak, masalan +998 90 123 45 67')]);
+    else if (c.why === 'long') bad.push(['#o-contact', T('В номере лишние цифры: после +998 нужно 9 цифр, например +998 90 123 45 67', 'Raqamda ortiqcha raqamlar bor: +998 dan keyin 9 ta raqam kerak, masalan +998 90 123 45 67')]);
+    else bad.push(['#o-contact', T('Укажите телефон (+998 90 123 45 67) или Telegram @username', 'Telefon (+998 90 123 45 67) yoki Telegram @username kiriting')]);
     if (!d.console) bad.push([null, T('Выберите консоль: PS4 или PS5', 'Konsolni tanlang: PS4 yoki PS5')]);
     if (bad.length) {
       bad.forEach(([s]) => s && $(s).setAttribute('aria-invalid', 'true'));
