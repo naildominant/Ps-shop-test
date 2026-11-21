@@ -202,7 +202,14 @@ async function handleOrder(req, env, h, ctx) {
   const html = orderMessage({ ...o, name, contact }, n);
   const row = orderRow({ ...o, name, contact }, n);
   const mid = await sendTelegram(env, html, n ? { reply_markup: ordKb(n) } : {});
-  if (n && env.STORE) await env.STORE.put(`order:${n}`, JSON.stringify({ html, row, mid }), { expirationTtl: 60 * 60 * 24 * 180 });
+  const code = /^[a-z0-9]{8,32}$/.test(o.code || '') ? o.code : '';
+  if (n && env.STORE) {
+    const keep = { expirationTtl: 60 * 60 * 24 * 180 };
+    const lang = o.lang === 'uz' ? 'uz' : 'ru';
+    const items = (o.items || []).slice(0, 30).map((i) => ({ title: String(i.title || '').slice(0, 120), option: String(i.option || '').slice(0, 40), price: Number(i.price) || 0 }));
+    await env.STORE.put(`order:${n}`, JSON.stringify({ html, row, mid, lang, items, total: Number(o.total) || 0, console: o.console, name, contact }), keep);
+    if (code) await env.STORE.put(`ordc:${code}`, String(n), keep);
+  }
   if (ctx) ctx.waitUntil(toSheet(env, row));
   return json({ ok: !!mid, n }, mid ? 200 : 502, h);
 }
@@ -292,6 +299,75 @@ const parseSum = (t) => {
   if (!d) return 0;
   return k || d < 10000 ? d * 1000 : d;
 };
+const MANAGER = 'https://t.me/Gaynullin_Nail';
+const CL = {
+  write: { ru: '✍️ Написать менеджеру', uz: '✍️ Menejerga yozish' },
+  site: { ru: '🎮 Каталог игр', uz: '🎮 O‘yinlar katalogi' },
+};
+const L = (o, k) => CL[k][o.lang === 'uz' ? 'uz' : 'ru'];
+const CLIENT_MSG = {
+  buy: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${n} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${n} bajarildi. Yoqimli o‘yin! 🎮` },
+  disc: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${n} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${n} bajarildi. Yoqimli o‘yin! 🎮` },
+  wait: { ru: (n) => `⏳ Заявка №${n} в работе. Менеджер с вами свяжется.`, uz: (n) => `⏳ Buyurtma №${n} ko‘rib chiqilmoqda. Menejer siz bilan bog‘lanadi.` },
+};
+function ordItems(o) {
+  return (o.items || []).map((i, k) => `${k + 1}. ${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
+}
+function clientConfirm(o, n) {
+  const uz = o.lang === 'uz';
+  return [
+    uz ? `✅ Buyurtma №${n} qabul qilindi!` : `✅ Заявка №${n} принята!`,
+    '',
+    ordItems(o),
+    '',
+    `${uz ? 'Jami' : 'Итого'}: ${money(o.total)} uzs`,
+    `${uz ? 'Konsol' : 'Консоль'}: ${o.console || ''}`,
+    '',
+    uz ? 'Menejer tez orada siz bilan bog‘lanadi. Tezroq bo‘lishi uchun pastdagi tugmani bosing va buyurtma matnini yuboring. Buyurtma holati shu yerga keladi.'
+      : 'Менеджер скоро с вами свяжется. Если хотите быстрее, нажмите кнопку ниже и отправьте текст заказа. Статус заявки будет приходить сюда.',
+  ].join('\n');
+}
+function managerText(o, n) {
+  const uz = o.lang === 'uz';
+  return [uz ? `Assalomu alaykum! Saytdagi buyurtma №${n}:` : `Здравствуйте! Заявка №${n} с сайта:`, '', ordItems(o), '',
+    `${uz ? 'Jami' : 'Итого'}: ${money(o.total)} uzs`, `${uz ? 'Konsol' : 'Консоль'}: ${o.console || ''}`, `${uz ? 'Ism' : 'Имя'}: ${o.name || ''}`].join('\n');
+}
+async function ordRender(env, n, o) {
+  if (!o.mid) return;
+  const st = o.status && ORD_ST[o.status];
+  const sum = o.row[11];
+  const lines = [o.html];
+  if (o.client) lines.push('', `📲 Клиент подтвердил в боте${o.clientName ? ` (${esc(o.clientName)})` : ''}, статусы ему приходят`);
+  if (st) lines.push('', `<b>Статус: ${st.icon} ${st.label}</b>${sum ? ` — ${money(sum)} uzs` : ''}`);
+  await ordTg(env, 'editMessageText', { chat_id: env.CHAT_ID, message_id: o.mid, text: lines.join('\n'), parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: ordKb(n, o.status) });
+}
+async function clientStart(env, msg, code) {
+  const chat = msg.chat.id;
+  const lang = /^uz/.test(msg.from?.language_code || '') ? 'uz' : 'ru';
+  const n = code && /^[a-z0-9]{8,32}$/.test(code) ? await env.STORE.get(`ordc:${code}`) : null;
+  const raw = n && await env.STORE.get(`order:${n}`);
+  if (!raw) {
+    if (!code || !/^[a-z0-9]{8,32}$/.test(code)) return clientHelp(env, chat, { lang });
+    // заявка могла ещё не дойти до этого узла Cloudflare (до минуты): даём кнопку повторной проверки
+    return ordTg(env, 'sendMessage', { chat_id: chat,
+      text: lang === 'uz' ? '⏳ Buyurtmangiz yuklanmoqda. Bir daqiqadan so‘ng pastdagi tugmani bosing.' : '⏳ Заявка ещё загружается. Нажмите кнопку ниже через минуту.',
+      reply_markup: { inline_keyboard: [[{ text: lang === 'uz' ? '🔄 Tekshirish' : '🔄 Проверить заявку', callback_data: `chk:${code}` }]] } });
+  }
+  const o = JSON.parse(raw);
+  const first = !o.client;
+  o.client = chat;
+  o.clientName = msg.from?.username ? `@${msg.from.username}` : [msg.from?.first_name, msg.from?.last_name].filter(Boolean).join(' ');
+  await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 });
+  await ordTg(env, 'sendMessage', { chat_id: chat, text: clientConfirm(o, n), reply_markup: { inline_keyboard: [[{ text: L(o, 'write'), url: `${MANAGER}?text=${encodeURIComponent(managerText(o, n))}` }]] } });
+  if (first) await ordRender(env, n, o);
+}
+async function clientHelp(env, chat, o) {
+  const uz = o.lang === 'uz';
+  await ordTg(env, 'sendMessage', { chat_id: chat,
+    text: uz ? 'Bu PS SHOP buyurtmalar boti. Bu yerga saytdagi buyurtmangiz tasdig‘i va holati keladi. Savollar bo‘lsa, menejerga yozing.'
+      : 'Это бот заказов PS SHOP. Сюда приходит подтверждение и статус вашей заявки с сайта. По любым вопросам напишите менеджеру.',
+    reply_markup: { inline_keyboard: [[{ text: L(o, 'write'), url: MANAGER }], [{ text: L(o, 'site'), url: uz ? 'https://psshop.uz/' : 'https://psshop.uz/ru/' }]] } });
+}
 async function setOrderStatus(env, n, key, paid) {
   const raw = await env.STORE.get(`order:${n}`);
   if (!raw) return { ok: false, text: `Заявка №${n} не найдена` };
@@ -300,10 +376,14 @@ async function setOrderStatus(env, n, key, paid) {
   const sum = key === 'buy' ? Number(o.row[5]) || 0 : key === 'disc' ? paid : '';
   o.row[7] = st.label; o.row[11] = sum; o.row[12] = Date.now(); o.status = key;
   await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 });
-  const line = `\n\n<b>Статус: ${st.icon} ${st.label}</b>${sum ? ` — ${money(sum)} uzs` : ''}`;
-  if (o.mid) await ordTg(env, 'editMessageText', { chat_id: env.CHAT_ID, message_id: o.mid, text: o.html + line, parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: ordKb(n, key) });
+  await ordRender(env, n, o);
   await toSheet(env, o.row);
-  return { ok: true, text: `${st.icon} ${st.label}` };
+  if (o.client && o.notified !== key && CLIENT_MSG[key]) {
+    const t = CLIENT_MSG[key][o.lang === 'uz' ? 'uz' : 'ru'](n);
+    const r = await ordTg(env, 'sendMessage', { chat_id: o.client, text: t, reply_markup: { inline_keyboard: [[{ text: L(o, 'write'), url: MANAGER }]] } });
+    if (r.ok) { o.notified = key; await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 }); }
+  }
+  return { ok: true, text: `${st.icon} ${st.label}${o.client ? '' : ' (клиент не в боте, ему не пришло)'}` };
 }
 async function handleOrderBot(req, env, ctx) {
   const secret = env.STORE && await env.STORE.get('orderbot:secret');
@@ -313,6 +393,8 @@ async function handleOrderBot(req, env, ctx) {
   const q = u.callback_query;
   if (q) {
     const ans = (text, alert) => json({ method: 'answerCallbackQuery', callback_query_id: q.id, text, show_alert: !!alert }, 200);
+    const ck = /^chk:([a-z0-9]{8,32})$/.exec(q.data || '');
+    if (ck && q.message?.chat) { await clientStart(env, { chat: q.message.chat, from: q.from }, ck[1]); return ans(''); }
     if (String(q.from?.id) !== owner) return ans('Нет доступа');
     const m = /^ord:(\d+):(buy|disc|wait|no)$/.exec(q.data || '');
     if (!m) return ans('');
@@ -326,6 +408,11 @@ async function handleOrderBot(req, env, ctx) {
     return ans(r.text, !r.ok);
   }
   const msg = u.message;
+  if (msg && msg.chat?.type === 'private') {
+    const st = /^\/start(?:\s+(\S+))?/.exec(msg.text || '');
+    if (st) { await clientStart(env, msg, st[1]); return new Response('ok'); }
+    if (String(msg.chat.id) !== owner) { await clientHelp(env, msg.chat.id, { lang: /^uz/.test(msg.from?.language_code || '') ? 'uz' : 'ru' }); return new Response('ok'); }
+  }
   if (msg && String(msg.chat?.id) === owner && msg.text) {
     const n = await env.STORE.get('orderbot:await');
     if (n) {

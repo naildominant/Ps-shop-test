@@ -148,22 +148,24 @@
     const items = cart.map((i) => { const x = info(i); return { id: i.id, title: x.title, option: x.opt, price: x.price }; });
     track('order_submit', { total: total(), items: items.length });
     visit.mark('order', total());
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
+    let url = `${PS.manager}?text=${encodeURIComponent(text)}`;
     if (PS.api) {
+      url = `${PS.bot}?start=${code}`;
       try {
         fetch(`${PS.api}/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true,
-          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, lang: UZ ? 'uz' : 'ru', vid: store.get('ps.vid', ''), website: d.website }) })
+          body: JSON.stringify({ name: d.name, contact: d.contact, console: d.console, items, total: total(), page: location.pathname, lang: UZ ? 'uz' : 'ru', vid: store.get('ps.vid', ''), code, website: d.website }) })
           .catch(() => {});
-      } catch { /* заявка всё равно уйдёт текстом в Telegram */ }
+      } catch { /* */ }
     }
     try { navigator.clipboard?.writeText(text).catch(() => {}); } catch { /* */ }
-    const url = `${PS.manager}?text=${encodeURIComponent(text)}`;
     $('#cart-body').innerHTML = `<div class="done"><h3>${T('Заявка принята', 'Ariza qabul qilindi')}</h3>
-      <p>${T('Сейчас откроется Telegram с текстом заказа. Отправьте его менеджеру, и мы сразу ответим.', 'Hozir buyurtma matni bilan Telegram ochiladi. Uni menejerga yuboring, darhol javob beramiz.')}</p>
-      <a class="btn btn-main btn-block" href="${url}" target="_blank" rel="noopener" data-track="tg_after_order">${T('Открыть Telegram', 'Telegramni ochish')}</a>
-      <p class="hint">${T('Текст заказа мы скопировали. Если он не подставился, вставьте его в чат.', 'Buyurtma matnini nusxaladik. Agar o‘zi qo‘yilmasa, chatga joylashtiring.')}</p></div>`;
+      <p>${T('Сейчас откроется наш Telegram-бот. Нажмите в нём «Старт»: бот пришлёт подтверждение заказа, а потом сообщит, когда заказ выполнен.', 'Hozir Telegram-botimiz ochiladi. Unda «Start» tugmasini bosing: bot buyurtma tasdig‘ini yuboradi, keyin buyurtma bajarilganini xabar qiladi.')}</p>
+      <a class="btn btn-main btn-block" href="${url}" target="_blank" rel="noopener" data-track="tg_after_order">${T('Получить подтверждение', 'Tasdiqni olish')}</a>
+      <p class="hint">${T('Менеджер свяжется с вами. Написать ему можно прямо из бота.', 'Menejer siz bilan bog‘lanadi. Unga botdan ham yozishingiz mumkin.')}</p></div>`;
     cart = []; save();
     track('tg_redirect');
-    setTimeout(() => { location.href = url; }, 700);
+    setTimeout(() => { location.href = url; }, 900);
   }
 
   /* ---------- события ---------- */
