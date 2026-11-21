@@ -651,7 +651,7 @@ async function publishAsOwner(env, q, chat, mid, post) {
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
 const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё', BTN_FIND = '🔎 Найти игру';
-const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
 
 // ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
@@ -1331,6 +1331,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
