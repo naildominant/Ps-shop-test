@@ -657,8 +657,9 @@ const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ tex
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
 // Индексы в KV: tgpost:chindex [{id,t}] (посты канала с ценой), tgpost:supindex [название] (каталог поставщика).
 const ROMAN = { i: '1', ii: '2', iii: '3', iv: '4', v: '5', vi: '6', vii: '7', viii: '8', ix: '9', x: '10' };
-const gnorm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/[^a-z0-9а-я]+/g, ' ').trim()
-  .split(' ').map((w) => ROMAN[w] || w).join(' ');
+const STOP = new Set(['the', 'marvels', 'marvel', 'tom', 'clancys', 'sid', 'meiers', 'edition', 'standard', 'game', 'of', 'and', 'игра', 'издание']);
+const gnorm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/[^a-z0-9а-я]+/g, ' ').trim()
+  .split(' ').map((w) => ROMAN[w] || w).filter((w) => w && !STOP.has(w)).join(' ');
 function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
 function dice(a, b) {
   const x = bigrams(a), y = bigrams(b);
@@ -677,20 +678,43 @@ function matchTitles(q, titles) {
     if (tn.replace(/ /g, '').includes(qs) || words.every((w) => tw.some((x) => x === w || (w.length >= 3 && x.startsWith(w))))) hits.push(i);
   });
   if (hits.length) return hits;
+  titles.forEach((t, i) => { // название поста целиком внутри запроса: «Witcher 3» для «The Witcher 3 Wild Hunt»
+    const tw = gnorm(t).split(' ').filter(Boolean);
+    if (tw.length && tw.join('').length >= 4 && tw.length > words.length / 2 && tw.every((w) => words.includes(w)) && (!/\d/.test(qn) || tw.some((w) => /\d/.test(w)))) hits.push(i);
+  });
+  if (hits.length) return hits;
   const scored = titles.map((t, i) => [dice(qs, gnorm(t).replace(/ /g, '')), i]).filter(([d]) => d >= 0.62).sort((a, b) => b[0] - a[0]);
   return scored.slice(0, 3).map(([, i]) => i);
 }
+// Названия, сказанные по-русски или с ошибками («человек паук два», «гта пять») → официальные названия игр.
+async function gameNames(env, text) {
+  if (!env.AI) return null;
+  try {
+    const r = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { max_tokens: 600, messages: [{ role: 'user', content:
+      'Владелец магазина игр PlayStation перечислил игры (возможно голосом, по-русски, с ошибками распознавания). Для КАЖДОЙ упомянутой игры, по порядку, дай официальное название на английском (как в PlayStation Store, номер части цифрой) и как её обычно называют по-русски. Не добавляй игр, которых нет в тексте. Ответ — только JSON-массив объектов {"en": "...", "ru": "...", "said": "как сказал владелец"}.\nТекст: ' + text.slice(0, 800) }] });
+    const out = String(r?.choices?.[0]?.message?.content ?? r?.response ?? '');
+    const arr = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1));
+    return Array.isArray(arr) && arr.length ? arr.slice(0, 15).map((x) => ({ en: String(x.en || ''), ru: String(x.ru || ''), said: String(x.said || x.en || '') })) : null;
+  } catch { return null; }
+}
+
 async function findGames(env, chat, text) {
   const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]');
   const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
   const ch = env.TGPOST_CHANNEL || '@psshopgo';
-  const qs = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15);
+  const parts = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15);
+  const names = await gameNames(env, text);
+  const qs = names ? names.map((x) => x.en || x.said) : parts;
+  const alt = names ? names.map((x) => [x.ru, x.said].filter(Boolean)) : parts.map(() => []);
+  if (names) await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Ищу: ${qs.join(', ')}` });
   if (!qs.length) return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки.');
   await remember(env, { task: `найти игры для клиента: ${qs.join(', ')}`, mode: 'find' });
   const none = [], make = [];
   let sent = 0;
-  for (const q of qs) {
-    const hits = matchTitles(q, idx.map((x) => x.t));
+  for (let qi = 0; qi < qs.length; qi++) {
+    const q = qs[qi];
+    let hits = matchTitles(q, idx.map((x) => x.t));
+    for (const a of alt[qi]) if (!hits.length) hits = matchTitles(a, idx.map((x) => x.t));
     if (hits.length) {
       const best = new Map();
       for (const i of hits) { const k = gnorm(idx[i].t); if (!best.has(k) || idx[i].id > best.get(k).id) best.set(k, idx[i]); }
@@ -700,7 +724,8 @@ async function findGames(env, chat, text) {
       }
       continue;
     }
-    const sh = matchTitles(q, sup);
+    let sh = matchTitles(q, sup);
+    for (const a of alt[qi]) if (!sh.length) sh = matchTitles(a, sup);
     if (sh.length) make.push({ q, sup: sh.slice(0, 3).map((i) => sup[i]) }); else none.push(q);
   }
   const notes = [];
@@ -795,8 +820,27 @@ function describeMessage(m) {
   return t;
 }
 
+// Голосовое владельца → текст (Workers AI Whisper), дальше как обычное сообщение.
+async function transcribe(env, fileId) {
+  const f = await tg(env, 'getFile', { file_id: fileId });
+  if (!f.ok) throw new Error('не смог скачать голосовое');
+  const buf = new Uint8Array(await (await fetch(`https://api.telegram.org/file/bot${await botToken(env)}/${f.result.file_path}`)).arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+  const r = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: btoa(bin), language: 'ru' });
+  return String(r?.text || '').trim();
+}
+
 async function ownerMessage(env, m) {
   const chat = m.chat.id;
+  const voice = m.voice || m.audio || m.video_note;
+  if (voice && env.AI) {
+    let text = '';
+    try { text = await transcribe(env, voice.file_id); } catch (e) { return say(env, chat, `⚠️ Не получилось разобрать голосовое: ${e.message}. Попробуйте ещё раз или напишите текстом.`); }
+    if (!text) return say(env, chat, '🎤 Не расслышал 🤔 Скажите ещё раз или напишите текстом.');
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
+    return ownerMessage(env, { ...m, voice: undefined, audio: undefined, video_note: undefined, text, caption: undefined, entities: [] });
+  }
   const t = (m.text || m.caption || '').trim();
   const ents = (m.entities || m.caption_entities || []).filter((e) => e.type === 'custom_emoji');
   const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
@@ -1278,6 +1322,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
