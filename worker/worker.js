@@ -503,7 +503,7 @@ async function handleTgPost(req, env, ctx) {
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
   const [action, idsPart, post] = String(q.data || '').split(':');
-  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', prfix: 'есть правки к ценам', later: 'отправить позже', story: 'выложить в историю' }[action];
+  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', prfix: 'есть правки к ценам', prok: 'отчёт по ценам принят', later: 'отправить позже', story: 'выложить в историю' }[action];
   if (said && env.STORE) await remember(env, { result: `владелец нажал: ${said}${post ? ' (' + post + ')' : ''}` });
 
   if (action === 'no') {
@@ -544,6 +544,10 @@ async function handleTgPost(req, env, ctx) {
     await setStatus(env, post, { status: 'deleted' });
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
+  }
+  if (action === 'prok') {
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Принято', callback_data: 'x' }]]) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Принято' }, 200);
   }
   if (action === 'prfix') {
     await env.STORE.put('tgpost:await', 'prices', { expirationTtl: 60 * 60 * 24 * 3 });
@@ -864,15 +868,15 @@ async function handleAgentReport(req, env) {
   const text = String(b.text || '').slice(0, 20000), day = String(b.day || '');
   if (!text) return json({ ok: false, error: 'bad input' }, 400);
   await env.STORE.put('tgpost:report', JSON.stringify({ text, day, ts: Date.now() }), { expirationTtl: 60 * 60 * 24 * 3 });
-  if (b.now) await sendPriceReport(env, true);
-  return json({ ok: true }, 200);
+  const sent = b.now ? await sendPriceReport(env, true, { text, day }) : null;
+  return json({ ok: true, sent }, 200);
 }
-async function sendPriceReport(env, force) {
+async function sendPriceReport(env, force, given) {
   const chat = env.TGPOST_OWNER;
-  const rep = JSON.parse(await env.STORE.get('tgpost:report') || 'null');
+  const rep = given ? { ...given, ts: Date.now() } : JSON.parse(await env.STORE.get('tgpost:report') || 'null');
   const fresh = rep && Date.now() - rep.ts < 1000 * 60 * 60 * 20;
   if (!fresh && !force) return tg(env, 'sendMessage', { chat_id: chat, text: '⚠️ Утренняя проверка цен ещё не закончилась или не сработала — посмотрю.' });
-  if (!rep) return;
+  if (!rep) return 'нет отчёта';
   const parts = [];
   let cur = '';
   for (const block of rep.text.split('\n\n')) {
@@ -881,10 +885,12 @@ async function sendPriceReport(env, force) {
   if (cur) parts.push(cur);
   for (let i = 0; i < parts.length; i++) {
     const last = i === parts.length - 1;
-    await tg(env, 'sendMessage', { chat_id: chat, text: parts[i], link_preview_options: { is_disabled: true }, ...(last ? { reply_markup: kb([[{ text: '✏️ Есть правки', callback_data: 'prfix::' }]]) } : {}) });
+    const r = await tg(env, 'sendMessage', { chat_id: chat, text: parts[i], link_preview_options: { is_disabled: true }, ...(last ? { reply_markup: kb([[{ text: '✅ Принято', callback_data: 'prok::' }, { text: '✏️ Есть правки', callback_data: 'prfix::' }]]) } : {}) });
+    if (!r.ok) return `telegram: ${r.description}`;
   }
   await env.STORE.delete('tgpost:report');
   await remember(env, { result: `утренний отчёт по ценам ${rep.day} отправлен` });
+  return 'отправлен';
 }
 
 // «БЫЛО» (пересланный пост канала) → «СТАЛО» (тот же пост с новым текстом) → кнопки Да / Нет / Правки.
@@ -1180,6 +1186,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
