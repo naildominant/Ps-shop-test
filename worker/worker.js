@@ -503,7 +503,7 @@ async function handleTgPost(req, env, ctx) {
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
   const [action, idsPart, post] = String(q.data || '').split(':');
-  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', later: 'отправить позже', story: 'выложить в историю' }[action];
+  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', later: 'отправить позже', story: 'выложить в историю' }[action];
   if (said && env.STORE) await remember(env, { result: `владелец нажал: ${said}${post ? ' (' + post + ')' : ''}` });
 
   if (action === 'no') {
@@ -545,8 +545,15 @@ async function handleTgPost(req, env, ctx) {
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
+  if (action === 'fixp') {
+    if (!/^\d+$/.test(idsPart)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+    await env.STORE.put('tgpost:await', `upd-${idsPart}`, { expirationTtl: 60 * 60 * 24 * 3 });
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✏️ Жду правки', callback_data: 'x' }]]) });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '✏️ Что поменять в этом посте? Напишите одним сообщением, я пришлю новый вариант «было / стало».' });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Жду правки' }, 200);
+  }
   if (action === 'keep') {
-    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '👌 Оставили как есть', callback_data: 'x' }]]) });
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '👌 Оставили как было', callback_data: 'x' }]]) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Оставили' }, 200);
   }
   if (action === 'upd') {
@@ -845,6 +852,40 @@ async function tgForm(env, method, form) {
   return r.json();
 }
 
+// «БЫЛО» (пересланный пост канала) → «СТАЛО» (тот же пост с новым текстом) → кнопки Да / Нет / Правки.
+async function handleAgentReview(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const b = await req.json().catch(() => ({}));
+  const id = Number(String(b.msg || '').replace(/\D/g, '')), html = String(b.html || ''), note = String(b.note || '').slice(0, 600);
+  if (!id || !html) return json({ ok: false, error: 'bad input' }, 400);
+  const chat = env.TGPOST_OWNER, ch = env.TGPOST_CHANNEL || '@psshopgo';
+  const link = `https://t.me/${ch.replace('@', '')}/${id}`;
+  const strip = (x) => x.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1');
+  await clearWait(env);
+  await tg(env, 'sendMessage', { chat_id: chat, text: '⬇️ БЫЛО' });
+  const fw = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: id });
+  if (!fw.ok) await tg(env, 'sendMessage', { chat_id: chat, text: `(не смог показать пост: ${link})` });
+  await tg(env, 'sendMessage', { chat_id: chat, text: '⬇️ СТАЛО' });
+  let r = null;
+  const media = fw.ok && (fw.result.photo || fw.result.video || fw.result.animation || fw.result.document);
+  if (media && visibleLen(html) <= 1024) {
+    r = await tg(env, 'copyMessage', { chat_id: chat, from_chat_id: ch, message_id: id, caption: html, parse_mode: 'HTML' });
+    if (!r.ok) r = await tg(env, 'copyMessage', { chat_id: chat, from_chat_id: ch, message_id: id, caption: strip(html), parse_mode: 'HTML' });
+  }
+  if (!r?.ok) {
+    r = await tg(env, 'sendMessage', { chat_id: chat, text: html, parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+    if (!r.ok) r = await tg(env, 'sendMessage', { chat_id: chat, text: strip(html), parse_mode: 'HTML', link_preview_options: { is_disabled: true } });
+  }
+  if (!r.ok) return json({ ok: false, error: r.description }, 502);
+  await tg(env, 'sendMessage', {
+    chat_id: chat, reply_to_message_id: r.result.message_id, link_preview_options: { is_disabled: true },
+    text: `${note ? '💡 ' + note + '\n\n' : ''}Пост в канале: ${link}\nМеняем?`,
+    reply_markup: kb([[{ text: '✅ Да', callback_data: `upd:${id}:` }], [{ text: '❌ Нет', callback_data: `keep:${id}:` }], [{ text: '✏️ Правки', callback_data: `fixp:${id}:` }]]),
+  });
+  await remember(env, { result: `прислал «было / стало» для поста канала ${id}${note ? ': ' + note : ''}` });
+  return json({ ok: true }, 200);
+}
+
 async function handleAgentPreview(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const fd = await req.formData();
@@ -1070,6 +1111,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/register-gh') return handleTgPostRegisterGh(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/review') return handleAgentReview(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file-path') {
       if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1094,3 +1136,4 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
