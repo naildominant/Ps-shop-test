@@ -487,6 +487,7 @@ async function handleTgPost(req, env, ctx) {
   const cp = u.channel_post;
   if (cp) {
     const channel = (env.TGPOST_CHANNEL || '@psshopgo').replace('@', '').toLowerCase();
+    if (env.STORE && String(cp.chat?.username || '').toLowerCase() === channel) await indexChannelPost(env, cp).catch(() => {});
     const pend = env.STORE ? JSON.parse(await env.STORE.get('tgpost:pending') || 'null') : null;
     if (pend && String(cp.chat?.username || '').toLowerCase() === channel && !cp.media_group_id) {
       const link = `https://t.me/${channel}/${cp.message_id}`;
@@ -649,8 +650,90 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё';
-const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё', BTN_FIND = '🔎 Найти игру';
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+
+// ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
+// Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
+// Индексы в KV: tgpost:chindex [{id,t}] (посты канала с ценой), tgpost:supindex [название] (каталог поставщика).
+const ROMAN = { i: '1', ii: '2', iii: '3', iv: '4', v: '5', vi: '6', vii: '7', viii: '8', ix: '9', x: '10' };
+const gnorm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/[^a-z0-9а-я]+/g, ' ').trim()
+  .split(' ').map((w) => ROMAN[w] || w).join(' ');
+function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
+function dice(a, b) {
+  const x = bigrams(a), y = bigrams(b);
+  if (!x.length || !y.length) return 0;
+  const m = new Map(); for (const g of y) m.set(g, (m.get(g) || 0) + 1);
+  let n = 0; for (const g of x) if (m.get(g)) { n++; m.set(g, m.get(g) - 1); }
+  return (2 * n) / (x.length + y.length);
+}
+function matchTitles(q, titles) {
+  const qn = gnorm(q), qs = qn.replace(/ /g, '');
+  if (!qn) return [];
+  const words = qn.split(' ');
+  const hits = [];
+  titles.forEach((t, i) => {
+    const tn = gnorm(t), tw = tn.split(' ');
+    if (tn.replace(/ /g, '').includes(qs) || words.every((w) => tw.some((x) => x === w || (w.length >= 3 && x.startsWith(w))))) hits.push(i);
+  });
+  if (hits.length) return hits;
+  const scored = titles.map((t, i) => [dice(qs, gnorm(t).replace(/ /g, '')), i]).filter(([d]) => d >= 0.62).sort((a, b) => b[0] - a[0]);
+  return scored.slice(0, 3).map(([, i]) => i);
+}
+async function findGames(env, chat, text) {
+  const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]');
+  const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
+  const ch = env.TGPOST_CHANNEL || '@psshopgo';
+  const qs = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15);
+  if (!qs.length) return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки.');
+  await remember(env, { task: `найти игры для клиента: ${qs.join(', ')}`, mode: 'find' });
+  const none = [], make = [];
+  let sent = 0;
+  for (const q of qs) {
+    const hits = matchTitles(q, idx.map((x) => x.t));
+    if (hits.length) {
+      const best = new Map();
+      for (const i of hits) { const k = gnorm(idx[i].t); if (!best.has(k) || idx[i].id > best.get(k).id) best.set(k, idx[i]); }
+      for (const x of [...best.values()].sort((a, b) => b.id - a.id).slice(0, 8)) {
+        const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: x.id });
+        if (r.ok) sent++;
+      }
+      continue;
+    }
+    const sh = matchTitles(q, sup);
+    if (sh.length) make.push({ q, sup: sh.slice(0, 3).map((i) => sup[i]) }); else none.push(q);
+  }
+  const notes = [];
+  if (none.length) notes.push(`❌ Данной игры нет в наличии: ${none.join(', ')}`);
+  if (make.length) notes.push(`🛠 Нет в канале, но есть у поставщика — готовлю объявление: ${make.map((x) => x.q).join(', ')}. Пришлю, как будет готово.`);
+  if (!sent && !notes.length) notes.push('Ничего не нашёл 🤔');
+  if (notes.length) await say(env, chat, notes.join('\n\n'));
+  await remember(env, { result: `переслал постов: ${sent}${none.length ? '; нет в наличии: ' + none.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.q).join(', ') : ''}` });
+  if (make.length) {
+    const task = 'Владелец ищет для клиента игры, которых нет в канале, но они есть у поставщика. Сделай объявление по шаблону для КАЖДОЙ игры (отдельная папка и отдельная строка в out/preview.txt). Если окажется, что игры у поставщика всё-таки нет, — сообщи через say «❌ <игра> — данной игры нет в наличии».\n'
+      + make.map((x) => `- «${x.q}» (в каталоге поставщика похоже на: ${x.sup.join(' / ')})`).join('\n');
+    const err = await dispatchAgent(env, { mode: 'new_game', task });
+    if (err) return say(env, chat, `⚠️ Не получилось запустить подготовку объявления: ${err}`);
+    await waitMark(env, chat);
+  }
+}
+async function handleAgentIndex(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const b = await req.json().catch(() => ({}));
+  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150) })).filter((x) => x.id && x.t)));
+  if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
+  return json({ ok: true }, 200);
+}
+async function indexChannelPost(env, cp) {
+  const t = cp.text || cp.caption || '';
+  const first = (t.split('\n').find((l) => l.trim()) || '').trim();
+  if (first.startsWith('📰') || !/UZS|сум/i.test(t) || !(/ЦЕНА/i.test(t) || /^\s*(🎮|🟣)/u.test(t))) return; // только объявления игр
+  const title = t.split('\n').map((l) => l.replace(/[^\p{L}\p{N}:+&.'’ -]/gu, '').trim()).find((l) => (l.match(/\p{L}/gu) || []).length >= 2 && !/^(ЦЕНА|ИЗДАНИ|РУССК|АНГЛИЙ)/i.test(l));
+  if (!title) return;
+  const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]').filter((x) => x.id !== cp.message_id);
+  idx.unshift({ id: cp.message_id, t: title });
+  await env.STORE.put('tgpost:chindex', JSON.stringify(idx));
+}
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
 const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
 
@@ -720,8 +803,16 @@ async function ownerMessage(env, m) {
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
   if (t === BTN_CANCEL || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
+  if (t === BTN_FIND) {
+    await env.STORE.put('tgpost:find', '1', { expirationTtl: 60 * 30 });
+    return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки. Например: «Spider-Man, FC 26, GTA 5».');
+  }
+  if (t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL].includes(t) && !t.startsWith('/') && !photo && !m.forward_origin && await env.STORE.get('tgpost:find')) {
+    await env.STORE.delete('tgpost:find');
+    return findGames(env, chat, t);
+  }
   const waitTime = await env.STORE.get('tgpost:awaittime');
-  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL].includes(t) && !t.startsWith('/')) {
+  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL, BTN_FIND].includes(t) && !t.startsWith('/')) {
     const ms = parseTime(t);
     if (!ms) return say(env, chat, 'Не понял время 🤔 Напишите, например: «19:30», «завтра 10:00» или «25.11 18:00».');
     const r = await scheduleAt(env, chat, waitTime, Math.floor(ms / 1000));
@@ -1161,6 +1252,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/review') return handleAgentReview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/report') return handleAgentReport(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/index') return handleAgentIndex(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file-path') {
       if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1186,6 +1278,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
