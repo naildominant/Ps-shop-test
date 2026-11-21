@@ -657,8 +657,8 @@ const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }]], resiz
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
 // Индексы в KV: tgpost:chindex [{id,t}] (посты канала с ценой), tgpost:supindex [название] (каталог поставщика).
 const ROMAN = { i: '1', ii: '2', iii: '3', iv: '4', v: '5', vi: '6', vii: '7', viii: '8', ix: '9', x: '10' };
-const STOP = new Set(['the', 'marvels', 'marvel', 'tom', 'clancys', 'sid', 'meiers', 'edition', 'standard', 'game', 'of', 'and', 'игра', 'издание']);
-const gnorm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/[^a-z0-9а-я]+/g, ' ').trim()
+const STOP = new Set(['ea', 'sports', 'the', 'marvels', 'marvel', 'tom', 'clancys', 'sid', 'meiers', 'edition', 'standard', 'game', 'of', 'and', 'игра', 'издание']);
+const gnorm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/\bfifa (2[4-9])\b/g, 'fc $1').replace(/[^a-z0-9а-я]+/g, ' ').trim()
   .split(' ').map((w) => ROMAN[w] || w).filter((w) => w && !STOP.has(w)).join(' ');
 function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
 function dice(a, b) {
@@ -668,7 +668,7 @@ function dice(a, b) {
   let n = 0; for (const g of x) if (m.get(g)) { n++; m.set(g, m.get(g) - 1); }
   return (2 * n) / (x.length + y.length);
 }
-function matchTitles(q, titles) {
+function matchTitles(q, titles, opt = {}) {
   const qn = gnorm(q), qs = qn.replace(/ /g, '');
   if (!qn) return [];
   const words = qn.split(' ');
@@ -682,75 +682,132 @@ function matchTitles(q, titles) {
     const tw = gnorm(t).split(' ').filter(Boolean);
     if (tw.length && tw.join('').length >= 4 && tw.length > words.length / 2 && tw.every((w) => words.includes(w)) && (!/\d/.test(qn) || tw.some((w) => /\d/.test(w)))) hits.push(i);
   });
-  if (hits.length) return hits;
+  if (hits.length || opt.strict) return hits;
   const scored = titles.map((t, i) => [dice(qs, gnorm(t).replace(/ /g, '')), i]).filter(([d]) => d >= 0.62).sort((a, b) => b[0] - a[0]);
   return scored.slice(0, 3).map(([, i]) => i);
 }
-// Названия, сказанные по-русски или с ошибками («человек паук два», «гта пять») → официальные названия игр.
-async function gameNames(env, text) {
-  if (!env.AI) return null;
-  try {
-    const r = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', { max_tokens: 600, messages: [{ role: 'user', content:
-      'Владелец магазина игр PlayStation перечислил игры (возможно голосом, по-русски, с ошибками распознавания). Для КАЖДОЙ упомянутой игры, по порядку, дай официальное название на английском (как в PlayStation Store, номер части цифрой) и как её обычно называют по-русски. Не добавляй игр, которых нет в тексте. НЕ добавляй год, номер части, издание или подзаголовок, если владелец их не назвал (сказал «эф один» — пиши «F1», а не «F1 2022»). Ответ — только JSON-массив объектов {"en": "...", "ru": "...", "said": "как сказал владелец"}.\nТекст: ' + text.slice(0, 800) }] });
-    const out = String(r?.choices?.[0]?.message?.content ?? r?.response ?? '');
-    const arr = JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1));
-    return Array.isArray(arr) && arr.length ? arr.slice(0, 15).map((x) => ({ en: String(x.en || ''), ru: String(x.ru || ''), said: String(x.said || x.en || '') })) : null;
-  } catch { return null; }
+// ── Понимание запроса: нейросеть получает запрос владельца и каталог ОБЪЯВЛЕНИЙ ИГР канала и выбирает нужные.
+const LLM = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+async function llmJson(env, prompt, maxTokens = 900) {
+  const r = await env.AI.run(LLM, { max_tokens: maxTokens, temperature: 0, messages: [{ role: 'user', content: prompt }] });
+  const out = String(r?.choices?.[0]?.message?.content ?? r?.response ?? '');
+  return JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1));
+}
+const HINTS = 'Русские и разговорные названия: Ведьмак = The Witcher, Человек-паук = Spider-Man, Майлз Моралес = Spider-Man Miles Morales, ГТА = GTA (Grand Theft Auto), РДР = Red Dead Redemption, Одни из нас = The Last of Us, Бог войны = God of War, Призрак Цусимы = Ghost of Tsushima, Фифа/ФК = EA Sports FC / FIFA, Эф один/Формула 1 = F1 (гонки, НЕ FC), Призрак Ётэй/Ёотэй/Йотей = Ghost of Yōtei (НЕ Tsushima), Стеллар блейд = Stellar Blade, Год оф вар/Годофвар = God of War, Рагнарёк = Ragnarök, Элден ринг = Elden Ring, Анчартед = Uncharted, Детройт = Detroit: Become Human, Гран туризмо = Gran Turismo, Форза = Forza Horizon, Ратчет = Ratchet & Clank, Колда/Кол оф дьюти = Call of Duty, Мортал комбат = Mortal Kombat, Ассасин = Assassin\'s Creed, Хогвартс = Hogwarts Legacy, Киберпанк = Cyberpunk 2077, Резидент = Resident Evil, Ласт оф ас = The Last of Us. Числа словами = цифры («пять» = 5, «шесть» = 6, «два» = 2). Текст мог быть распознан из голоса с ошибками — угадывай по звучанию.';
+
+// Каталог: одно объявление на название (самое свежее).
+function uniqueCatalog(idx) {
+  const best = new Map();
+  for (const x of idx) { const k = gnorm(x.t); if (k && (!best.has(k) || x.id > best.get(k).id)) best.set(k, x); }
+  return [...best.values()];
+}
+
+// «гта шесть», «фифа двадцать шесть» → число, если нейросеть его потеряла
+const NUMW = { 'один': 1, 'одна': 1, 'первая': 1, 'два': 2, 'две': 2, 'вторая': 2, 'три': 3, 'третья': 3, 'четыре': 4, 'четвертая': 4, 'пять': 5, 'пятая': 5, 'шесть': 6, 'шестая': 6, 'семь': 7, 'восемь': 8, 'девять': 9, 'десять': 10, 'одиннадцать': 11, 'двенадцать': 12, 'тринадцать': 13, 'четырнадцать': 14, 'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30 };
+function spokenNumber(said) {
+  const d = String(said).match(/\b\d{1,4}\b/); if (d) return d[0];
+  const w = String(said).toLowerCase().replace(/ё/g, 'е').split(/[^а-я]+/);
+  let n = 0;
+  for (const x of w) if (NUMW[x]) n = n >= 20 && NUMW[x] < 10 ? n + NUMW[x] : NUMW[x];
+  return n ? String(n) : '';
+}
+// Числа в названии (часть игры): «Resident Evil 4» не должен находить «Resident Evil 2».
+function partOk(official, title) {
+  const want = (gnorm(official).match(/\b\d{1,2}\b/g) || []);
+  if (!want.length) return true;
+  const have = gnorm(title).match(/\b\d{1,4}\b/g) || [];
+  return want.every((n) => have.includes(n));
+}
+
+async function resolveGames(env, text) {
+  const idx = uniqueCatalog(JSON.parse(await env.STORE.get('tgpost:chindex') || '[]'));
+  const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
+  const byId = new Map(idx.map((x) => [x.id, x]));
+  let items = null;
+  if (env.AI) {
+    try { // шаг 1: какие игры просит владелец (каждая отдельно, официальное английское название)
+      const arr = await llmJson(env, `Владелец магазина игр PlayStation назвал игры (текст мог быть распознан из голоса с ошибками).
+${HINTS}
+Текст: «${text.slice(0, 600)}»
+Перечисли КАЖДУЮ названную игру по порядку, ни одной не пропусти и не добавляй лишних. "official" — ВСЕГДА официальное английское название латиницей; номер части — цифрой, только если владелец его назвал; год и издание не выдумывай. "ru" — как игру называют по-русски (например «Ведьмак 3: Дикая Охота»), если есть. "series": true, если назвал серию без номера части.
+Ответ — только JSON-массив: [{"said": "как сказал", "official": "...", "ru": "...", "series": false}]`, 600);
+      if (Array.isArray(arr) && arr.length) items = arr.slice(0, 15).map((x) => ({ asked: String(x.said || x.official || ''), official: String(x.official || x.said || ''), ru: String(x.ru || ''), series: !!x.series, posts: [] }));
+    } catch { items = null; }
+  }
+  if (!items) items = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15).map((q) => ({ asked: q, official: q, series: !/\d/.test(q), posts: [] }));
+  for (const it of items) {
+    const num = spokenNumber(it.asked);
+    if (num && !/\d/.test(gnorm(it.official))) { it.official += ' ' + num; it.series = false; }
+    // точное сравнение названий: английское → русское → как сказал (первое, что нашлось)
+    for (const q of [it.official, it.ru, it.asked]) {
+      if (it.posts.length || !q) continue;
+      it.posts = matchTitles(q, idx.map((x) => x.t), { strict: true }).map((i) => idx[i].id);
+    }
+    if (!it.series) it.posts = it.posts.filter((id) => partOk(it.official, byId.get(id).t));
+  }
+  // нет в канале → каталог поставщика: кандидаты по буквам, выбор — нейросетью
+  for (const it of items) {
+    if (it.posts.length) continue;
+    const cand = new Set();
+    for (const q of [it.official, it.asked, it.official.replace(/\b(19|20)\d{2}\b/g, '')]) for (const i of matchTitles(q, sup)) cand.add(sup[i]);
+    const qs = gnorm(it.official).replace(/ /g, '');
+    sup.map((t) => [dice(qs, gnorm(t).replace(/ /g, '')), t]).sort((a, b) => b[0] - a[0]).slice(0, 15).forEach(([, t]) => cand.add(t));
+    const list = [...cand].slice(0, 30);
+    it.supplier = null;
+    if (env.AI && list.length) {
+      try {
+        const pick = await llmJson(env, `Владелец магазина ищет игру «${it.asked}» (официально: «${it.official}»). ${HINTS}
+Вот названия из каталога поставщика:
+${list.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+Какое из них — ИМЕННО эта игра (та же часть)? Если владелец не назвал часть — самая новая часть. Если ни одно не подходит — 0.
+Ответ — только JSON-массив из одного числа, например [3] или [0].`, 20);
+        const n = Number(pick?.[0]);
+        if (n > 0 && n <= list.length) it.supplier = list[n - 1];
+      } catch { it.supplier = null; }
+    } else if (list.length && matchTitles(it.official, sup).length) it.supplier = sup[matchTitles(it.official, sup)[0]];
+  }
+  return items.map((it) => ({ ...it, posts: it.posts.map((id) => byId.get(id)) }));
 }
 
 async function findGames(env, chat, text) {
-  const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]');
-  const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
+  if (!text.trim()) return say(env, chat, '🔎 Напишите или скажите названия игр.');
+  await remember(env, { task: `найти игры для клиента: ${text}`, mode: 'find' });
   const ch = env.TGPOST_CHANNEL || '@psshopgo';
-  const parts = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15);
-  const names = await gameNames(env, text);
-  const qs = names ? names.map((x) => x.en || x.said) : parts;
-  const alt = names ? names.map((x) => [x.ru, x.said].filter(Boolean)) : parts.map(() => []);
-  if (names) await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Ищу: ${qs.join(', ')}` });
-  if (!qs.length) return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки.');
-  await remember(env, { task: `найти игры для клиента: ${qs.join(', ')}`, mode: 'find' });
+  const items = await resolveGames(env, text);
+  if (!items.length) return say(env, chat, 'Не понял, какие игры нужны 🤔 Скажите ещё раз.');
+  await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Понял: ${items.map((x) => x.official || x.asked).join(', ')}` });
   const none = [], make = [];
   let sent = 0;
-  for (let qi = 0; qi < qs.length; qi++) {
-    const q = qs[qi];
-    let hits = matchTitles(q, idx.map((x) => x.t));
-    for (const a of alt[qi]) if (!hits.length) hits = matchTitles(a, idx.map((x) => x.t));
-    if (hits.length) {
-      // одно и то же название + русские слова сверху («GTA 6 выходит через 10 дней») — старый анонс, не шлём, если есть точное объявление
-      const qn = gnorm(q), exact = hits.some((i) => gnorm(idx[i].t) === qn);
-      if (exact) hits = hits.filter((i) => { const tn = gnorm(idx[i].t); return tn === qn || !(tn.startsWith(qn + ' ') && /[а-я]/.test(tn.slice(qn.length))); });
-      const best = new Map();
-      for (const i of hits) { const k = gnorm(idx[i].t); if (!best.has(k) || idx[i].id > best.get(k).id) best.set(k, idx[i]); }
-      for (const x of [...best.values()].sort((a, b) => b.id - a.id).slice(0, 8)) {
+  for (const it of items) {
+    if (it.posts.length) {
+      for (const x of it.posts.sort((a, b) => b.id - a.id).slice(0, 6)) {
         const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: x.id });
         if (r.ok) sent++;
       }
-      continue;
-    }
-    let sh = matchTitles(q, sup);
-    for (const a of alt[qi]) if (!sh.length) sh = matchTitles(a, sup);
-    const noYear = q.replace(/\b(19|20)\d{2}\b/g, '').trim(); // «F1 2022» → «F1»: год мог придумать распознаватель
-    if (!sh.length && noYear && noYear !== q) {
-      const h2 = matchTitles(noYear, idx.map((x) => x.t));
-      if (h2.length) { for (const i of h2.slice(0, 4)) { const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: idx[i].id }); if (r.ok) sent++; } continue; }
-      sh = matchTitles(noYear, sup);
-    }
-    if (sh.length) make.push({ q, sup: sh.slice(0, 3).map((i) => sup[i]) }); else none.push(q);
+    } else if (it.supplier) make.push(it); else none.push(it.official || it.asked);
   }
   const notes = [];
   if (none.length) notes.push(`❌ Данной игры нет в наличии: ${none.join(', ')}`);
-  if (make.length) notes.push(`🛠 Нет в канале, но есть у поставщика — готовлю объявление: ${make.map((x) => x.q).join(', ')}. Пришлю, как будет готово.`);
-  if (!sent && !notes.length) notes.push('Ничего не нашёл 🤔');
+  if (make.length) notes.push(`🛠 Нет в канале, но есть у поставщика — готовлю объявление: ${make.map((x) => x.supplier).join(', ')}. Пришлю, как будет готово.`);
   if (notes.length) await say(env, chat, notes.join('\n\n'));
-  await remember(env, { result: `переслал постов: ${sent}${none.length ? '; нет в наличии: ' + none.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.q).join(', ') : ''}` });
+  await remember(env, { result: `переслал объявлений: ${sent}${none.length ? '; нет в наличии: ' + none.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.supplier).join(', ') : ''}` });
   if (make.length) {
-    const task = 'Владелец ищет для клиента игры, которых нет в канале, но они есть у поставщика. Сделай объявление по шаблону для КАЖДОЙ игры (отдельная папка и отдельная строка в out/preview.txt). Если окажется, что игры у поставщика всё-таки нет, — сообщи через say «❌ <игра> — данной игры нет в наличии».\n'
-      + make.map((x) => `- «${x.q}» (в каталоге поставщика похоже на: ${x.sup.join(' / ')})`).join('\n');
+    const task = 'Владелец ищет для клиента игры, которых нет в канале, но они есть у поставщика. Сделай объявление по шаблону для КАЖДОЙ игры (отдельная папка и отдельная строка в out/preview.txt). Название у поставщика указано точно.\n'
+      + make.map((x) => `- ${x.supplier} (владелец сказал: «${x.asked}»)`).join('\n');
     const err = await dispatchAgent(env, { mode: 'new_game', task });
     if (err) return say(env, chat, `⚠️ Не получилось запустить подготовку объявления: ${err}`);
     await waitMark(env, chat);
   }
 }
+// Проверка поиска без отправки в Telegram: GET /tgpost/findtest?key=<KV tgpost:testkey>&q=...
+async function handleFindTest(req, env) {
+  const u = new URL(req.url);
+  const key = await env.STORE.get('tgpost:testkey');
+  if (!key || u.searchParams.get('key') !== key) return json({ ok: false }, 403);
+  const items = await resolveGames(env, u.searchParams.get('q') || '');
+  return json(items.map((x) => ({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null })), 200);
+}
+
 async function handleAgentIndex(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const b = await req.json().catch(() => ({}));
@@ -758,13 +815,19 @@ async function handleAgentIndex(req, env) {
   if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
   return json({ ok: true }, 200);
 }
+const NEWS_RE = /игра дня|выходит|скидк|акци|подписк|black friday|день рождени|таких цен|ps ?plus|распродаж|результат|голосовани|обновлени|релиз|осталось|в наличии|предзаказ/i;
+// Объявление игры (а не новость/акция/«игра дня»): есть «ЦЕНА» и цена в сумах; название — первая строка с буквами.
+function listingTitle(t) {
+  if (!/ЦЕНА/i.test(t) || !/(\d{1,3}[ . ]\d{3}|\d{5,7})\s*(UZS|сум)/i.test(t)) return null;
+  const title = t.split('\n').map((l) => l.replace(/[^\p{L}\p{N}_:+&.'’ -]/gu, '').trim().replace(/^-+|-+$/g, '').trim()).find((l) => /\p{L}/u.test(l) && (l.match(/[\p{L}\p{N}]/gu) || []).length >= 2);
+  if (!title || /^(ЦЕНА|ИЗДАНИ|РУССК|АНГЛИЙ)/i.test(title)) return null;
+  if (NEWS_RE.test(title) || /по результатам|голосовани|акция|только сегодня|успей/i.test(t)) return null;
+  return title.slice(0, 150);
+}
 async function indexChannelPost(env, cp) {
-  const t = cp.text || cp.caption || '';
-  const first = (t.split('\n').find((l) => l.trim()) || '').trim();
-  if (first.startsWith('📰') || !/UZS|сум/i.test(t) || !(/ЦЕНА/i.test(t) || /^\s*(🎮|🟣)/u.test(t))) return; // только объявления игр
-  const title = t.split('\n').map((l) => l.replace(/[^\p{L}\p{N}:+&.'’ -]/gu, '').trim()).find((l) => (l.match(/\p{L}/gu) || []).length >= 2 && !/^(ЦЕНА|ИЗДАНИ|РУССК|АНГЛИЙ)/i.test(l));
-  if (!title) return;
+  const title = listingTitle(cp.text || cp.caption || '');
   const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]').filter((x) => x.id !== cp.message_id);
+  if (!title) { await env.STORE.put('tgpost:chindex', JSON.stringify(idx)); return; }
   idx.unshift({ id: cp.message_id, t: title });
   await env.STORE.put('tgpost:chindex', JSON.stringify(idx));
 }
@@ -847,7 +910,7 @@ async function ownerMessage(env, m) {
     let text = '';
     try { text = await transcribe(env, voice.file_id); } catch (e) { return say(env, chat, `⚠️ Не получилось разобрать голосовое: ${e.message}. Попробуйте ещё раз или напишите текстом.`); }
     if (!text) return say(env, chat, '🎤 Не расслышал 🤔 Скажите ещё раз или напишите текстом.');
-    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
+    if (!(await env.STORE.get('tgpost:find'))) await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
     return ownerMessage(env, { ...m, voice: undefined, audio: undefined, video_note: undefined, text, caption: undefined, entities: [] });
   }
   const t = (m.text || m.caption || '').trim();
@@ -1306,6 +1369,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/review') return handleAgentReview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/report') return handleAgentReport(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/index') return handleAgentIndex(req, env);
+    if (req.method === 'GET' && pathname === '/tgpost/findtest') return handleFindTest(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file-path') {
       if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1331,6 +1395,7 @@ export default {
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
 
