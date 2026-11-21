@@ -503,7 +503,7 @@ async function handleTgPost(req, env, ctx) {
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
   const [action, idsPart, post] = String(q.data || '').split(':');
-  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', later: 'отправить позже', story: 'выложить в историю' }[action];
+  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', prfix: 'есть правки к ценам', later: 'отправить позже', story: 'выложить в историю' }[action];
   if (said && env.STORE) await remember(env, { result: `владелец нажал: ${said}${post ? ' (' + post + ')' : ''}` });
 
   if (action === 'no') {
@@ -544,6 +544,11 @@ async function handleTgPost(req, env, ctx) {
     await setStatus(env, post, { status: 'deleted' });
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
+  }
+  if (action === 'prfix') {
+    await env.STORE.put('tgpost:await', 'prices', { expirationTtl: 60 * 60 * 24 * 3 });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '✏️ Что поправить в ценах? Напишите одним сообщением, например: «Assassin’s Creed — верни 429 000» или «NBA 2K26 PS5 — 419 000».' });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Жду правки' }, 200);
   }
   if (action === 'fixp') {
     if (!/^\d+$/.test(idsPart)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
@@ -852,6 +857,36 @@ async function tgForm(env, method, form) {
   return r.json();
 }
 
+// Утренний отчёт по ценам: бот-обход (6:00) кладёт текст в KV, ровно в 7:00 Ташкент (cron 0 2 * * *) он уходит владельцу.
+async function handleAgentReport(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const b = await req.json().catch(() => ({}));
+  const text = String(b.text || '').slice(0, 20000), day = String(b.day || '');
+  if (!text) return json({ ok: false, error: 'bad input' }, 400);
+  await env.STORE.put('tgpost:report', JSON.stringify({ text, day, ts: Date.now() }), { expirationTtl: 60 * 60 * 24 * 3 });
+  if (b.now) await sendPriceReport(env, true);
+  return json({ ok: true }, 200);
+}
+async function sendPriceReport(env, force) {
+  const chat = env.TGPOST_OWNER;
+  const rep = JSON.parse(await env.STORE.get('tgpost:report') || 'null');
+  const fresh = rep && Date.now() - rep.ts < 1000 * 60 * 60 * 20;
+  if (!fresh && !force) return tg(env, 'sendMessage', { chat_id: chat, text: '⚠️ Утренняя проверка цен ещё не закончилась или не сработала — посмотрю.' });
+  if (!rep) return;
+  const parts = [];
+  let cur = '';
+  for (const block of rep.text.split('\n\n')) {
+    if (cur && (cur + '\n\n' + block).length > 3800) { parts.push(cur); cur = block; } else cur = cur ? cur + '\n\n' + block : block;
+  }
+  if (cur) parts.push(cur);
+  for (let i = 0; i < parts.length; i++) {
+    const last = i === parts.length - 1;
+    await tg(env, 'sendMessage', { chat_id: chat, text: parts[i], link_preview_options: { is_disabled: true }, ...(last ? { reply_markup: kb([[{ text: '✏️ Есть правки', callback_data: 'prfix::' }]]) } : {}) });
+  }
+  await env.STORE.delete('tgpost:report');
+  await remember(env, { result: `утренний отчёт по ценам ${rep.day} отправлен` });
+}
+
 // «БЫЛО» (пересланный пост канала) → «СТАЛО» (тот же пост с новым текстом) → кнопки Да / Нет / Правки.
 async function handleAgentReview(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1119,6 +1154,7 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/review') return handleAgentReview(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/report') return handleAgentReport(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file-path') {
       if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1140,8 +1176,10 @@ export default {
     return json({ ok: false }, 404, h);
   },
   async scheduled(event, env, ctx) {
+    if (event.cron === '0 2 * * *') return ctx.waitUntil(sendPriceReport(env)); // 7:00 Ташкент — отчёт по ценам
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
+
 
 
