@@ -16,3 +16,8 @@
 - 22.11: OLX profile https://www.olx.uz/list/user/6lj3A/ audited (40 ads) → reklama-log.md. Sent to Бос. Waiting: BIR BIR link; owner confirm of guarantee 5y / rental tariffs from OLX ads.
 - Env: olx.uz, www.olx.uz, frankfurt.apollo.olxcdn.com, birbir.uz, www.birbir.uz, api.birbir.uz allowed (owner approved). birbir.uz = Cloudflare bot check (403). OLX: browse pages only, no internal API.
 - 22.11: waiting for owner's OLX and BIR BIR profile links → audit → report to Бос. Asked Мастер re CLAUDE.md team entry + network to olx.uz/birbir.uz.
+
+## Owner answers (10-question interview, 22.11; then I propose my strategy)
+1. Goal: OLX/BIR BIR = lead source; every lead goes straight to Telegram (manager). Quote: «чтобы оттуда приходили заявки и сразу же перерабатывались на Telegram».
+2. Priority: PS5 rental; PS Plus subscriptions; games GTA 6, UFC 6, FIFA 27, Mortal Kombat 1, Modern Warfare 4 (MW4 is current — not outdated).
+3. Guarantee: owner says info is on site/channel. Channel: «Гарантия 5 лет и поддержка 24/7» (GTA 6 posts). Site psshop.uz: «Гарантия: работоспособность, замена или возврат», «На связи 24/7», «Подключим дистанционно, консоль никуда везти не нужно».
