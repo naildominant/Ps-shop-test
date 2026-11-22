@@ -42,7 +42,7 @@
 
 ## Задачи в работе (на 23.11)
 - Team now: Сайтер #3 session_014Ko8ovvnMbxaBiKNTLtGF5; Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost only; memory there); Мастер #3 session_014Ko8ozTcaf294JXVpozb1n; Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t. Archived: Постик #4. Постик #3 unpinned.
-- Owner 23.11 00:25: «записать задачи для Сайтера, поэтапно выполнять, начнём с первой» — waiting for owner to dictate tasks; write them to docs/site-tasks.md via Сайтер, one at a time.
+- Owner 23.11: 3 Saiter tasks sent to Сайтер #3 (one at a time, report to me): T1 GTA 6 default Ultimate (catalog "+" too); T2 resend all past orders via @psshop_zayavki_bot with bought/not-bought buttons → CRM status; T3 order number offset +1100 (17→1117). In progress: T1.
 - Master: ponytail skill installed for Saiter+Postik (pinned ebd8654c), trial result in 30.11 token review. Weekly token review 29–30.11.
 - Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
 - **Questions to owner (queue):** 1) L.A. Noire scheduled 23.11 14:00 (id 860) — keep or move to Dec? 2) domain psshop.uz registrar (Saiter task 4Б); 3) 2 test news previews in bot — publish/cancel; 4) 2–3 trusted Telegram news channels; 5) Xbox/Switch reply wording; 6) brandbook cheatsheet OK?; 7) Shrek 2 post-check example OK?
