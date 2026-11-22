@@ -8,6 +8,7 @@
 - Автоматические квадратные обложки игр в постах канала (covers.py) — по-прежнему у Постика. Дизайнер отвечает за их вид и шаблоны, если попросят.
 
 ## Правила
+- **Обязательные навыки:** `psshop-art-director` перед каждой картинкой (журнал → 3 вопроса через Боса → схема A–J → проверка → журнал) и `psshop-telegram-posts` для текста и приёмов (`designer/.claude/skills/`). Подробно — раздел 0 в `designer/brand-kit/BRANDBOOK.md`.
 - **Вся работа только через Боса (поправка владельца 22.11):** к владельцу не обращаться вообще. Готовые картинки и итоги — Босу через send_message: путь к файлам в репозитории (сначала запушить в main), Бос сам показывает владельцу. Вопросы тоже Босу. Это заменяет правило «показать владельцу и спросить».
 - Скиллы: `canvas-design` (PNG/PDF, шрифты в `canvas-fonts/`), `frontend-design` и `unslop` для сайта.
 - Свой стиль PS SHOP, без логотипов и фирменного стиля Sony. Логотип: `brand/logo.png`, `brand/logo-transparent.png`, `brand/logo-transparent-full.png`.
@@ -20,7 +21,7 @@
 - **Брендбук: `designer/brand-kit/BRANDBOOK.md`** — логотип, точные цвета, шрифты, стиль постов/новостей/сторис/сайта, «так делаем / так не делаем». Шпаргалка-картинка `designer/brand-kit/cheatsheet.png` (скрипт `designer/scripts/brand_cheatsheet.py`).
 - `designer/brand-kit/`: `logo/` (+ `site-icons/`), `fonts/site/` (woff2 сайта), `examples-channel/` (25 наших постов из канала), `examples-site/` (скрины psshop.uz телефон 390 / компьютер 1440), `templates/`. Тяжёлое (TTF, обложки сайта, полные посты) — ссылками в брендбуке.
 - Ключевые цвета: фон `#07061A`, градиент `#C35CFF → #6A55FF → #2BC8FF`, текст `#F2EFFF`, подписи `#A9A3D4`, кнопка-золото `#FFCD78`. Шрифты: Unbounded (заголовки, цены), Oswald (огромное слово), Manrope (текст).
-- Навыки дизайна: canvas-design (картинки, сначала короткая «философия» .md, потом PNG), frontend-design и unslop (сайт: одна яркая вещь, спокойный интерфейс, без лишних свечений и эмодзи), psshop-art-director и psshop-telegram-posts (`designer/.claude/skills/`). Поиск новых навыков 22.11 — ничего подходящего не нашлось.
+- Навыки дизайна: canvas-design (картинки, сначала короткая «философия» .md, потом PNG), frontend-design и unslop (сайт: одна яркая вещь, спокойный интерфейс, без лишних свечений и эмодзи), psshop-art-director и psshop-telegram-posts (`designer/.claude/skills/`). Поиск новых навыков в каталоге 22.11 — ничего не нашлось (свои art-director и telegram-posts уже есть, обязательны).
 
 ## Стиль PS SHOP (изучено 22.11 по designer/ и brand/)
 - Подробные правила: `designer/CLAUDE.md` (главное), `designer/STATE.md`, журнал работ `designer/journal.md` (новые сверху, не повторять композиции последних 5). Навыки: `designer/.claude/skills/psshop-art-director` (перед каждой картинкой: 3 вопроса по одному, выбор схемы из каталога, проверка, запись в журнал) и `psshop-telegram-posts`.
