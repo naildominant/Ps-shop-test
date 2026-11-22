@@ -46,7 +46,8 @@
 - CLAUDE.md transfer rule now has a verification step (memory line + git ls-remote per repo + open tasks) before unpinning, and task/trigger handover.
 - Sync duty (Master): any CLAUDE.md change touching team/transfer/tokens → send to Postik same turn (he applies it in autopost CLAUDE.md); weekly review: ask Postik for diff. curl/clone of Ps-shop-test from a 1-repo session is refused by scope rules.
 - worker/worker.js copy stays in Ps-shop-test (Сайтер); Postik deploys from live download.
-- Done: Postik moved (autopost e5eb1af, Ps-shop-test 91d27dd pointer). CLAUDE.md updated: Postik source_url = ps-shop-autopost. Next: supervised first Postik transfer.
+- Done: Postik moved (autopost e5eb1af, Ps-shop-test 91d27dd pointer). CLAUDE.md: Postik source_url = ps-shop-autopost.
+- 22.11 14:54 UTC supervised transfer OK: «Постик #5» session_014Ko8p19yU3DL5iozNYAn3t (source autopost, context 87k vs 407k in #3); verification passed; autopost CLAUDE.md synced 861bda9. Send rule changes to #5 (and its successors).
 
 ## В работе и планы
 - Убедиться завтра, что чаты сами переносятся по правилу при первом сообщении дня.
