@@ -44,6 +44,8 @@
 - Every session's system rules scope GitHub to its attached repos; create_session takes ONE source_url. add_repo is classifier-gated: auto-allowed when the owner asks in that chat, denied in a Bos-relayed chain. Writing .claude/settings.json allow-rules is denied ("undermining oversight") — don't retry.
 - Fix for Postik (option A): Postik lives only in ps-shop-autopost (memory docs/state/bot.md + team rules in its CLAUDE.md there); Postik #N+1 source_url = ps-shop-autopost. designer/ in Ps-shop-test is read by Actions, not by the agent. Rule changes for Postik: Master sends them by message, Postik applies in autopost CLAUDE.md.
 - CLAUDE.md transfer rule now has a verification step (memory line + git ls-remote per repo + open tasks) before unpinning, and task/trigger handover.
+- Sync duty (Master): any CLAUDE.md change touching team/transfer/tokens → send to Postik same turn (he applies it in autopost CLAUDE.md); weekly review: ask Postik for diff. curl/clone of Ps-shop-test from a 1-repo session is refused by scope rules.
+- worker/worker.js copy stays in Ps-shop-test (Сайтер); Postik deploys from live download.
 - TODO: after Postik moves memory → update CLAUDE.md (Postik source_url autopost, remove "on hold"), supervise first Postik transfer.
 
 ## В работе и планы
