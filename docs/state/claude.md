@@ -54,6 +54,8 @@
 - Done: Postik moved (autopost e5eb1af, Ps-shop-test 91d27dd pointer). CLAUDE.md: Postik source_url = ps-shop-autopost.
 - 22.11 14:54 UTC supervised transfer OK: «Постик #5» session_014Ko8p19yU3DL5iozNYAn3t (source autopost, context 87k vs 407k in #3); verification passed; autopost CLAUDE.md synced 861bda9. Send rule changes to #5 (and its successors).
 
+- 22.11 new role «Маркетолог #1» session_014Ko8ow3Pj9znwGG17DRV1X (created by owner from iOS): OLX/BIR BIR ads, memory reklama.md; added to CLAUDE.md + README. olx.uz / birbir.uz blocked by env network (curl 000) — needs owner-approved env change.
+
 ## В работе и планы
 - Убедиться завтра, что чаты сами переносятся по правилу при первом сообщении дня.
 
