@@ -19,6 +19,7 @@
 | Постик | «Постик #N» | bot.md | бот @psshop_postTG_bot, посты канала, новинка 13:00, истории, поиск игр, цены 7:00, проверка поста 7:05, tgpost в воркере, репо ps-shop-autopost |
 | Мастер | «Мастер #N» | claude.md | CLAUDE.md, правила, скиллы, перенос чатов, расписание; **экономия токенов команды — раз в неделю** (напоминание по понедельникам в моём отчёте), журнал в claude.md |
 | Дизайнер | «Дизайнер #N» | design.md | весь дизайн: картинки постов/новостей/сторис, баннеры, графика сайта. Брендбук designer/brand-kit/ (BRANDBOOK.md, cheatsheet.png). Автообложки игр — у Постика |
+| Маркетолог | «Маркетолог #N» | reklama.md | реклама: объявления OLX и BIR BIR (с 22.11, создан владельцем). Картинки — через Дизайнера |
 Общее: перед деплоем воркера — живая версия; при поломке пишут мне. Всё это есть в CLAUDE.md (раздел «Команда»).
 Найти чаты: list_sessions mine:true → тег ui:pinned + названия. Номера растут каждый день (перенос — CLAUDE.md).
 
@@ -41,7 +42,7 @@
 - (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
 ## Задачи в работе (на 23.11)
-- Team now: Сайтер #4 session_014Ko8oxakuJuMavdiYmLwLk; Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost only; memory there); Мастер #3 session_014Ko8ozTcaf294JXVpozb1n; Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t. Archived: Постик #4. Постик #3 unpinned.
+- Team now: Сайтер #4 session_014Ko8oxakuJuMavdiYmLwLk; Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost only; memory there); Мастер #3 session_014Ko8ozTcaf294JXVpozb1n; Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t; Маркетолог #1 session_014Ko8ow3Pj9znwGG17DRV1X (briefed 22.11, waiting OLX/BIR BIR links from owner). Archived: Постик #4. Постик #3 unpinned.
 - Owner 23.11: 3 Saiter tasks sent to Сайтер #3 (one at a time, report to me): T1 GTA 6 default Ultimate (catalog "+" too); T2 resend all past orders via @psshop_zayavki_bot with bought/not-bought buttons → CRM status; T3 order number offset +1100 (17→1117). T1 DONE live (PR #37). T2 DONE (17 marked; 7 bought, 7 964 000 uzs). T3 DONE live (next order №1118, old №1101–1117). All 3 closed; ask owner for next Saiter task.
 - Master: ponytail skill installed for Saiter+Postik (pinned ebd8654c), trial result in 30.11 token review. Weekly token review 29–30.11.
 - Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
