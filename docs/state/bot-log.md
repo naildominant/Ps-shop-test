@@ -82,3 +82,6 @@ _Новые записи сверху._
 #### Архив
 - 21.11: цены сначала шли как «БЫЛО/СТАЛО» постами, потом коротко по сообщению на игру с кнопками — владельцу было слишком много сообщений; заменено автоповышением + одним отчётом.
 - Таблица сверки цен (artifact 1HecKDQKSoeNU2APs897rk) — больше не в меню.
+
+## 2026-11-22 — БОТ ПОСТИК #3
+- Daily post check (3/day, 7:05), prices 5:30, ⛔️ Отмена, «только ПК» (Wikidata), strict supplier match, «Вы имели в виду…?», 📰 Новость (agent mode news), team rules (via Bos, English to agents). Reschedule task in progress (see bot.md). Transferred early on Bos request (tokens).
