@@ -2,6 +2,10 @@
 
 Тема: настройка самого Claude для владельца PS SHOP — перенос рабочих чатов в новые, память между чатами, экономия лимитов.
 
+## Current chats (23.11)
+- Бос #4 session_014Ko8ovmxXetwTVooX1LTHV · Сайтер #4 session_014Ko8oxakuJuMavdiYmLwLk · Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost) · Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t · Маркетолог #1 session_014Ko8ow3Pj9znwGG17DRV1X. IDs change daily — find by list_sessions.
+- Open: weekly token review Mon 30.11 (+ ponytail verdict); Маркетолог needs owner-approved env change for olx.uz/birbir.uz; this file is 14.7k chars — trim to ~10k (move «Сделано» details to log).
+
 ## Как всё устроено
 - Рабочие чаты (цепочки): «САЙТ PS SHOP #N» → `docs/state/sayt.md`; «БОТ ПОСТИК #N» → `bot.md`; «НАСТРОЙКА CLAUDE #N» → `claude.md`; «БОС #N» → `bos.md` (надзор за всеми чатами, создан 22.11). У каждой есть журнал `*-log.md` (новое сверху).
 - **Ежедневный перенос:** правило в CLAUDE.md. Чат при первом сообщении владельца за день (по Ташкенту), если он создан раньше сегодняшнего дня, сам дописывает базу, пушит в main, создаёт «<ИМЯ> #N+1» с тем же model, ставит новому тег `ui:pinned`, снимает со своего и отвечает «Перешёл в новый чат…». Сообщение владельца передаётся в новый чат, ответ даётся там.
