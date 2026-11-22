@@ -51,7 +51,7 @@
 
 - 23.11 new owner tasks via Бос #4 (session_014Ko8ovmxXetwTVooX1LTHV), do one at a time, report to Бос, wait OK: T1 GTA 6 default edition = Ultimate (catalog «+» adds Ultimate, game page preselects it; check 390px+desktop, uz+/ru/); T2 resend all past orders to owner via @psshop_zayavki_bot with bought/not bought buttons → status into CRM «Заявки» (tell Бос before sending); T3 order number offset +1100 (17 → 1117), keep CRM ids consistent, note mapping here. Task 4B (Cloudflare) on hold: registrar answer still not received.
 - 23.11 T1 DONE: PR #37 merged after owner OK, live-checked (catalog.json "d", game page uz/ru Ultimate). Card price stays "от 978 000" (owner). Next: T2.
-- 23.11 T2: worker route GET /orderbot/resend?key=<orderbot:secret>&from=&to= (resends order:n to owner with status kb, sets quiet=1 → no client msgs). KV order:1..14 created from CRM (mid 0, quiet). Waiting Бос OK to send.
+- 23.11 T2: worker route GET /orderbot/resend?key=<orderbot:secret>&from=&to= (resends order:n to owner with status kb, sets quiet=1 → no client msgs). KV order:1..14 created from CRM. SENT 1–17 at 19:48Z after owner OK; waiting owner taps; check trigger trig_01N5nXnwXTiZPUwUsb1cc3mD (30 min, re-schedule until all 17 marked), then summary to Бос, then T3 (owner OK before publish).
 
 ## Проблемы и открытые вопросы
 - Старые 14 заявок в боте без кнопок — статус только через таблицу.
