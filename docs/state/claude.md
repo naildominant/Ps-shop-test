@@ -37,7 +37,8 @@
 - Self-bound recurring trigger (fires into its own chat) WORKS with session tools: Bos trig_01LABPq3uqbEGdX1uwxTGahB (daily report 18:37 Tashkent, persistent_session_id = Bos #3) fired 22.11 18:37 — list_sessions, get_session, send_message OK. Self-bound send_later also OK (PushNotification available).
 - Still NOT working: trigger into ANOTHER chat, and fresh-session-per-fire (no session tools).
 - Caveat: trigger stays bound to the old chat after daily transfer — new chat must create its own and disable the old (update_trigger enabled=false).
-- 22.11 ui:pinned tags were missing on all team chats (probably lost on rename); re-added to Бос/Мастер/Постик/Сайтер/Дизайнер #3.
+- ui:pinned is NOT shown in get_session/list_sessions output (set_session_tags returned updated:5, get_session still shows only config:*). "Missing pins" in listings is not a signal; re-added anyway 22.11.
+- 22.11 13:37 UTC: Постик #3 $19.0, context 407k; account rate limit seven_day = allowed_warning. Recommended Bos: transfer Постик to a fresh chat now.
 
 ## В работе и планы
 - Убедиться завтра, что чаты сами переносятся по правилу при первом сообщении дня.
