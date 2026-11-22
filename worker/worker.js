@@ -659,8 +659,8 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '⛔️ Отмена', BTN_CANCEL_OLD = '🛑 Отменить всё', BTN_CANCEL_OLD2 = '🛑 Отмена', BTN_FIND = '🔎 Найти игру';
-const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '⛔️ Отмена', BTN_CANCEL_OLD = '🛑 Отменить всё', BTN_CANCEL_OLD2 = '🛑 Отмена', BTN_FIND = '🔎 Найти игру', BTN_NEWS = '📰 Новость';
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_NEWS }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
 
 // ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
@@ -1047,6 +1047,11 @@ async function ownerMessage(env, m) {
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
   if (t === BTN_CANCEL || t === BTN_CANCEL_OLD || t === BTN_CANCEL_OLD2 || t === '⛔ Отмена' || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
+  if (t === BTN_NEWS) { // «📰 Новость» (владелец 22.11): агент ищет свежую новость PlayStation и присылает превью
+    await env.STORE.delete('tgpost:find');
+    const err = await dispatchAgent(env, { mode: 'news', task: 'Кнопка «📰 Новость»: найди одну свежую интересную новость PlayStation и сделай пост с картинкой (AGENT.md, режим news).' });
+    return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
+  }
   if (t === BTN_FIND) {
     await env.STORE.put('tgpost:find', '1', { expirationTtl: 60 * 30 });
     return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки. Например: «Spider-Man, FC 26, GTA 5».');
