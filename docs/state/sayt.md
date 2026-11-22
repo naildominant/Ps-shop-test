@@ -50,6 +50,7 @@
 - 9. Старые заявки №1–14: выяснить, кто купил и за сколько, проставить статус/оплачено (со слов владельца или по переписке в личке).
 
 - 23.11 new owner tasks via Бос #4 (session_014Ko8ovmxXetwTVooX1LTHV), do one at a time, report to Бос, wait OK: T1 GTA 6 default edition = Ultimate (catalog «+» adds Ultimate, game page preselects it; check 390px+desktop, uz+/ru/); T2 resend all past orders to owner via @psshop_zayavki_bot with bought/not bought buttons → status into CRM «Заявки» (tell Бос before sending); T3 order number offset +1100 (17 → 1117), keep CRM ids consistent, note mapping here. Task 4B (Cloudflare) on hold: registrar answer still not received.
+- 23.11 T1 done on branch sayt/gta6-ultimate (DEFAULT_ED in build.py, catalog.json "d", app.js card), tested 390/1366 uz+ru; reported to Бос, waiting OK to merge.
 
 ## Проблемы и открытые вопросы
 - Старые 14 заявок в боте без кнопок — статус только через таблицу.
