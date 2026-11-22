@@ -45,6 +45,7 @@
 - Мастер: результат экономии проверит 29.11.
 
 ## Журнал
+- 22.11 18:37 daily report #1 (trigger has session tools ✔): Saiter blocked on domain registrar; Postik — news button done, reschedule plan pending (more Nov posts); Designer idle after brandbook; Master idle. Weekly limit allowed_warning, reset 29.11 00:00.
 - 22.11: первая проверка — сайт и воркер работают, Actions зелёные (после этого владелец сказал сайт не проверять). Раздал обязанности, имена утверждены, чаты переименованы, создан Дизайнер (session_014Ko8p19FZ9xGgJ4a8NUV8t), правило «всё через Боса» в CLAUDE.md. Сделано за день: брендбук Дизайнера; у Постика — кнопка «⛔️ Отмена» и ответ «игра только на ПК» (Wikidata). Первый замер расхода (Мастер): Постик $5.8, Бос $5.0, Дизайнер $2.8, Мастер $1.9, Сайтер $1.3.
 
 ## Архив
