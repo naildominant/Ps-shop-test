@@ -546,6 +546,15 @@ async function handleTgPost(req, env, ctx) {
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
   }
+  if (action === 'dym' || action === 'dyn') { // «Вы имели в виду …?»
+    const d = JSON.parse(await env.STORE.get(`tgpost:dym:${idsPart}`) || 'null');
+    if (!d) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Уже ответили' }, 200);
+    await env.STORE.delete(`tgpost:dym:${idsPart}`);
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: action === 'dym' ? `✅ ${d.official}` : '❌ Нет', callback_data: 'x' }]]) });
+    if (action === 'dym') await findGames(env, chat, d.official, { sure: true });
+    else await say(env, chat, `❌ Данной игры нет в наличии: ${d.asked}`);
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+  }
   if (action === 'prok') {
     await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Принято', callback_data: 'x' }]]) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Принято' }, 200);
@@ -860,12 +869,34 @@ async function platformCheck(env, names, dbg) {
   return 'unknown';
 }
 
-async function findGames(env, chat, text) {
+// Нейросеть заметно поменяла латинское название («Dead Reset» → Red Dead Redemption) — сначала спросить владельца (Бос 22.11).
+function doubtful(asked, official) {
+  const a = gnorm(asked), o = gnorm(official);
+  if (!a || !o || a === o || !/^[\x20-\x7E]+$/.test(asked)) return false; // русские/разговорные названия — переводит нейросеть, не спрашиваем
+  const as = a.replace(/ /g, ''), os = o.replace(/ /g, '');
+  if (os.includes(as) || as.includes(os)) return false;
+  const initials = o.split(' ').map((w) => (/^\d+$/.test(w) ? w : w[0])).join('');
+  const raw = String(official).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map((w) => (/^\d+$/.test(w) ? w : w[0])).join('');
+  if (as === initials || as === raw) return false; // аббревиатура: rdr2, gow, lol
+  return dice(as, os) < 0.5;
+}
+async function findGames(env, chat, text, opts = {}) {
   if (!text.trim()) return say(env, chat, '🔎 Напишите или скажите названия игр.');
   await remember(env, { task: `найти игры для клиента: ${text}`, mode: 'find' });
   const ch = env.TGPOST_CHANNEL || '@psshopgo';
-  const items = await resolveGames(env, text);
+  let items = await resolveGames(env, text);
   if (!items.length) return say(env, chat, 'Не понял, какие игры нужны 🤔 Скажите ещё раз.');
+  if (!opts.sure) {
+    const ask = items.filter((it) => doubtful(it.asked, it.official));
+    for (const it of ask) {
+      const id = String(Date.now()).slice(-9) + Math.floor(Math.random() * 90 + 10);
+      await env.STORE.put(`tgpost:dym:${id}`, JSON.stringify({ official: it.official, asked: it.asked }), { expirationTtl: 60 * 60 * 24 });
+      await tg(env, 'sendMessage', { chat_id: chat, text: `🤔 «${it.asked}» — вы имели в виду «${it.official}»?`,
+        reply_markup: kb([[{ text: '✅ Да', callback_data: `dym:${id}:` }, { text: '❌ Нет', callback_data: `dyn:${id}:` }]]) });
+    }
+    items = items.filter((it) => !ask.includes(it));
+    if (!items.length) return;
+  }
   await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Понял: ${items.map((x) => x.official || x.asked).join(', ')}` });
   const none = [], make = [];
   let sent = 0;
@@ -900,7 +931,7 @@ async function handleFindTest(req, env) {
   if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
   const items = await resolveGames(env, u.searchParams.get('q') || '');
   const out = [];
-  for (const x of items) out.push({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null,
+  for (const x of items) out.push({ asked: x.asked, official: x.official, ask: doubtful(x.asked, x.official) || undefined, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null,
     platform: !x.posts.length && !x.supplier ? await platformCheck(env, [x.official, x.asked], u.searchParams.get('dbg') ? (x.dbg = []) : null) : undefined, dbg: x.dbg });
   return json(out, 200);
 }
