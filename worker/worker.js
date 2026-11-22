@@ -378,7 +378,7 @@ async function setOrderStatus(env, n, key, paid) {
   await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 });
   await ordRender(env, n, o);
   await toSheet(env, o.row);
-  if (o.client && o.notified !== key && CLIENT_MSG[key]) {
+  if (o.client && !o.quiet && o.notified !== key && CLIENT_MSG[key]) {
     const t = CLIENT_MSG[key][o.lang === 'uz' ? 'uz' : 'ru'](n);
     const r = await ordTg(env, 'sendMessage', { chat_id: o.client, text: t, reply_markup: { inline_keyboard: [[{ text: L(o, 'write'), url: MANAGER }]] } });
     if (r.ok) { o.notified = key; await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 }); }
@@ -431,6 +431,29 @@ async function handleOrderBot(req, env, ctx) {
     }
   }
   return new Response('ok');
+}
+// T2 23.11: GET /orderbot/resend?key=<секрет>&from=1&to=17 — заново шлёт владельцу старые заявки с кнопками статуса.
+// Клиентам при отметке старой заявки ничего не уходит (quiet).
+async function handleOrderBotResend(req, env) {
+  const url = new URL(req.url);
+  const secret = env.STORE && await env.STORE.get('orderbot:secret');
+  if (!secret || url.searchParams.get('key') !== secret) return new Response('forbidden', { status: 403 });
+  const from = Number(url.searchParams.get('from')) || 1;
+  const to = Math.min(Number(url.searchParams.get('to')) || from, from + 40);
+  const out = [];
+  for (let n = from; n <= to; n++) {
+    const raw = await env.STORE.get(`order:${n}`);
+    if (!raw) { out.push(`${n}: нет`); continue; }
+    const o = JSON.parse(raw);
+    const st = o.status && ORD_ST[o.status];
+    const head = `📂 <b>Старая заявка, отметьте: купил или нет</b>\n\n`;
+    const html = head + o.html + (st ? `\n\n<b>Статус: ${st.icon} ${st.label}</b>${o.row[11] ? ` — ${money(o.row[11])} uzs` : ''}` : '');
+    const mid = await sendTelegram(env, html, { reply_markup: ordKb(n, o.status) });
+    if (mid) { o.mid = mid; o.quiet = 1; await env.STORE.put(`order:${n}`, JSON.stringify(o), { expirationTtl: 60 * 60 * 24 * 180 }); }
+    out.push(`${n}: ${mid ? 'ok' : 'ошибка'}`);
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+  return new Response(out.join('\n'), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }
 async function handleOrderBotSetup(req, env) {
   const url = new URL(req.url);
@@ -591,12 +614,27 @@ async function handleTgPost(req, env, ctx) {
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Меняю, около минуты' }, 200);
   }
   if (action === 'later') {
-    await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 3 });
+    await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 24 });
     await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '🕒 Когда опубликовать? Выберите кнопку или напишите время (Ташкент), например: «19:30», «завтра 10:00», «25.11 18:00».', reply_markup: kb(timeOptions(post)) });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
   }
-  if (action === 'at') {
-    const r = await scheduleAt(env, chat, post, Number(idsPart));
+  if (action === 'odate' || action === 'cal' || action === 'cd') { // «📅 Другая дата»: календарь → время (то же сообщение); текст/голос тоже работают
+    await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 24 });
+    await env.STORE.delete('tgpost:awaitday');
+    const v = action === 'cd' ? await dayView(env, post, idsPart) : await calView(env, post, action === 'cal' ? idsPart : '');
+    await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: v.text, reply_markup: kb(v.kb) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+  }
+  if (action === 'ct') { // «✏️ Своё время» для выбранного дня
+    await env.STORE.put('tgpost:awaittime', post, { expirationTtl: 60 * 60 * 24 });
+    await env.STORE.put('tgpost:awaitday', idsPart, { expirationTtl: 60 * 60 * 24 });
+    const d = idsPart;
+    await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: `✏️ Напишите время для ${d.slice(6, 8)}.${d.slice(4, 6)} (Ташкент), например: 14:30`, reply_markup: kb([[{ text: '⬅️ Назад к календарю', callback_data: `cal:${d.slice(0, 6)}:${post}`.slice(0, 64) }]]) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
+  }
+  if (action === 'at' || action === 'atf') {
+    const r = await scheduleAt(env, chat, post, Number(idsPart), action === 'atf');
+    if (r.busy) { await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: r.text, reply_markup: kb(r.kb) }); return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200); }
     if (r.ok) await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: r.text });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: r.ok ? 'Запланировано ✅' : r.text, show_alert: !r.ok }, 200);
   }
@@ -942,6 +980,7 @@ async function handleAgentIndex(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const b = await req.json().catch(() => ({}));
   if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150), ...(x.s ? { s: String(x.s).slice(0, 40) } : {}) })).filter((x) => x.id && x.t)));
+  if (Array.isArray(b.sched)) await env.STORE.put('tgpost:schedtimes', JSON.stringify(b.sched.map((x) => ({ ms: Date.parse(x.d), t: String(x.t || '').slice(0, 80) })).filter((x) => x.ms > Date.now())));
   if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
   return json({ ok: true }, 200);
 }
@@ -1064,10 +1103,23 @@ async function ownerMessage(env, m) {
   }
   const waitTime = await env.STORE.get('tgpost:awaittime');
   if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL, BTN_FIND].includes(t) && !t.startsWith('/')) {
-    const ms = parseTime(t);
-    if (!ms) return say(env, chat, 'Не понял время 🤔 Напишите, например: «19:30», «завтра 10:00» или «25.11 18:00».');
+    const day = await env.STORE.get('tgpost:awaitday'), hm = t.match(/^(?:в\s*)?(\d{1,2})[:.\s-]?(\d{2})?$/);
+    const ms = day && hm && Number(hm[1]) < 24 && Number(hm[2] || 0) < 60 ? fromTashkent(Number(day.slice(0, 4)), Number(day.slice(4, 6)) - 1, Number(day.slice(6, 8)), Number(hm[1]), Number(hm[2] || 0)) : parseTime(t);
+    if (ms) await env.STORE.delete('tgpost:awaitday');
+    if (!ms) return say(env, chat, 'Не понял дату и время 🤔 Напишите ещё раз, например: «12.12 14:00», «12 декабря 14:00» или «завтра 10:00».');
     const r = await scheduleAt(env, chat, waitTime, Math.floor(ms / 1000));
-    return say(env, chat, r.text);
+    if (r.busy) return tg(env, 'sendMessage', { chat_id: chat, text: r.text, reply_markup: kb(r.kb) });
+    return say(env, chat, r.ok ? r.text : `${r.text}. Напишите другую дату и время, например: «12.12 14:00».`);
+  }
+  // «поставь в отложенные на 12.12 14:00» без кнопки — про последний пост, ждущий решения
+  if (t && t.length <= 60 && /^(?:пожалуйста\s+)?(?:постав|отлож|запланир)/i.test(t) && parseTime(t)) {
+    const pend = JSON.parse(await env.STORE.get('tgpost:pending') || 'null');
+    if (pend?.post) {
+      await env.STORE.put('tgpost:awaittime', pend.post, { expirationTtl: 60 * 60 * 24 });
+      const r = await scheduleAt(env, chat, pend.post, Math.floor(parseTime(t) / 1000));
+      if (r.busy) return tg(env, 'sendMessage', { chat_id: chat, text: r.text, reply_markup: kb(r.kb) });
+      return say(env, chat, r.ok ? r.text : `${r.text}. Напишите другую дату и время, например: «12.12 14:00».`);
+    }
   }
   if (t === BTN_PRICES) return say(env, chat, `💰 Таблица сверки цен канала с поставщиком:\n${PRICE_TABLE}\n\nЦены поставщика обновляются каждый день. Чтобы поменять цены в канале, напишите сюда, например: «меняй всё из „Цена меняется“».`);
   if (t === BTN_NEW_POST) return say(env, chat, '✍️ Напишите одним сообщением, какой пост нужен. Например: «пост про игру Hogwarts Legacy» или «новость: скидки на PS Plus до конца недели». Можно приложить фото или переслать пост из другого канала.');
@@ -1405,6 +1457,7 @@ function timeOptions(post) {
   for (const h of [10, 12, 18, 20]) add(1, h, 'Завтра');
   const out = [];
   for (let i = 0; i < rows.length; i += 2) out.push(rows.slice(i, i + 2));
+  out.push([{ text: '📅 Другая дата', callback_data: `odate::${post}`.slice(0, 64) }]);
   out.push([{ text: '↩️ Не откладывать', callback_data: `nolater::${post}`.slice(0, 64) }]);
   return out;
 }
@@ -1415,12 +1468,21 @@ function parseTime(text) {
   const h = Number(tm[1]), mi = Number(tm[2] || 0);
   if (h > 23 || mi > 59) return null;
   const now = Date.now(), t = tashkentParts(now);
-  const date = s.match(/(\d{1,2})\.(\d{1,2})(?:\.(\d{2,4}))?\s/);
+  const MON = ['янв', 'фев', 'мар', 'апр', 'мая|май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  let date = s.match(/(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?\s/);
+  if (!date) {
+    const w = s.match(/(\d{1,2})\s*([а-яё]+)(?:\s+(\d{4}))?\s/);
+    const mo = w ? MON.findIndex((x) => new RegExp(`^(${x})`).test(w[2])) : -1;
+    if (mo >= 0) date = [w[0], w[1], String(mo + 1), w[3]];
+  }
   let ms;
   if (date) {
+    const d = Number(date[1]), mo = Number(date[2]) - 1;
+    if (d < 1 || d > 31 || mo < 0 || mo > 11) return null;
     const y = date[3] ? (Number(date[3]) < 100 ? 2000 + Number(date[3]) : Number(date[3])) : t.y;
-    ms = fromTashkent(y, Number(date[2]) - 1, Number(date[1]), h, mi);
-    if (!date[3] && ms < now) ms = fromTashkent(y + 1, Number(date[2]) - 1, Number(date[1]), h, mi);
+    ms = fromTashkent(y, mo, d, h, mi);
+    if (tashkentParts(ms).d !== d) return null; // 31.11 и т. п.
+    if (!date[3] && mo < t.mo) ms = fromTashkent(y + 1, mo, d, h, mi); // январь в декабре — следующий год; прошедший день этого месяца → «уже прошло»
   } else {
     const shift = /послезавтра/.test(s) ? 2 : /завтра/.test(s) ? 1 : 0;
     ms = fromTashkent(t.y, t.mo, t.d + shift, h, mi);
@@ -1428,11 +1490,70 @@ function parseTime(text) {
   }
   return ms;
 }
-async function scheduleAt(env, chat, post, sec) {
+// Календарь для «📅 Другая дата»: callback cal:YYYYMM:post, cd:YYYYMMDD:post, ct:YYYYMMDD:post, at:<sec>:post
+const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const MON_S = ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сен', 'Окт', 'Нояб', 'Дек'];
+async function busyByDay(env) { // {'YYYYMMDD': [ 'HH:MM', ... ]} по Ташкенту
+  const out = {}, z = (n) => String(n).padStart(2, '0');
+  for (const x of JSON.parse(await env.STORE.get('tgpost:schedtimes') || '[]')) {
+    if (!(x.ms > Date.now())) continue;
+    const p = tashkentParts(x.ms), k = `${p.y}${z(p.mo + 1)}${z(p.d)}`;
+    (out[k] = out[k] || []).push(`${z(p.h)}:${z(p.mi)}`);
+  }
+  return out;
+}
+async function calView(env, post, ym) {
+  const now = tashkentParts(Date.now()), z = (n) => String(n).padStart(2, '0');
+  let y = Number(ym.slice(0, 4)) || now.y, mo = ym ? Number(ym.slice(4, 6)) - 1 : now.mo;
+  const idx = (yy, mm) => yy * 12 + mm, first = idx(now.y, now.mo);
+  if (idx(y, mo) < first || idx(y, mo) > first + 11) { y = now.y; mo = now.mo; }
+  const busy = await busyByDay(env), cb = (a, x) => `${a}:${x}:${post}`.slice(0, 64), rows = [];
+  const pm = new Date(Date.UTC(y, mo - 1, 1)), nm = new Date(Date.UTC(y, mo + 1, 1));
+  rows.push([
+    idx(y, mo) > first ? { text: `◀️ ${MON_S[pm.getUTCMonth()]}`, callback_data: cb('cal', `${pm.getUTCFullYear()}${z(pm.getUTCMonth() + 1)}`) } : { text: ' ', callback_data: 'x' },
+    { text: `${MONTHS[mo]} ${y}`, callback_data: 'x' },
+    idx(y, mo) < first + 11 ? { text: `${MON_S[nm.getUTCMonth()]} ▶️`, callback_data: cb('cal', `${nm.getUTCFullYear()}${z(nm.getUTCMonth() + 1)}`) } : { text: ' ', callback_data: 'x' },
+  ]);
+  rows.push(['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((d) => ({ text: d, callback_data: 'x' })));
+  const days = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate(), lead = (new Date(Date.UTC(y, mo, 1)).getUTCDay() + 6) % 7;
+  let row = Array.from({ length: lead }, () => ({ text: ' ', callback_data: 'x' }));
+  for (let d = 1; d <= days; d++) {
+    const key = `${y}${z(mo + 1)}${z(d)}`, n = (busy[key] || []).length;
+    const past = idx(y, mo) === first && d < now.d;
+    row.push(past ? { text: '·', callback_data: 'x' } : { text: `${d}${n ? '📌' + (n > 1 ? n : '') : ''}`, callback_data: cb('cd', key) });
+    if (row.length === 7) { if (row.some((b) => b.callback_data !== 'x')) rows.push(row); row = []; } // целиком прошедшие недели не показываем
+  }
+  if (row.length) { while (row.length < 7) row.push({ text: ' ', callback_data: 'x' }); rows.push(row); }
+  rows.push([{ text: '↩️ Не откладывать', callback_data: `nolater::${post}`.slice(0, 64) }]);
+  return { text: '📅 Выберите день (время Ташкента). 📌 — в этот день уже есть отложенный пост.\nИли напишите дату и время, например: 12.12 14:00', kb: rows };
+}
+async function dayView(env, post, key) {
+  const y = Number(key.slice(0, 4)), mo = Number(key.slice(4, 6)) - 1, d = Number(key.slice(6, 8));
+  const taken = (await busyByDay(env))[key] || [], now = Date.now(), btns = [];
+  for (const h of [10, 12, 14, 16, 18, 20]) {
+    const ms = fromTashkent(y, mo, d, h, 0), hh = `${h}:00`;
+    if (ms > now + 10 * 60 * 1000) btns.push({ text: `${hh}${taken.includes(hh) ? '📌' : ''}`, callback_data: `at:${Math.floor(ms / 1000)}:${post}`.slice(0, 64) });
+  }
+  const rows = [];
+  for (let i = 0; i < btns.length; i += 3) rows.push(btns.slice(i, i + 3));
+  rows.push([{ text: '✏️ Своё время', callback_data: `ct:${key}:${post}`.slice(0, 64) }]);
+  rows.push([{ text: '⬅️ Назад к календарю', callback_data: `cal:${key.slice(0, 6)}:${post}`.slice(0, 64) }]);
+  const note = taken.length ? `\n📌 Уже занято: ${taken.sort().join(', ')}` : '';
+  return { text: `🕒 ${String(d).padStart(2, '0')}.${String(mo + 1).padStart(2, '0')} — во сколько опубликовать? (Ташкент)${note}`, kb: rows };
+}
+async function scheduleAt(env, chat, post, sec, force = false) {
   const ms = sec * 1000;
   if (!/^[\w.-]{1,80}$/.test(post || '') || !ms) return { ok: false, text: 'Не понял, какой пост' };
-  if (ms < Date.now() + 2 * 60 * 1000) return { ok: false, text: 'Это время уже прошло, выберите позже' };
+  if (ms < Date.now() + 2 * 60 * 1000) return { ok: false, text: `Это время уже прошло (${fmtTashkent(ms)})` };
   if (ms > Date.now() + 360 * 24 * 3600 * 1000) return { ok: false, text: 'Слишком далеко, максимум год' };
+  const busy = JSON.parse(await env.STORE.get('tgpost:schedtimes') || '[]');
+  const same = busy.find((x) => Math.abs(x.ms - ms) < 60 * 1000);
+  if (same && !force) {
+    let alt = ms + 30 * 60 * 1000;
+    while (busy.some((x) => Math.abs(x.ms - alt) < 60 * 1000)) alt += 30 * 60 * 1000;
+    return { ok: false, busy: true, text: `⚠️ На ${fmtTashkent(ms)} уже стоит пост${same.t ? ` «${same.t}»` : ''}. Поставить на ${fmtTashkent(alt).split(' в ')[1]}?`,
+      kb: [[{ text: `✅ На ${fmtTashkent(alt)}`, callback_data: `at:${Math.floor(alt / 1000)}:${post}`.slice(0, 64) }], [{ text: `Всё равно на ${fmtTashkent(ms)}`, callback_data: `atf:${sec}:${post}`.slice(0, 64) }], [{ text: '📅 Другая дата', callback_data: `odate::${post}`.slice(0, 64) }]] };
+  }
   const gh = await env.STORE.get('tgpost:gh');
   const at = new Date(ms).toISOString().slice(0, 16) + 'Z';
   const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/post.yml/dispatches`, {
@@ -1442,7 +1563,8 @@ async function scheduleAt(env, chat, post, sec) {
   if (r.status !== 204) return { ok: false, text: `Не получилось (GitHub ${r.status})` };
   await env.STORE.delete('tgpost:awaittime');
   await setStatus(env, post, { status: 'scheduled', at });
-  const text = `🕒 Пост запланирован на ${fmtTashkent(ms)}. Он появится в канале сам. Изменить или отменить можно в канале: «Отложенные сообщения».`;
+  busy.push({ ms, t: post }); await env.STORE.put('tgpost:schedtimes', JSON.stringify(busy.filter((x) => x.ms > Date.now())));
+  const text = `🕒 Поставил в отложенные на ${fmtTashkent(ms)}`;
   const pend = JSON.parse(await env.STORE.get('tgpost:pending') || 'null');
   if (pend?.post === post && pend.ctrl) await tg(env, 'editMessageReplyMarkup', { chat_id: pend.chat, message_id: pend.ctrl, reply_markup: kb([[{ text: `🕒 Запланирован на ${fmtTashkent(ms)}`, callback_data: 'x' }]]) });
   return { ok: true, text };
@@ -1536,6 +1658,7 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
     if (req.method === 'POST' && pathname === '/orderbot') return handleOrderBot(req, env, ctx);
     if (req.method === 'GET' && pathname === '/orderbot/setup') return handleOrderBotSetup(req, env);
+    if (req.method === 'GET' && pathname === '/orderbot/resend') return handleOrderBotResend(req, env);
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
     if (req.method === 'POST' && pathname === '/visit') return handleVisit(req, env, h, ctx);
