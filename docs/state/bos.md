@@ -30,7 +30,7 @@
 **Экономия у меня (совет Мастера 22.11):** состояние чатов — get_session / list_sessions (post_turn_summary), list_events только с kinds и малым limit, большой ответ разбирать скриптом; команды пачкой; bos.md держать коротким (~8 тыс. байт), старое — в Архив.
 
 ## Ежедневный отчёт владельцу
-- Задача trig_01LABPq3uqbEGdX1uwxTGahB, каждый день **18:37 Ташкент**, привязана к «Бос #3». Первый запуск 22.11 — проверить, есть ли в нём инструменты сессий, и сообщить Мастеру.
+- Задача trig_013WZ2BgBM8CHVSHsjq9tLmQ, каждый день **18:37 Ташкент**, привязана к «Бос #4» (session_014Ko8ovmxXetwTVooX1LTHV). Старая trig_01LABPq3uqbEGdX1uwxTGahB (Бос #3) выключена 22.11.
 - При переносе «Бос #N» → «#N+1»: новый чат создаёт такую же задачу на себя (create_trigger без persistent_session_id, тот же текст — взять из get_trigger), старую выключает (update_trigger enabled=false; удалять нельзя).
 - Запуск по расписанию — не сообщение владельца, переносить чат по нему не нужно.
 
@@ -46,7 +46,7 @@
 - Master: ponytail skill installed for Saiter+Postik (pinned ebd8654c), trial result in 30.11 token review. Weekly token review 29–30.11.
 - Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
 - **Questions to owner (queue):** 1) L.A. Noire scheduled 23.11 14:00 (id 860) — keep or move to Dec? 2) domain psshop.uz registrar (Saiter task 4Б); 3) 2 test news previews in bot — publish/cancel; 4) 2–3 trusted Telegram news channels; 5) Xbox/Switch reply wording; 6) brandbook cheatsheet OK?; 7) Shrek 2 post-check example OK?
-- Triggers of Бос: daily report trig_01LABPq3uqbEGdX1uwxTGahB (18:37, bound to Бос #3) — new Бос must recreate on itself (same prompt via get_trigger) and disable old.
+- Triggers of Бос: daily report trig_013WZ2BgBM8CHVSHsjq9tLmQ (18:37, bound to Бос #4) — new Бос must recreate on itself (same prompt via get_trigger) and disable old.
 
 ## Журнал
 - 22.11 ~20:00 final: Postik memory moved to ps-shop-autopost (Postik #N+1 source_url=ps-shop-autopost; Master syncs CLAUDE.md to him + weekly diff). Supervised transfer OK → «Постик #5» session_014Ko8p19yU3DL5iozNYAn3t (pinned, verified). Reschedule: 9 posts 10–31 Dec 14:00, BG3 dup removed; scheduled posts counted in index.
