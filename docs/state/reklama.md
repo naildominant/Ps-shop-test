@@ -21,3 +21,4 @@
 1. Goal: OLX/BIR BIR = lead source; every lead goes straight to Telegram (manager). Quote: «чтобы оттуда приходили заявки и сразу же перерабатывались на Telegram».
 2. Priority: PS5 rental; PS Plus subscriptions; games GTA 6, UFC 6, FIFA 27, Mortal Kombat 1, Modern Warfare 4 (MW4 is current — not outdated).
 3. Guarantee: owner says info is on site/channel. Channel: «Гарантия 5 лет и поддержка 24/7» (GTA 6 posts). Site psshop.uz: «Гарантия: работоспособность, замена или возврат», «На связи 24/7», «Подключим дистанционно, консоль никуда везти не нужно».
+- Price decision (owner, final): games ads keep «50 000 сум» — it's the install fee (described in text: «50.000 сум услуга установки, стоимость игры уточняйте у менеджера»), works as a filter. Target = above-average segment. Quote: «50 тысяч сумм как будет, так и останется». Don't propose changing it again. My line: no outright false claims in new texts (owner told I won't write them).
