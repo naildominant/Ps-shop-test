@@ -28,6 +28,7 @@
 ## Сейчас (22.11)
 - **IN PROGRESS — reschedule (owner task via Bos 22.11):** move ALL scheduled game posts of @psshopgo evenly to 10–31 Dec 14:00 Tashkent (extras same day 14:30, 15:00…), keep order, only schedule_date; non-game ones listed, untouched. Tool: ps-shop-autopost `tools/schedule_move.py` + workflow `schedule-move.yml` (cmd plan | apply | scan). `plan` found only 3 in @psshopgo queue (849 Clair Obscur, 851 Baldur's Gate 3, 852 BeamNG.drive, all 31.12 20:00). Owner says there are more (November). `scan` (all dialogs, raw GetScheduledHistory) run 45027761734 was still running at handover — read its log, find where the Nov posts are, send Bos full plan table, **wait for Bos «apply»** before running apply. Note: if posts are in another chat, schedule_move works only on CH=@psshopgo — adapt.
 - Bos rule 22.11: no frequent polling (sleep/send_later); 1–2 checks per run.
+- 22.11: «Постик #4» archived by owner; active Postik = «БОТ ПОСТИК #3» (session_014Ko8oxQ1ysNFRULef8kw7b, pinned). **No daily transfer until Master confirms the new transfer procedure works.** Reschedule continued here (owner approved apply).
 - Готово сегодня: проверка постов (3/день), цены в 5:30, «⛔️ Отмена», «только ПК», строгий выбор у поставщика.
 - Ждут кнопок владельца: проверка постов 1059, 923 (новая обложка), 800 (1261 применён).
 - Ждём от Боса: формулировка для игр на Xbox/Switch без PlayStation (сейчас «нет в наличии»); отзыв о поиске.
