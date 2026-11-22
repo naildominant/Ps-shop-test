@@ -12,4 +12,4 @@ On transfer: new chat updates its own row here in step 1 (same commit as memory)
 | Дизайнер | Дизайнер #4 | session_014Ko8owBDWyasHngmZMRm7v | Ps-shop-test |
 | Маркетолог | Маркетолог #1 | session_014Ko8ow3Pj9znwGG17DRV1X | Ps-shop-test |
 
-Updated: 2026-11-22 by Мастер #4
+Updated: 2026-11-22 by Мастер #4 (Постик #6; Постик row is kept by Мастер — his repo has no team.md)
