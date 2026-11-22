@@ -34,7 +34,8 @@
 ## Лимит Claude (задача владельца 22.11)
 - Следить за лимитом и присылать владельцу пуш на телефон (PushNotification), когда лимит обновился. Данные: get_session (без id) → external_metadata.rate_limit_info {rateLimitType five_hour|seven_day, resetsAt (unix), status allowed|allowed_warning}.
 - Механизм: send_later на resetsAt+1 мин → пуш «Лимит обновился» → снова get_session, если есть будущий resetsAt — следующий send_later. Если окна нет (никто не работал) — перезапуск при следующем сообщении владельца или в вечернем отчёте. При переносе чата — перезавести.
-- 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
+- 22.11 15:31: push sent «5h window reset». rate_limit_info now shows only seven_day (allowed_warning, reset 29.11 00:00) — the 5h resetsAt is visible only when 5h is the binding limit; re-arm on next owner msg / daily report.
+- (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
 ## Задачи в работе
 - 22.11 Postik: «📰 Новость» DONE (sources ps-shop-autopost/data/news_sources.json, dedup news_offered.json). 2 test previews in owner bot: PS Store Black Friday, GTA VI record. Need from owner: 2–3 trusted Telegram news channels.
