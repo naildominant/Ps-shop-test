@@ -650,8 +650,8 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё', BTN_FIND = '🔎 Найти игру';
-const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отмена', BTN_CANCEL_OLD = '🛑 Отменить всё', BTN_FIND = '🔎 Найти игру';
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
 
 // ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
@@ -960,7 +960,7 @@ async function ownerMessage(env, m) {
   const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
-  if (t === BTN_CANCEL || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
+  if (t === BTN_CANCEL || t === BTN_CANCEL_OLD || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
   if (t === BTN_FIND) {
     await env.STORE.put('tgpost:find', '1', { expirationTtl: 60 * 30 });
     return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки. Например: «Spider-Man, FC 26, GTA 5».');
@@ -1051,23 +1051,29 @@ async function ownerMessage(env, m) {
 }
 
 // «🛑 Отменить всё»: останавливает работу агента и сбрасывает ожидания (правки, время)
+// «🛑 Отмена» (владелец 22.11): останавливает то, что идёт прямо сейчас по задачам владельца.
+// Агент, публикация, история, правка поста канала, сообщения контактам — отменяются (в очереди и в работе);
+// ожидания (поиск, комментарий, правки, время, пересланный пост) сбрасываются. Расписание (цены, проверка постов) не выключается,
+// опубликованное в канале не трогается.
 async function cancelAll(env, chat) {
   const gh = await env.STORE.get('tgpost:gh');
   let stopped = 0;
-  for (const st of ['in_progress', 'queued']) {
-    const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/agent.yml/runs?status=${st}&per_page=20`, { headers: ghHeaders(gh) });
-    const runs = r.ok ? (await r.json()).workflow_runs || [] : [];
-    for (const run of runs) {
-      const c = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/runs/${run.id}/cancel`, { method: 'POST', headers: ghHeaders(gh) });
-      if (c.status === 202) stopped++;
+  for (const wf of ['agent.yml', 'post.yml', 'story.yml', 'channel.yml', 'dm.yml']) {
+    for (const st of ['in_progress', 'queued', 'waiting', 'pending']) {
+      const r = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/workflows/${wf}/runs?status=${st}&per_page=20`, { headers: ghHeaders(gh) });
+      const runs = r.ok ? (await r.json()).workflow_runs || [] : [];
+      for (const run of runs) {
+        if (wf === 'channel.yml' && run.event === 'schedule') continue; // ежедневный индекс канала не трогаем
+        const c = await fetch(`https://api.github.com/repos/${AUTOPOST_REPO}/actions/runs/${run.id}/cancel`, { method: 'POST', headers: ghHeaders(gh) });
+        if (c.status === 202) stopped++;
+      }
     }
   }
-  await env.STORE.delete('tgpost:await');
-  await env.STORE.delete('tgpost:awaittime');
+  for (const k of ['tgpost:await', 'tgpost:awaittime', 'tgpost:find', 'tgpost:pendtask', 'tgpost:pending']) await env.STORE.delete(k);
   const list = JSON.parse(await env.STORE.get('tgpost:waitmsgs') || '[]');
   await env.STORE.delete('tgpost:waitmsgs');
   for (const [c, id] of list) await tg(env, 'deleteMessage', { chat_id: c, message_id: id });
-  return say(env, chat, stopped ? `🛑 Остановил задач: ${stopped}. Ничего не публикую.` : '🛑 Всё отменено. Сейчас ничего не делается.');
+  return say(env, chat, stopped ? `🛑 Всё остановил (задач: ${stopped}). Ничего не публикую.` : '🛑 Всё остановил. Сейчас ничего не делается.');
 }
 
 // Пересланный пост / фото ждут ~15 с: следующее текстовое сообщение владельца — комментарий к ним (одна задача).
