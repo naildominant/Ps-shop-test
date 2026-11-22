@@ -54,7 +54,7 @@ function orderMessage(o, n) {
   const link = tgUser ? `https://t.me/${tgUser[1]}` : (phone.length >= 9 ? `tel:${phone}` : '');
   const time = new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   return [
-    `🛒 <b>Новая заявка с сайта${n ? ` №${ON(n)}` : ''}</b>`,
+    `🛒 <b>Новая заявка с сайта${n ? ` №${n}` : ''}</b>`,
     '',
     `👤 ${esc(o.name)}`,
     `📞 ${esc(contact)}${link ? `  ${link}` : ''}`,
@@ -88,11 +88,9 @@ async function sheetPost(env, payload) {
 
 const ORDER_HEADER = ['Дата', 'Имя', 'Контакт', 'Консоль', 'Что заказали', 'Сумма, uzs', 'Язык сайта', 'Статус', 'Комментарий', 'Посетитель', '№ заявки', 'Оплачено, uzs', 'Статус изменён'];
 
-// Номер для людей = внутренний n + 1100 (T3 23.11): KV order:<n>, кнопки ord:<n>, а в сообщениях и CRM «№ заявки» — n+1100.
-const ON = (n) => Number(n) + 1100;
 function orderRow(o, n) {
   const items = (o.items || []).slice(0, 30).map((i) => `${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
-  return [Date.now(), o.name, o.contact, o.console, items, Number(o.total) || 0, o.lang || 'ru', 'Новая', '', String(o.vid || '').slice(0, 12), n ? String(ON(n)) : '', '', ''];
+  return [Date.now(), o.name, o.contact, o.console, items, Number(o.total) || 0, o.lang || 'ru', 'Новая', '', String(o.vid || '').slice(0, 12), n ? String(n) : '', '', ''];
 }
 
 async function toSheet(env, row) {
@@ -308,9 +306,9 @@ const CL = {
 };
 const L = (o, k) => CL[k][o.lang === 'uz' ? 'uz' : 'ru'];
 const CLIENT_MSG = {
-  buy: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${ON(n)} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${ON(n)} bajarildi. Yoqimli o‘yin! 🎮` },
-  disc: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${ON(n)} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${ON(n)} bajarildi. Yoqimli o‘yin! 🎮` },
-  wait: { ru: (n) => `⏳ Заявка №${ON(n)} в работе. Менеджер с вами свяжется.`, uz: (n) => `⏳ Buyurtma №${ON(n)} ko‘rib chiqilmoqda. Menejer siz bilan bog‘lanadi.` },
+  buy: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${n} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${n} bajarildi. Yoqimli o‘yin! 🎮` },
+  disc: { ru: (n) => `🎉 Спасибо за покупку! Заявка №${n} выполнена. Приятной игры! 🎮`, uz: (n) => `🎉 Xaridingiz uchun rahmat! Buyurtma №${n} bajarildi. Yoqimli o‘yin! 🎮` },
+  wait: { ru: (n) => `⏳ Заявка №${n} в работе. Менеджер с вами свяжется.`, uz: (n) => `⏳ Buyurtma №${n} ko‘rib chiqilmoqda. Menejer siz bilan bog‘lanadi.` },
 };
 function ordItems(o) {
   return (o.items || []).map((i, k) => `${k + 1}. ${i.title} (${i.option}) — ${money(i.price)} uzs`).join('\n');
@@ -318,7 +316,7 @@ function ordItems(o) {
 function clientConfirm(o, n) {
   const uz = o.lang === 'uz';
   return [
-    uz ? `✅ Buyurtma №${ON(n)} qabul qilindi!` : `✅ Заявка №${ON(n)} принята!`,
+    uz ? `✅ Buyurtma №${n} qabul qilindi!` : `✅ Заявка №${n} принята!`,
     '',
     ordItems(o),
     '',
@@ -331,7 +329,7 @@ function clientConfirm(o, n) {
 }
 function managerText(o, n) {
   const uz = o.lang === 'uz';
-  return [uz ? `Assalomu alaykum! Saytdagi buyurtma №${ON(n)}:` : `Здравствуйте! Заявка №${ON(n)} с сайта:`, '', ordItems(o), '',
+  return [uz ? `Assalomu alaykum! Saytdagi buyurtma №${n}:` : `Здравствуйте! Заявка №${n} с сайта:`, '', ordItems(o), '',
     `${uz ? 'Jami' : 'Итого'}: ${money(o.total)} uzs`, `${uz ? 'Konsol' : 'Консоль'}: ${o.console || ''}`, `${uz ? 'Ism' : 'Имя'}: ${o.name || ''}`].join('\n');
 }
 async function ordRender(env, n, o) {
@@ -372,7 +370,7 @@ async function clientHelp(env, chat, o) {
 }
 async function setOrderStatus(env, n, key, paid) {
   const raw = await env.STORE.get(`order:${n}`);
-  if (!raw) return { ok: false, text: `Заявка №${ON(n)} не найдена` };
+  if (!raw) return { ok: false, text: `Заявка №${n} не найдена` };
   const o = JSON.parse(raw);
   const st = ORD_ST[key];
   const sum = key === 'buy' ? Number(o.row[5]) || 0 : key === 'disc' ? paid : '';
@@ -403,7 +401,7 @@ async function handleOrderBot(req, env, ctx) {
     const [, n, key] = m;
     if (key === 'disc') {
       await env.STORE.put('orderbot:await', n, { expirationTtl: 3600 });
-      await ordTg(env, 'sendMessage', { chat_id: owner, reply_to_message_id: q.message?.message_id, text: `💸 Заявка №${ON(n)}: на какую сумму купили со скидкой? Напишите число, например 950000 или 950к.`, reply_markup: { force_reply: true, input_field_placeholder: 'Сумма, например 950000' } });
+      await ordTg(env, 'sendMessage', { chat_id: owner, reply_to_message_id: q.message?.message_id, text: `💸 Заявка №${n}: на какую сумму купили со скидкой? Напишите число, например 950000 или 950к.`, reply_markup: { force_reply: true, input_field_placeholder: 'Сумма, например 950000' } });
       return ans('Напишите сумму');
     }
     const r = await setOrderStatus(env, n, key);
@@ -423,11 +421,11 @@ async function handleOrderBot(req, env, ctx) {
         await ordTg(env, 'sendMessage', { chat_id: owner, text: 'Хорошо, скидку не записываю.' });
       } else {
         const sum = parseSum(msg.text);
-        if (!sum) await ordTg(env, 'sendMessage', { chat_id: owner, text: `Не понял сумму. Напишите число для заявки №${ON(n)}, например 950000. Или «отмена».`, reply_markup: { force_reply: true } });
+        if (!sum) await ordTg(env, 'sendMessage', { chat_id: owner, text: `Не понял сумму. Напишите число для заявки №${n}, например 950000. Или «отмена».`, reply_markup: { force_reply: true } });
         else {
           await env.STORE.delete('orderbot:await');
           const r = await setOrderStatus(env, n, 'disc', sum);
-          await ordTg(env, 'sendMessage', { chat_id: owner, text: r.ok ? `💸 Записал: заявка №${ON(n)} куплена со скидкой за ${money(sum)} сум.` : r.text });
+          await ordTg(env, 'sendMessage', { chat_id: owner, text: r.ok ? `💸 Записал: заявка №${n} куплена со скидкой за ${money(sum)} сум.` : r.text });
         }
       }
     }
