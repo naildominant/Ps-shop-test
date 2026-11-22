@@ -1,6 +1,6 @@
 # База знаний — чаты «САЙТ PS SHOP»
 
-Обновлено: 22.11.2026 (конец чата «САЙТ PS SHOP #2»). Подробный список задач: `docs/site-tasks.md`.
+Обновлено: 23.11.2026 (конец чата «САЙТ PS SHOP #3», дальше «Сайтер #4»). Подробный список задач: `docs/site-tasks.md`.
 
 ## Команда (утверждено владельцем 22.11)
 - Я — **Сайтер** (чаты «САЙТ PS SHOP #N», название не меняется). Обязанности: сайт psshop.uz и /ru/, заявки (бот @psshop_zayavki_bot, /orderbot, handleOrder, CRM), задачи docs/site-tasks.md по одной, проверка сайта после выкладки, живая версия воркера перед деплоем, обновлять этот файл после каждого шага.
@@ -48,6 +48,8 @@
 - 7. График «Визиты по дням»: даты по порядку слева направо, «18.11», нули в пустые дни; округлить средние до 0,1.
 - 8. «Мой отчёт» наглядно (карточки, полоски, значки итога визита); поиск писать только итоговым словом (сейчас пишет каждую букву). Открытый вопрос: отдельная страница для телефона (Claude советует) или в таблице.
 - 9. Старые заявки №1–14: выяснить, кто купил и за сколько, проставить статус/оплачено (со слов владельца или по переписке в личке).
+
+- 23.11 new owner tasks via Бос #4 (session_014Ko8ovmxXetwTVooX1LTHV), do one at a time, report to Бос, wait OK: T1 GTA 6 default edition = Ultimate (catalog «+» adds Ultimate, game page preselects it; check 390px+desktop, uz+/ru/); T2 resend all past orders to owner via @psshop_zayavki_bot with bought/not bought buttons → status into CRM «Заявки» (tell Бос before sending); T3 order number offset +1100 (17 → 1117), keep CRM ids consistent, note mapping here. Task 4B (Cloudflare) on hold: registrar answer still not received.
 
 ## Проблемы и открытые вопросы
 - Старые 14 заявок в боте без кнопок — статус только через таблицу.
