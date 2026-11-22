@@ -686,6 +686,12 @@ function matchTitles(q, titles, opt = {}) {
   const scored = titles.map((t, i) => [dice(qs, gnorm(t).replace(/ /g, '')), i]).filter(([d]) => d >= 0.62).sort((a, b) => b[0] - a[0]);
   return scored.slice(0, 3).map(([, i]) => i);
 }
+// Название у поставщика — это сама игра, а не слово внутри другого названия (решение Боса 22.11: «League of Legends» ≠ «Song of Nunu: A League of Legends Story»).
+// Одно название должно начинаться с другого (по целым словам): «The Witcher 3» ↔ «The Witcher 3: Wild Hunt», «FC 25» ↔ «EA Sports FC 25».
+function sameGame(supTitle, names) {
+  const a = gnorm(supTitle);
+  return names.filter(Boolean).some((n) => { const b = gnorm(n); return b && (a === b || a.startsWith(b + ' ') || b.startsWith(a + ' ')); });
+}
 // ── Понимание запроса: нейросеть получает запрос владельца и каталог ОБЪЯВЛЕНИЙ ИГР канала и выбирает нужные.
 const LLM = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 async function llmJson(env, prompt, maxTokens = 900) {
@@ -791,9 +797,9 @@ ${list.map((t, i) => `${i + 1}. ${t}`).join('\n')}
 Какое из них — ИМЕННО эта игра (та же часть)? Если владелец не назвал часть — самая новая часть. Если ни одно не подходит — 0.
 Ответ — только JSON-массив из одного числа, например [3] или [0].`, 20);
         const n = Number(pick?.[0]);
-        if (n > 0 && n <= list.length) it.supplier = list[n - 1];
+        if (n > 0 && n <= list.length && sameGame(list[n - 1], [it.official, it.ru, it.asked])) it.supplier = list[n - 1];
       } catch { it.supplier = null; }
-    } else if (list.length && matchTitles(it.official, sup).length) it.supplier = sup[matchTitles(it.official, sup)[0]];
+    } else if (list.length && matchTitles(it.official, sup).length && sameGame(sup[matchTitles(it.official, sup)[0]], [it.official, it.asked])) it.supplier = sup[matchTitles(it.official, sup)[0]];
   }
   return items.map((it) => ({ ...it, posts: it.posts.map((id) => byId.get(id)) }));
 }
