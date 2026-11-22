@@ -28,4 +28,4 @@
 - Plan (owner 22.11): tomorrow owner fixes laptop → connect it (Claude desktop app, Remote Control / browser) so Маркетолог manages OLX himself. Before acting in his account: agree rules (what I may publish/edit without asking).
 - CTA (owner): primary = phone call to owner («пусть лучше звонит мне»); owner then moves client to Telegram/site.
 6. Volume goal (owner): 120 ads per month (~4/day).
-- Budget (owner): 300 000 сум/month for OLX + BIR BIR together. TODO: check OLX.uz paid limits/packages & boost prices vs 120 ads/month goal.
+- Budget (owner): 300 000 сум/month, then raised: «можно больше 500 тысяч» incl. per-post fees + promotion; I choose packages myself for OLX + BIR BIR together. TODO: check OLX.uz paid limits/packages & boost prices vs 120 ads/month goal.
