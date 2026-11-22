@@ -33,6 +33,11 @@
 - 21.11: придуманы утренние запуски, память `docs/state/`, правила в CLAUDE.md.
 - 22.11: утренний запуск в 5:31 не создал чаты (нет инструментов). Ложная тревога про /ru/ — проверялся адрес воркера вместо psshop.uz. Перенос сделан руками через сами чаты: «САЙТ PS SHOP #3» (session_014Ko8ovvnMbxaBiKNTLtGF5), «БОТ ПОСТИК #3» (session_014Ko8oxQ1ysNFRULef8kw7b). Принято правило ежедневного самопереноса. Этот чат перенесён в «НАСТРОЙКА CLAUDE #3».
 
+### Ponytail trial (owner OK via Bos, 22.11 → review Mon 30.11)
+- Source github.com/DietrichGebert/ponytail @ ebd8654c (v5.3.3, MIT). Reviewed: core SKILL.md is plain guidance (keeps tests, validation, security); no network/injection. NOT vendored: hooks (local CSV ledger, optional webhook), npm installer, band/statusline.
+- Installed: Ps-shop-test `.claude/skills/ponytail/SKILL.md` (with PS SHOP override note: CLAUDE.md wins, no `ultra`, Сайтер+Постик only); Постик: same file sent for ps-shop-autopost.
+- 30.11: compare Сайтер/Постик cost per task vs 22–29.11 (baseline 22.11: Сайтер $1.33, Постик #3 $19 → #5 fresh). Keep or remove.
+
 ## Scheduled tasks — verified 22.11
 - Self-bound recurring trigger (fires into its own chat) WORKS with session tools: Bos trig_01LABPq3uqbEGdX1uwxTGahB (daily report 18:37 Tashkent, persistent_session_id = Bos #3) fired 22.11 18:37 — list_sessions, get_session, send_message OK. Self-bound send_later also OK (PushNotification available).
 - Still NOT working: trigger into ANOTHER chat, and fresh-session-per-fire (no session tools).
