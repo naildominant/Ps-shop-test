@@ -487,6 +487,7 @@ async function handleTgPost(req, env, ctx) {
   const cp = u.channel_post;
   if (cp) {
     const channel = (env.TGPOST_CHANNEL || '@psshopgo').replace('@', '').toLowerCase();
+    if (env.STORE && String(cp.chat?.username || '').toLowerCase() === channel) await indexChannelPost(env, cp).catch(() => {});
     const pend = env.STORE ? JSON.parse(await env.STORE.get('tgpost:pending') || 'null') : null;
     if (pend && String(cp.chat?.username || '').toLowerCase() === channel && !cp.media_group_id) {
       const link = `https://t.me/${channel}/${cp.message_id}`;
@@ -503,7 +504,7 @@ async function handleTgPost(req, env, ctx) {
   if (String(q.from?.id) !== owner) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Нет доступа' }, 200);
   const chat = q.message.chat.id, mid = q.message.message_id;
   const [action, idsPart, post] = String(q.data || '').split(':');
-  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', later: 'отправить позже', story: 'выложить в историю' }[action];
+  const said = { go: 'опубликовать', no: 'нужна доработка', del: 'отменить пост', upd: 'да, меняем пост в канале', keep: 'нет, оставить пост', fixp: 'правки к посту канала', prfix: 'есть правки к ценам', prok: 'отчёт по ценам принят', later: 'отправить позже', story: 'выложить в историю' }[action];
   if (said && env.STORE) await remember(env, { result: `владелец нажал: ${said}${post ? ' (' + post + ')' : ''}` });
 
   if (action === 'no') {
@@ -544,6 +545,15 @@ async function handleTgPost(req, env, ctx) {
     await setStatus(env, post, { status: 'deleted' });
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
+  }
+  if (action === 'prok') {
+    await tg(env, 'editMessageReplyMarkup', { chat_id: chat, message_id: mid, reply_markup: kb([[{ text: '✅ Принято', callback_data: 'x' }]]) });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Принято' }, 200);
+  }
+  if (action === 'prfix') {
+    await env.STORE.put('tgpost:await', 'prices', { expirationTtl: 60 * 60 * 24 * 3 });
+    await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: mid, text: '✏️ Что поправить в ценах? Напишите одним сообщением, например: «Assassin’s Creed — верни 429 000» или «NBA 2K26 PS5 — 419 000».' });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Жду правки' }, 200);
   }
   if (action === 'fixp') {
     if (!/^\d+$/.test(idsPart)) return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
@@ -640,8 +650,229 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё';
-const MENU = { keyboard: [[{ text: BTN_NEW_GAME }], [{ text: BTN_NEW_POST }, { text: BTN_PRICES }]], resize_keyboard: true, is_persistent: true };
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '🛑 Отменить всё', BTN_FIND = '🔎 Найти игру';
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
+
+// ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
+// Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
+// Индексы в KV: tgpost:chindex [{id,t}] (посты канала с ценой), tgpost:supindex [название] (каталог поставщика).
+const ROMAN = { i: '1', ii: '2', iii: '3', iv: '4', v: '5', vi: '6', vii: '7', viii: '8', ix: '9', x: '10' };
+const STOP = new Set(['ea', 'sports', 'the', 'marvels', 'marvel', 'tom', 'clancys', 'sid', 'meiers', 'edition', 'standard', 'game', 'of', 'and', 'игра', 'издание']);
+const gnorm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/ё/g, 'е').replace(/[’'`ʼ]/g, '').replace(/grand theft auto/g, 'gta').replace(/\bfifa\b/g, 'fc').replace(/[^a-z0-9а-я]+/g, ' ').trim()
+  .split(' ').map((w) => ROMAN[w] || w).filter((w) => w && !STOP.has(w)).join(' ');
+function bigrams(s) { const a = []; for (let i = 0; i < s.length - 1; i++) a.push(s.slice(i, i + 2)); return a; }
+function dice(a, b) {
+  const x = bigrams(a), y = bigrams(b);
+  if (!x.length || !y.length) return 0;
+  const m = new Map(); for (const g of y) m.set(g, (m.get(g) || 0) + 1);
+  let n = 0; for (const g of x) if (m.get(g)) { n++; m.set(g, m.get(g) - 1); }
+  return (2 * n) / (x.length + y.length);
+}
+function matchTitles(q, titles, opt = {}) {
+  const qn = gnorm(q), qs = qn.replace(/ /g, '');
+  if (!qn) return [];
+  const words = qn.split(' ');
+  const hits = [];
+  titles.forEach((t, i) => {
+    const tn = gnorm(t), tw = tn.split(' ');
+    if ((qs.length >= 4 && tn.replace(/ /g, '').includes(qs)) || words.every((w) => tw.some((x) => x === w || (w.length >= 3 && x.startsWith(w))))) hits.push(i);
+  });
+  if (hits.length) return hits;
+  titles.forEach((t, i) => { // название поста целиком внутри запроса: «Witcher 3» для «The Witcher 3 Wild Hunt»
+    const tw = gnorm(t).split(' ').filter(Boolean);
+    if (tw.length && tw.join('').length >= 4 && tw.length > words.length / 2 && tw.every((w) => words.includes(w)) && (!/\d/.test(qn) || tw.some((w) => /\d/.test(w)))) hits.push(i);
+  });
+  if (hits.length || opt.strict) return hits;
+  const scored = titles.map((t, i) => [dice(qs, gnorm(t).replace(/ /g, '')), i]).filter(([d]) => d >= 0.62).sort((a, b) => b[0] - a[0]);
+  return scored.slice(0, 3).map(([, i]) => i);
+}
+// ── Понимание запроса: нейросеть получает запрос владельца и каталог ОБЪЯВЛЕНИЙ ИГР канала и выбирает нужные.
+const LLM = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+async function llmJson(env, prompt, maxTokens = 900) {
+  const r = await env.AI.run(LLM, { max_tokens: maxTokens, temperature: 0, messages: [{ role: 'user', content: prompt }] });
+  const out = String(r?.choices?.[0]?.message?.content ?? r?.response ?? '');
+  return JSON.parse(out.slice(out.indexOf('['), out.lastIndexOf(']') + 1));
+}
+const HINTS = 'Русские и разговорные названия: Ведьмак = The Witcher, Человек-паук = Spider-Man, Майлз Моралес = Spider-Man Miles Morales, ГТА = GTA (Grand Theft Auto), РДР = Red Dead Redemption, Одни из нас = The Last of Us, Бог войны = God of War, Призрак Цусимы = Ghost of Tsushima, Фифа/ФК = EA Sports FC / FIFA, Эф один/Формула 1 = F1 (гонки, НЕ FC), Призрак Ётэй/Ёотэй/Йотей = Ghost of Yōtei (НЕ Tsushima), Стеллар блейд = Stellar Blade, Год оф вар/Годофвар = God of War, Рагнарёк = Ragnarök, Элден ринг = Elden Ring, Анчартед = Uncharted, Детройт = Detroit: Become Human, Гран туризмо = Gran Turismo, Форза = Forza Horizon, Ратчет = Ratchet & Clank, Колда/Кол оф дьюти = Call of Duty, Мортал комбат = Mortal Kombat, Ассасин = Assassin\'s Creed, Хогвартс = Hogwarts Legacy, Киберпанк = Cyberpunk 2077, Резидент = Resident Evil, Ласт оф ас = The Last of Us. Числа словами = цифры («пять» = 5, «шесть» = 6, «два» = 2). Текст мог быть распознан из голоса с ошибками — угадывай по звучанию.';
+
+// Каталог: одно объявление на название (самое свежее).
+function uniqueCatalog(idx) {
+  const best = new Map();
+  for (const x of idx) { const k = gnorm(x.t); if (k && (!best.has(k) || x.id > best.get(k).id)) best.set(k, x); }
+  return [...best.values()];
+}
+
+// «гта шесть», «фифа двадцать шесть» → число, если нейросеть его потеряла
+const NUMW = { 'один': 1, 'одна': 1, 'первая': 1, 'два': 2, 'две': 2, 'вторая': 2, 'три': 3, 'третья': 3, 'четыре': 4, 'четвертая': 4, 'пять': 5, 'пятая': 5, 'шесть': 6, 'шестая': 6, 'семь': 7, 'восемь': 8, 'девять': 9, 'десять': 10, 'одиннадцать': 11, 'двенадцать': 12, 'тринадцать': 13, 'четырнадцать': 14, 'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30 };
+function spokenNumber(said) {
+  const d = String(said).match(/\b\d{1,4}\b/); if (d) return d[0];
+  const w = String(said).toLowerCase().replace(/ё/g, 'е').split(/[^а-я]+/);
+  let n = 0;
+  for (const x of w) if (NUMW[x]) n = n >= 20 && NUMW[x] < 10 ? n + NUMW[x] : NUMW[x];
+  return n ? String(n) : '';
+}
+// Числа в названии (часть игры): «Resident Evil 4» не должен находить «Resident Evil 2».
+function partOk(official, title) {
+  const want = (gnorm(official).match(/\b\d{1,2}\b/g) || []);
+  if (!want.length) return true;
+  const have = gnorm(title).match(/\b\d{1,4}\b/g) || [];
+  return want.every((n) => have.includes(n));
+}
+
+// Лишнее убираем: конкретная игра → только её объявление (точное название, иначе самое короткое);
+// серия → по одному объявлению на каждую часть, сборники («+», bundle, trilogy) — только если части нет отдельно.
+const EDITION = new Set(['ultimate', 'deluxe', 'gold', 'complete', 'remastered', 'remaster', 'definitive', 'goty', 'premium', 'digital', 'ps4', 'ps5', 'version', 'director', 'cut', 'directors', 'enhanced', 'special', 'collectors', 'launch', 'cross', 'gen', 'bundle', 'vr', 'vr2', 'remake']);
+const extraWords = (q, t) => gnorm(t).split(' ').filter((w) => w && !gnorm(q).split(' ').includes(w)).length;
+const isBundle = (t) => /\+|bundle|trilogy|collection|сборник|части сразу|игры сразу/i.test(t);
+function pickMain(it, posts) {
+  if (posts.length <= 1) return posts;
+  if (!it.series && /\d/.test(gnorm(it.official))) {
+    const exact = posts.filter((p) => gnorm(p.t) === gnorm(it.official) || (it.ru && gnorm(p.t) === gnorm(it.ru)));
+    if (exact.length) return exact.slice(0, 1);
+    const plain = posts.filter((p) => !isBundle(p.t));
+    const pool = plain.length ? plain : posts;
+    const min = Math.min(...pool.map((p) => extraWords(it.official, p.t)));
+    return pool.filter((p) => extraWords(it.official, p.t) === min).slice(0, 1);
+  }
+  // серия: разные игры оставляем, издания одной игры («MK 11» и «MK 11 Ultimate») схлопываем в одно
+  const words = (t) => gnorm(t).split(' ').filter(Boolean);
+  const nums = (t) => (gnorm(t).match(/\b\d{1,4}\b/g) || []).join(' ');
+  const sorted = [...posts].sort((a, b) => isBundle(a.t) - isBundle(b.t) || words(a.t).length - words(b.t).length || b.id - a.id);
+  const out = [];
+  for (const p of sorted) {
+    if (out.some((q) => nums(q.t) === nums(p.t) && words(q.t).every((w) => words(p.t).includes(w)) && words(p.t).every((w) => words(q.t).includes(w) || EDITION.has(w)))) continue;
+    if (isBundle(p.t) && out.length) continue;
+    out.push(p);
+  }
+  return out;
+}
+
+async function resolveGames(env, text) {
+  const idx = uniqueCatalog(JSON.parse(await env.STORE.get('tgpost:chindex') || '[]'));
+  const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
+  const byId = new Map(idx.map((x) => [x.id, x]));
+  let items = null;
+  if (env.AI) {
+    try { // шаг 1: какие игры просит владелец (каждая отдельно, официальное английское название)
+      const arr = await llmJson(env, `Владелец магазина игр PlayStation назвал игры (текст мог быть распознан из голоса с ошибками).
+${HINTS}
+Текст: «${text.slice(0, 600)}»
+Перечисли КАЖДУЮ названную игру по порядку, ни одной не пропусти и не добавляй лишних. "official" — ВСЕГДА официальное английское название латиницей; номер части — цифрой, только если владелец его назвал; год и издание не выдумывай. "ru" — как игру называют по-русски (например «Ведьмак 3: Дикая Охота»), если есть. "series": true, если назвал серию без номера части.
+Ответ — только JSON-массив: [{"said": "как сказал", "official": "...", "ru": "...", "series": false}]`, 600);
+      if (Array.isArray(arr) && arr.length) items = arr.slice(0, 15).map((x) => ({ asked: String(x.said || x.official || ''), official: String(x.official || x.said || ''), ru: String(x.ru || ''), series: !!x.series, posts: [] }));
+    } catch { items = null; }
+  }
+  if (!items) items = text.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean).slice(0, 15).map((q) => ({ asked: q, official: q, series: !/\d/.test(q), posts: [] }));
+  for (const it of items) {
+    const num = spokenNumber(it.asked);
+    if (num && !/\d/.test(gnorm(it.official))) { it.official += ' ' + num; it.series = false; }
+    // точное сравнение названий: английское → русское → как сказал (первое, что нашлось)
+    for (const q of [it.official, it.ru, it.asked]) {
+      if (it.posts.length || !q) continue;
+      it.posts = matchTitles(q, idx.map((x) => x.t), { strict: true }).map((i) => idx[i].id);
+    }
+    if (!it.series) it.posts = it.posts.filter((id) => partOk(it.official, byId.get(id).t)); // без номера — как серия (pickMain)
+    it.posts = pickMain(it, it.posts.map((id) => byId.get(id))).map((x) => x.id);
+  }
+  // нет в канале → каталог поставщика: кандидаты по буквам, выбор — нейросетью
+  for (const it of items) {
+    if (it.posts.length) continue;
+    const cand = new Set();
+    for (const q of [it.official, it.asked, it.official.replace(/\b(19|20)\d{2}\b/g, '')]) for (const i of matchTitles(q, sup)) cand.add(sup[i]);
+    const qs = gnorm(it.official).replace(/ /g, '');
+    sup.map((t) => [dice(qs, gnorm(t).replace(/ /g, '')), t]).sort((a, b) => b[0] - a[0]).slice(0, 15).forEach(([, t]) => cand.add(t));
+    const list = [...cand].slice(0, 30);
+    it.supplier = null;
+    if (env.AI && list.length) {
+      try {
+        const pick = await llmJson(env, `Владелец магазина ищет игру «${it.asked}» (официально: «${it.official}»). ${HINTS}
+Вот названия из каталога поставщика:
+${list.map((t, i) => `${i + 1}. ${t}`).join('\n')}
+Какое из них — ИМЕННО эта игра (та же часть)? Если владелец не назвал часть — самая новая часть. Если ни одно не подходит — 0.
+Ответ — только JSON-массив из одного числа, например [3] или [0].`, 20);
+        const n = Number(pick?.[0]);
+        if (n > 0 && n <= list.length) it.supplier = list[n - 1];
+      } catch { it.supplier = null; }
+    } else if (list.length && matchTitles(it.official, sup).length) it.supplier = sup[matchTitles(it.official, sup)[0]];
+  }
+  return items.map((it) => ({ ...it, posts: it.posts.map((id) => byId.get(id)) }));
+}
+
+// Без кнопки: «скинь/отправь мне GTA 6, FIFA» — это поиск готовых объявлений, а не новый пост.
+async function isFindRequest(env, text) {
+  if (!env.AI || text.length > 400) return false;
+  if (/(сделай|создай|напиши|подготовь|нужен|нужна)\s+(пост|новост|объявлен|картинк|истори)/i.test(text)) return false;
+  try {
+    const r = await env.AI.run(LLM, { max_tokens: 5, temperature: 0, messages: [{ role: 'user', content: `Владелец магазина игр пишет боту. Бот умеет: FIND — прислать УЖЕ ГОТОВЫЕ объявления игр из канала (владелец просит «отправь/скинь/пришли/покажи/есть ли» игры или просто перечисляет названия игр); POST — сделать НОВЫЙ пост/новость/картинку/правку для канала.
+Сообщение: «${text}»
+Ответь одним словом: FIND или POST.` }] });
+    return /FIND/i.test(String(r?.choices?.[0]?.message?.content ?? r?.response ?? ''));
+  } catch { return false; }
+}
+
+async function findGames(env, chat, text) {
+  if (!text.trim()) return say(env, chat, '🔎 Напишите или скажите названия игр.');
+  await remember(env, { task: `найти игры для клиента: ${text}`, mode: 'find' });
+  const ch = env.TGPOST_CHANNEL || '@psshopgo';
+  const items = await resolveGames(env, text);
+  if (!items.length) return say(env, chat, 'Не понял, какие игры нужны 🤔 Скажите ещё раз.');
+  await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Понял: ${items.map((x) => x.official || x.asked).join(', ')}` });
+  const none = [], make = [];
+  let sent = 0;
+  for (const it of items) {
+    if (it.posts.length) {
+      for (const x of it.posts.sort((a, b) => b.id - a.id).slice(0, 6)) {
+        const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: x.id });
+        if (r.ok) sent++;
+      }
+    } else if (it.supplier) make.push(it); else none.push(it.official || it.asked);
+  }
+  const notes = [];
+  if (none.length) notes.push(`❌ Данной игры нет в наличии: ${none.join(', ')}`);
+  if (make.length) notes.push(`🛠 Нет в канале, но есть у поставщика — готовлю объявление: ${make.map((x) => x.supplier).join(', ')}. Пришлю, как будет готово.`);
+  if (notes.length) await say(env, chat, notes.join('\n\n'));
+  await remember(env, { result: `переслал объявлений: ${sent}${none.length ? '; нет в наличии: ' + none.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.supplier).join(', ') : ''}` });
+  if (make.length) {
+    const task = 'Владелец ищет для клиента игры, которых нет в канале, но они есть у поставщика. Сделай объявление по шаблону для КАЖДОЙ игры (отдельная папка и отдельная строка в out/preview.txt). Название у поставщика указано точно.\n'
+      + make.map((x) => `- ${x.supplier} (владелец сказал: «${x.asked}»)`).join('\n');
+    const err = await dispatchAgent(env, { mode: 'new_game', task });
+    if (err) return say(env, chat, `⚠️ Не получилось запустить подготовку объявления: ${err}`);
+    await waitMark(env, chat);
+  }
+}
+// Проверка поиска без отправки в Telegram: GET /tgpost/findtest?key=<KV tgpost:testkey>&q=...
+async function handleFindTest(req, env) {
+  const u = new URL(req.url);
+  const key = await env.STORE.get('tgpost:testkey');
+  if (!key || u.searchParams.get('key') !== key) return json({ ok: false }, 403);
+  if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
+  const items = await resolveGames(env, u.searchParams.get('q') || '');
+  return json(items.map((x) => ({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null })), 200);
+}
+
+async function handleAgentIndex(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const b = await req.json().catch(() => ({}));
+  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150) })).filter((x) => x.id && x.t)));
+  if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
+  return json({ ok: true }, 200);
+}
+const NEWS_RE = /игра дня|выходит|скидк|акци|подписк|black friday|день рождени|таких цен|ps ?plus|распродаж|результат|голосовани|обновлени|релиз|осталось|в наличии|предзаказ/i;
+// Объявление игры (а не новость/акция/«игра дня»): есть «ЦЕНА» и цена в сумах; название — первая строка с буквами.
+function listingTitle(t) {
+  if (!/ЦЕНА/i.test(t) || !/(\d{1,3}[ . ]\d{3}|\d{5,7})\s*(UZS|сум)/i.test(t)) return null;
+  const title = t.split('\n').map((l) => l.replace(/[^\p{L}\p{N}_:+&.'’ -]/gu, '').trim().replace(/^-+|-+$/g, '').trim()).find((l) => /\p{L}/u.test(l) && (l.match(/[\p{L}\p{N}]/gu) || []).length >= 2);
+  if (!title || /^(ЦЕНА|ИЗДАНИ|РУССК|АНГЛИЙ)/i.test(title)) return null;
+  if (NEWS_RE.test(title) || /по результатам|голосовани|акция|только сегодня|успей/i.test(t)) return null;
+  return title.slice(0, 150);
+}
+async function indexChannelPost(env, cp) {
+  const title = listingTitle(cp.text || cp.caption || '');
+  const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]').filter((x) => x.id !== cp.message_id);
+  if (!title) { await env.STORE.put('tgpost:chindex', JSON.stringify(idx)); return; }
+  idx.unshift({ id: cp.message_id, t: title });
+  await env.STORE.put('tgpost:chindex', JSON.stringify(idx));
+}
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
 const say = (env, chat, text, extra) => tg(env, 'sendMessage', { chat_id: chat, text, reply_markup: MENU, link_preview_options: { is_disabled: true }, ...extra });
 
@@ -703,16 +934,43 @@ function describeMessage(m) {
   return t;
 }
 
+// Голосовое владельца → текст (Workers AI Whisper), дальше как обычное сообщение.
+async function transcribe(env, fileId) {
+  const f = await tg(env, 'getFile', { file_id: fileId });
+  if (!f.ok) throw new Error('не смог скачать голосовое');
+  const buf = new Uint8Array(await (await fetch(`https://api.telegram.org/file/bot${await botToken(env)}/${f.result.file_path}`)).arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+  const r = await env.AI.run('@cf/openai/whisper-large-v3-turbo', { audio: btoa(bin), language: 'ru' });
+  return String(r?.text || '').trim();
+}
+
 async function ownerMessage(env, m) {
   const chat = m.chat.id;
+  const voice = m.voice || m.audio || m.video_note;
+  if (voice && env.AI) {
+    let text = '';
+    try { text = await transcribe(env, voice.file_id); } catch (e) { return say(env, chat, `⚠️ Не получилось разобрать голосовое: ${e.message}. Попробуйте ещё раз или напишите текстом.`); }
+    if (!text) return say(env, chat, '🎤 Не расслышал 🤔 Скажите ещё раз или напишите текстом.');
+    if (!(await env.STORE.get('tgpost:find'))) await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
+    return ownerMessage(env, { ...m, voice: undefined, audio: undefined, video_note: undefined, text, caption: undefined, entities: [] });
+  }
   const t = (m.text || m.caption || '').trim();
   const ents = (m.entities || m.caption_entities || []).filter((e) => e.type === 'custom_emoji');
   const photo = m.photo?.length ? m.photo[m.photo.length - 1].file_id : (m.document?.mime_type?.startsWith('image/') ? m.document.file_id : '');
 
   if (t === '/start' || t === '/menu' || t.toLowerCase() === 'меню') return say(env, chat, 'Меню внизу 👇 Можно просто написать задачу своими словами или переслать пост из другого канала.');
   if (t === BTN_CANCEL || /^(отмена|стоп|отмени(ть)?( всё| все)?)[.!]*$/i.test(t)) return cancelAll(env, chat);
+  if (t === BTN_FIND) {
+    await env.STORE.put('tgpost:find', '1', { expirationTtl: 60 * 30 });
+    return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки. Например: «Spider-Man, FC 26, GTA 5».');
+  }
+  if (t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL].includes(t) && !t.startsWith('/') && !photo && !m.forward_origin && await env.STORE.get('tgpost:find')) {
+    await env.STORE.delete('tgpost:find');
+    return findGames(env, chat, t);
+  }
   const waitTime = await env.STORE.get('tgpost:awaittime');
-  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL].includes(t) && !t.startsWith('/')) {
+  if (waitTime && t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL, BTN_FIND].includes(t) && !t.startsWith('/')) {
     const ms = parseTime(t);
     if (!ms) return say(env, chat, 'Не понял время 🤔 Напишите, например: «19:30», «завтра 10:00» или «25.11 18:00».');
     const r = await scheduleAt(env, chat, waitTime, Math.floor(ms / 1000));
@@ -832,6 +1090,7 @@ async function startTask(env, chat, text, files, opts = {}) {
     const err = await dispatchAgent(env, { mode: 'edit', post: waiting, task: text, files: files.join(',') });
     return err ? say(env, chat, `⚠️ Не получилось запустить правки: ${err}`) : mark();
   }
+  if (!files.length && !text.startsWith('[Переслано') && await isFindRequest(env, text)) return findGames(env, chat, text);
   const err = await dispatchAgent(env, { mode: 'task', task: text, files: files.join(',') });
   return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : mark();
 }
@@ -852,6 +1111,38 @@ async function tgForm(env, method, form) {
   return r.json();
 }
 
+// Утренний отчёт по ценам: бот-обход (6:00) кладёт текст в KV, ровно в 7:00 Ташкент (cron 0 2 * * *) он уходит владельцу.
+async function handleAgentReport(req, env) {
+  if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
+  const b = await req.json().catch(() => ({}));
+  const text = String(b.text || '').slice(0, 20000), day = String(b.day || '');
+  if (!text) return json({ ok: false, error: 'bad input' }, 400);
+  await env.STORE.put('tgpost:report', JSON.stringify({ text, day, ts: Date.now() }), { expirationTtl: 60 * 60 * 24 * 3 });
+  const sent = b.now ? await sendPriceReport(env, true, { text, day }) : null;
+  return json({ ok: true, sent }, 200);
+}
+async function sendPriceReport(env, force, given) {
+  const chat = env.TGPOST_OWNER;
+  const rep = given ? { ...given, ts: Date.now() } : JSON.parse(await env.STORE.get('tgpost:report') || 'null');
+  const fresh = rep && Date.now() - rep.ts < 1000 * 60 * 60 * 20;
+  if (!fresh && !force) return tg(env, 'sendMessage', { chat_id: chat, text: '⚠️ Утренняя проверка цен ещё не закончилась или не сработала — посмотрю.' });
+  if (!rep) return 'нет отчёта';
+  const parts = [];
+  let cur = '';
+  for (const block of rep.text.split('\n\n')) {
+    if (cur && (cur + '\n\n' + block).length > 3800) { parts.push(cur); cur = block; } else cur = cur ? cur + '\n\n' + block : block;
+  }
+  if (cur) parts.push(cur);
+  for (let i = 0; i < parts.length; i++) {
+    const last = i === parts.length - 1;
+    const r = await tg(env, 'sendMessage', { chat_id: chat, text: parts[i], link_preview_options: { is_disabled: true }, ...(last ? { reply_markup: kb([[{ text: '✅ Принято', callback_data: 'prok::' }, { text: '✏️ Есть правки', callback_data: 'prfix::' }]]) } : {}) });
+    if (!r.ok) return `telegram: ${r.description}`;
+  }
+  await env.STORE.delete('tgpost:report');
+  await remember(env, { result: `утренний отчёт по ценам ${rep.day} отправлен` });
+  return 'отправлен';
+}
+
 // «БЫЛО» (пересланный пост канала) → «СТАЛО» (тот же пост с новым текстом) → кнопки Да / Нет / Правки.
 async function handleAgentReview(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -862,13 +1153,31 @@ async function handleAgentReview(req, env) {
   const link = `https://t.me/${ch.replace('@', '')}/${id}`;
   const strip = (x) => x.replace(/<tg-emoji[^>]*>(.*?)<\/tg-emoji>/g, '$1');
   await clearWait(env);
+  const btns = kb([[{ text: '✅ Да', callback_data: `upd:${id}:` }], [{ text: '❌ Нет', callback_data: `keep:${id}:` }], [{ text: '✏️ Правки', callback_data: `fixp:${id}:` }]]);
+  if (b.short) { // цены: одно короткое сообщение «игра: было → стало» без постов
+    const r = await tg(env, 'sendMessage', { chat_id: chat, text: `${note}\n\nПост: ${link}`, link_preview_options: { is_disabled: true }, reply_markup: btns });
+    if (!r.ok) return json({ ok: false, error: r.description }, 502);
+    await remember(env, { result: `прислал изменение цены поста канала ${id}: ${note}` });
+    return json({ ok: true }, 200);
+  }
   await tg(env, 'sendMessage', { chat_id: chat, text: '⬇️ БЫЛО' });
   const fw = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: id });
   if (!fw.ok) await tg(env, 'sendMessage', { chat_id: chat, text: `(не смог показать пост: ${link})` });
   await tg(env, 'sendMessage', { chat_id: chat, text: '⬇️ СТАЛО' });
   let r = null;
   const media = fw.ok && (fw.result.photo || fw.result.video || fw.result.animation || fw.result.document);
-  if (media && visibleLen(html) <= 1024) {
+  if (b.img) { // новая обложка (ежедневная проверка поста)
+    const bytes = Uint8Array.from(atob(String(b.img)), (c) => c.charCodeAt(0));
+    const sendImg = async (cap) => {
+      const f = new FormData();
+      f.append('chat_id', chat); f.append('photo', new Blob([bytes], { type: 'image/jpeg' }), 'image.jpg');
+      if (cap) { f.append('caption', cap); f.append('parse_mode', 'HTML'); }
+      return tgForm(env, 'sendPhoto', f);
+    };
+    if (visibleLen(html) <= 1024) { r = await sendImg(html); if (!r.ok) r = await sendImg(strip(html)); }
+    else await sendImg('');
+  }
+  if (!r?.ok && !b.img && media && visibleLen(html) <= 1024) {
     r = await tg(env, 'copyMessage', { chat_id: chat, from_chat_id: ch, message_id: id, caption: html, parse_mode: 'HTML' });
     if (!r.ok) r = await tg(env, 'copyMessage', { chat_id: chat, from_chat_id: ch, message_id: id, caption: strip(html), parse_mode: 'HTML' });
   }
@@ -1112,6 +1421,9 @@ export default {
     if (req.method === 'POST' && pathname === '/tgpost/preview') return handleAgentPreview(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/say') return handleAgentSay(req, env);
     if (req.method === 'POST' && pathname === '/tgpost/review') return handleAgentReview(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/report') return handleAgentReport(req, env);
+    if (req.method === 'POST' && pathname === '/tgpost/index') return handleAgentIndex(req, env);
+    if (req.method === 'GET' && pathname === '/tgpost/findtest') return handleFindTest(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file') return handleAgentFile(req, env);
     if (req.method === 'GET' && pathname === '/tgpost/file-path') {
       if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
@@ -1133,7 +1445,7 @@ export default {
     return json({ ok: false }, 404, h);
   },
   async scheduled(event, env, ctx) {
+    if (event.cron === '0 2 * * *') return ctx.waitUntil(sendPriceReport(env)); // 7:00 Ташкент — отчёт по ценам
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
-
