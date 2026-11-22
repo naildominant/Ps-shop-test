@@ -13,4 +13,6 @@
 - Inter-chat msgs English, short. Daily chat transfer «Маркетолог #N».
 
 ## Состояние
+- 22.11: OLX profile https://www.olx.uz/list/user/6lj3A/ audited (40 ads) → reklama-log.md. Sent to Бос. Waiting: BIR BIR link; owner confirm of guarantee 5y / rental tariffs from OLX ads.
+- Env: olx.uz, www.olx.uz, frankfurt.apollo.olxcdn.com, birbir.uz, www.birbir.uz, api.birbir.uz allowed (owner approved). birbir.uz = Cloudflare bot check (403). OLX: browse pages only, no internal API.
 - 22.11: waiting for owner's OLX and BIR BIR profile links → audit → report to Бос. Asked Мастер re CLAUDE.md team entry + network to olx.uz/birbir.uz.
