@@ -313,7 +313,7 @@
     sortSel.value = sort; $('#search-q').value = q;
     const plural = (n) => { if (UZ) return 'ta o‘yin'; const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? 'игра' : m >= 2 && m <= 4 && (h < 10 || h >= 20) ? 'игры' : 'игр'; };
     const card = (g) => {
-      const o = g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
+      const o = (g.d && g.o.find((x) => x[0] === g.d)) || g.o.reduce((b, x) => (x[1] <= b[1] ? x : b), g.o[0]);
       const tags = [g.f.includes('sale') && `<span class="tag tag-sale">${T('Акция', 'Aksiya')}</span>`, g.f.includes('pre') && `<span class="tag tag-pre">${T('Предзаказ', 'Oldindan buyurtma')}</span>`, g.f.includes('hit') && `<span class="tag tag-hit">${T('Хит', 'Xit')}</span>`,
         g.f.includes('new') && !g.f.includes('pre') && `<span class="tag tag-new">${T('Новинка', 'Yangi')}</span>`].filter(Boolean).slice(0, 2).join('');
       const multi = new Set(g.o.map((x) => x[1])).size > 1;

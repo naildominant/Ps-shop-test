@@ -131,6 +131,15 @@ def best_opt(g):
     return best
 
 
+# издание по умолчанию (решение владельца 23.11: GTA VI — сразу Ultimate)
+DEFAULT_ED = {'grand-theft-auto-vi': 'ultimate'}
+
+
+def default_opt(g):
+    want = DEFAULT_ED.get(g['id'])
+    return next((o for o in g['opts'] if o['key'].lower() == want), None) or best_opt(g)
+
+
 # ---------- иконки ----------
 IC = {
     'search': '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
@@ -304,7 +313,7 @@ def tags(g, limit=2):
 
 
 def card(g, lazy=True):
-    o = best_opt(g)
+    o = default_opt(g)
     return f'''<article class="card">
   <div class="card-media">
     <a class="card-img" href="/game/{g['id']}/"><img src="/static/covers/sm/{g['id']}.webp" alt="{E(g['title'])}" width="300" height="400"{' loading="lazy"' if lazy else ''} decoding="async"></a>
@@ -595,7 +604,7 @@ def similar_games(g, games, n=12):
 
 
 def page_game(g, games):
-    o = best_opt(g)
+    o = default_opt(g)
     opts = ''.join(f'<button class="opt" role="radio" aria-checked="{"true" if x is o else "false"}" data-key="{E(x["key"])}" data-price="{x["price"]}" data-old="{x.get("old", "")}"><b>{E(x["label"])}</b><span>{f"<s>{money(x['old'])}</s> " if x.get("old") else ""}{money(x["price"])} uzs</span></button>' for x in g['opts'])
     facts = [('Язык', LANG_RU.get(g.get('lang', ''), '')), ('Издание', ' / '.join(e['name'] for e in g['editions']) if g.get('editions') else (g.get('edition') or 'Standard')),
              ('Игроков', g.get('players') or '1'), ('Дата выхода' if g['rel'] else 'Платформа', g['rel'].strftime('%d.%m.%Y') if g['rel'] else ' / '.join(g['plats']))]
@@ -795,7 +804,8 @@ def catalog_json(games):
                      'f': [k for k in ('pre', 'hit', 'new', 'vr', 'coop') if g.get(k)] + (['sale'] if g.get('promo_until') else []) + (['voice'] if g.get('lang') == 'voice' else [])
                      + (['ru'] if g.get('lang') in ('voice', 'subs') else []),
                      'r': g['rel'].isoformat() if g['rel'] else None,
-                     'od': {o['key']: o['old'] for o in g['opts'] if o.get('old')}})
+                     'od': {o['key']: o['old'] for o in g['opts'] if o.get('old')}}
+                    | ({'d': default_opt(g)['key']} if g['id'] in DEFAULT_ED else {}))
     return rows
 
 
