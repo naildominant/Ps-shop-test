@@ -26,7 +26,8 @@
 - Владелец: просто, по-русски, минимум сообщений от бота; не любит лишние посты в поиске и новый пост вместо готового.
 
 ## Сейчас (22.11)
-- **DONE 22.11 — reschedule:** all 10 scheduled game posts of @psshopgo moved to 10–31 Dec 14:00 (schedule-move.yml apply, verified 0 mismatches). Lesson: Telethon `iter_messages(scheduled=True)` returned only 3 — use raw `messages.GetScheduledHistoryRequest(hash=0)` (returned 10). Baldur's Gate 3 is scheduled twice (858 → 19.12, 851 → 29.12) — reported to Bos.
+- **DONE 22.11 — reschedule:** all 10 scheduled game posts of @psshopgo moved to 10–31 Dec 14:00 (schedule-move.yml apply, verified 0 mismatches). Lesson: Telethon `iter_messages(scheduled=True)` returned only 3 — use raw `messages.GetScheduledHistoryRequest(hash=0)` (returned 10). BG3 duplicate: 851 deleted (identical to 858, kept newer 858), 9 posts re-spread: 10.12 SF6, 13.12 CoD AW, 15.12 SnowRunner, 18.12 KCD2, 20.12 BG3, 23.12 Stupid Never Dies, 26.12 Wukong, 28.12 Clair Obscur, 31.12 BeamNG.
+- **Scheduled posts are «in channel» (owner 22.11):** `channel.py index` → `save_scheduled` → `data/scheduled.json` (raw getScheduledHistory); `bot.py index` adds them to chindex with `s` = date; worker search: scheduled → «🕒 Уже стоит в отложенных: <игра> — ДД.ММ в ЧЧ:ММ» (no forward); `game_post.py pick` excludes them. Refresh: channel.yml daily, post-check, schedule-move apply (commits scheduled.json + bot.py index).
 - Bos rule 22.11: no frequent polling (sleep/send_later); 1–2 checks per run.
 - 22.11: «Постик #4» archived by owner; active Postik = «БОТ ПОСТИК #3» (session_014Ko8oxQ1ysNFRULef8kw7b, pinned). **No daily transfer until Master confirms the new transfer procedure works.** Reschedule continued here (owner approved apply).
 - Готово сегодня: проверка постов (3/день), цены в 5:30, «⛔️ Отмена», «только ПК», строгий выбор у поставщика.

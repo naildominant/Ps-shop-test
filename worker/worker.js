@@ -898,17 +898,19 @@ async function findGames(env, chat, text, opts = {}) {
     if (!items.length) return;
   }
   await tg(env, 'sendMessage', { chat_id: chat, text: `🔎 Понял: ${items.map((x) => x.official || x.asked).join(', ')}` });
-  const none = [], make = [];
+  const none = [], make = [], sched = [];
   let sent = 0;
   for (const it of items) {
     if (it.posts.length) {
       for (const x of it.posts.sort((a, b) => b.id - a.id).slice(0, 6)) {
+        if (x.s) { sched.push(`${x.t} — ${fmtTashkent(Date.parse(x.s))}`); continue; } // отложенный пост: переслать нельзя, сообщаем дату
         const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: x.id });
         if (r.ok) sent++;
       }
     } else if (it.supplier) make.push(it); else none.push(it);
   }
   const notes = [], pcOnly = [], absent = [];
+  if (sched.length) notes.push(`🕒 Уже стоит в отложенных:\n${sched.join('\n')}`);
   for (const it of none) ((await platformCheck(env, [it.official, it.asked])) === 'pc_only' ? pcOnly : absent).push(it.official || it.asked);
   if (pcOnly.length) notes.push(`❌ Данная игра на PlayStation не выходила, она вышла только на ПК: ${pcOnly.join(', ')}`);
   if (absent.length) notes.push(`❌ Данной игры нет в наличии: ${absent.join(', ')}`);
@@ -931,7 +933,7 @@ async function handleFindTest(req, env) {
   if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
   const items = await resolveGames(env, u.searchParams.get('q') || '');
   const out = [];
-  for (const x of items) out.push({ asked: x.asked, official: x.official, ask: doubtful(x.asked, x.official) || undefined, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null,
+  for (const x of items) out.push({ asked: x.asked, official: x.official, ask: doubtful(x.asked, x.official) || undefined, posts: x.posts.map((p) => `${p.id}: ${p.t}${p.s ? ' [отложен ' + p.s + ']' : ''}`), supplier: x.supplier ?? null,
     platform: !x.posts.length && !x.supplier ? await platformCheck(env, [x.official, x.asked], u.searchParams.get('dbg') ? (x.dbg = []) : null) : undefined, dbg: x.dbg });
   return json(out, 200);
 }
@@ -939,7 +941,7 @@ async function handleFindTest(req, env) {
 async function handleAgentIndex(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const b = await req.json().catch(() => ({}));
-  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150) })).filter((x) => x.id && x.t)));
+  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150), ...(x.s ? { s: String(x.s).slice(0, 40) } : {}) })).filter((x) => x.id && x.t)));
   if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
   return json({ ok: true }, 200);
 }
