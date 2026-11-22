@@ -679,6 +679,12 @@
   "source": "channel",
   "why": "оставлена картинка из канала"
  },
+ "helldivers-2": {
+  "appid": 553850,
+  "match": "HELLDIVERS™ 2",
+  "score": 1.0,
+  "source": "steam"
+ },
  "high-on-life-2": {
   "source": "channel",
   "why": "оставлена картинка из канала"
