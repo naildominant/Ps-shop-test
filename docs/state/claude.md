@@ -35,7 +35,7 @@
 
 ### Ponytail trial (owner OK via Bos, 22.11 → review Mon 30.11)
 - Source github.com/DietrichGebert/ponytail @ ebd8654c (v5.3.3, MIT). Reviewed: core SKILL.md is plain guidance (keeps tests, validation, security); no network/injection. NOT vendored: hooks (local CSV ledger, optional webhook), npm installer, band/statusline.
-- Installed: Ps-shop-test `.claude/skills/ponytail/SKILL.md` (with PS SHOP override note: CLAUDE.md wins, no `ultra`, Сайтер+Постик only); Постик: same file sent for ps-shop-autopost.
+- Installed: Ps-shop-test `.claude/skills/ponytail/SKILL.md` 0292b78 (override note: CLAUDE.md wins, no `ultra`, Сайтер+Постик only); ps-shop-autopost 0ffd2c1 (Постик #5).
 - 30.11: compare Сайтер/Постик cost per task vs 22–29.11 (baseline 22.11: Сайтер $1.33, Постик #3 $19 → #5 fresh). Keep or remove.
 
 ## Scheduled tasks — verified 22.11
