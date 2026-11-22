@@ -9,7 +9,7 @@ On transfer: new chat updates its own row here in step 1 (same commit as memory)
 | Сайтер | Сайтер #4 | session_014Ko8oxakuJuMavdiYmLwLk | Ps-shop-test |
 | Постик | Постик #5 | session_014Ko8p19yU3DL5iozNYAn3t | ps-shop-autopost (can't read this file → list_sessions) |
 | Мастер | Мастер #4 | session_014Ko8oxKsCXiBjYiakVSKJE | Ps-shop-test |
-| Дизайнер | Дизайнер #4 (moving; until id is filled use #3) | session_014Ko8p19FZ9xGgJ4a8NUV8t | Ps-shop-test |
+| Дизайнер | Дизайнер #4 | session_014Ko8owBDWyasHngmZMRm7v | Ps-shop-test |
 | Маркетолог | Маркетолог #1 | session_014Ko8ow3Pj9znwGG17DRV1X | Ps-shop-test |
 
 Updated: 2026-11-22 by Мастер #4
