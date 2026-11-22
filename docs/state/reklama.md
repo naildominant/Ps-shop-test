@@ -26,3 +26,4 @@
 - Owner 22.11: PS4 rental ads = bait (no PS4 rental); «без залога» — «оставь». Existing ads: don't touch these. My new texts: won't state PS4 rental / no-deposit myself (told owner; he can add).
 5. Owner is the only person in the business; answers OLX chat himself; «менеджер» @Gaynullin_Nail = owner. Implication: minimize his chat load, push leads to Telegram fast (template replies).
 - Plan (owner 22.11): tomorrow owner fixes laptop → connect it (Claude desktop app, Remote Control / browser) so Маркетолог manages OLX himself. Before acting in his account: agree rules (what I may publish/edit without asking).
+- CTA (owner): primary = phone call to owner («пусть лучше звонит мне»); owner then moves client to Telegram/site.
