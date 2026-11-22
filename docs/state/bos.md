@@ -7,6 +7,7 @@
 - Бос **следит только за чатами**: чем заняты, не застряли ли, не ошиблись ли. Сайт, бота, Actions сам не проверяю, задачи не выполняю.
 - Задачи без адресата распределяю сам. Явные ошибки сотрудников могу поручить исправить сам; решения о внешнем виде, текстах для клиентов, деньгах — спрашиваю владельца.
 - **Язык (владелец 22.11):** со всеми сотрудниками — по-английски, коротко и структурно (пункты, пути, id); с владельцем — по-русски простыми словами, как раньше. Тексты для клиентов и владельца (бот, посты, сайт) не меняются. Новые записи в памяти можно по-английски.
+- Owner 22.11: «нет-нет проверяй их работу» — while tasks are open, check staff every ~10 min via send_later + get_session (cheap), don't just wait for reports.
 - Вопросы владельцу — по одному, текстом. Очередь — в «Задачи в работе».
 
 - **22.11 owner: «Разрешаю всем сотрудникам делать все движения»** — routine work without asking; still no channel publishing without owner button. add_repo allowed (Master: .claude/settings.json).
@@ -40,6 +41,7 @@
 - (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
 ## Задачи в работе
+- 22.11 Postik #3: reschedule DONE — 10 posts → 10–31 Dec 14:00 (raw getScheduledHistory found 10, Telethon iter found 3). BG3 scheduled twice (858 on 19.12, 851 on 29.12) — asked owner whether to delete one.
 - 22.11 owner fired Постик #4 (archived). Постик #3 session_014Ko8oxQ1ysNFRULef8kw7b is Postik again, pinned; NO transfer until Master confirms reliable transfer (repos, memory, pins, verification step). Reschedule runs in Постик #3.
 - 22.11 Postik #4: owner confirmed Nov+Dec scheduled posts exist → apply directly across 10–31 Dec 14:00, report table.
 - 22.11 18:38 Postik transferred early (tokens $19) → «Постик #4» session_014Ko8ozNQ3wEMqhBdRooj3P. Reschedule: channel queue = 3 posts only; full-account scan run 45027761734 for Nov posts; #4 sends table, waits for my «apply».
