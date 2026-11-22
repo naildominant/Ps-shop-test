@@ -41,6 +41,8 @@
 - (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
 ## Задачи в работе
+- 22.11 Master: review third-party skill ponytail (github DietrichGebert/ponytail); if clean → trial 1 week for Saiter+Postik, compare in 30.11 token review. Owner approved.
+- Open Q to owner: L.A. Noire scheduled 23.11 14:00 (id 860) — keep or move to Dec?
 - 22.11 Postik #3: reschedule DONE — 10 posts → 10–31 Dec 14:00 (raw getScheduledHistory found 10, Telethon iter found 3). BG3 scheduled twice (858 on 19.12, 851 on 29.12) — asked owner whether to delete one.
 - 22.11 owner fired Постик #4 (archived). Постик #3 session_014Ko8oxQ1ysNFRULef8kw7b is Postik again, pinned; NO transfer until Master confirms reliable transfer (repos, memory, pins, verification step). Reschedule runs in Постик #3.
 - 22.11 Postik #4: owner confirmed Nov+Dec scheduled posts exist → apply directly across 10–31 Dec 14:00, report table.
