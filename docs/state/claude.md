@@ -33,6 +33,12 @@
 - 21.11: придуманы утренние запуски, память `docs/state/`, правила в CLAUDE.md.
 - 22.11: утренний запуск в 5:31 не создал чаты (нет инструментов). Ложная тревога про /ru/ — проверялся адрес воркера вместо psshop.uz. Перенос сделан руками через сами чаты: «САЙТ PS SHOP #3» (session_014Ko8ovvnMbxaBiKNTLtGF5), «БОТ ПОСТИК #3» (session_014Ko8oxQ1ysNFRULef8kw7b). Принято правило ежедневного самопереноса. Этот чат перенесён в «НАСТРОЙКА CLAUDE #3».
 
+## Scheduled tasks — verified 22.11
+- Self-bound recurring trigger (fires into its own chat) WORKS with session tools: Bos trig_01LABPq3uqbEGdX1uwxTGahB (daily report 18:37 Tashkent, persistent_session_id = Bos #3) fired 22.11 18:37 — list_sessions, get_session, send_message OK. Self-bound send_later also OK (PushNotification available).
+- Still NOT working: trigger into ANOTHER chat, and fresh-session-per-fire (no session tools).
+- Caveat: trigger stays bound to the old chat after daily transfer — new chat must create its own and disable the old (update_trigger enabled=false).
+- 22.11 ui:pinned tags were missing on all team chats (probably lost on rename); re-added to Бос/Мастер/Постик/Сайтер/Дизайнер #3.
+
 ## В работе и планы
 - Убедиться завтра, что чаты сами переносятся по правилу при первом сообщении дня.
 
