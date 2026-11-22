@@ -810,6 +810,50 @@ async function isFindRequest(env, text) {
   } catch { return false; }
 }
 
+// Выходила ли игра на PlayStation (решение владельца 22.11, через Боса): Wikidata, свойство «платформа» (P400).
+// 'ps' — есть PS4/PS5; 'pc_only' — платформы известны и это только ПК; 'other' — есть Xbox/Switch, но нет PlayStation;
+// 'unknown' — не нашёл точно или не уверен (тогда отвечаем как раньше «нет в наличии»).
+const WD_PS45 = new Set(['Q5014725', 'Q63184502']);
+const WD_PS_ANY = new Set(['Q5014725', 'Q63184502', 'Q10683', 'Q10680', 'Q10677', 'Q188808', 'Q170323']);
+const WD_PC = new Set(['Q1406', 'Q14116', 'Q388', 'Q16338', 'Q47604', 'Q11368', 'Q1052', 'Q1047', 'Q3251801']);
+async function platformCheck(env, names, dbg) {
+  const dbgRef = dbg;
+  const wd = async (params) => {
+    const url = 'https://www.wikidata.org/w/api.php?format=json&' + new URLSearchParams(params), hd = { headers: { 'User-Agent': 'psshop-bot/1.0 (Telegram bot)' } };
+    let r = await fetch(url, hd);
+    if (!r.ok) { await new Promise((ok) => setTimeout(ok, 800)); r = await fetch(url, hd); }
+    if (!r.ok && dbgRef) dbgRef.push({ http: r.status });
+    return r.ok ? r.json() : null;
+  };
+  try {
+    for (const name of names.filter(Boolean)) {
+      const want = gnorm(name);
+      if (!want) continue;
+      const found = await wd({ action: 'wbsearchentities', search: name, language: 'en', type: 'item', limit: '7' });
+      const ids = (found?.search || []).map((x) => x.id);
+      if (dbg) dbg.push({ name, ids, err: found?.error?.info });
+      if (!ids.length) continue;
+      const ents = (await wd({ action: 'wbgetentities', ids: ids.join('|'), props: 'claims|labels|aliases', languages: 'mul|en|ru' }))?.entities || {};
+      for (const id of ids) {
+        const e = ents[id];
+        if (!e) continue;
+        const vals = (p) => (e.claims?.[p] || []).map((c) => c.mainsnak?.datavalue?.value?.id).filter(Boolean);
+        if (!vals('P31').some((v) => v === 'Q7889')) continue; // только «видеоигра»
+        const labels = [...Object.values(e.labels || {}).map((l) => l.value), ...Object.values(e.aliases || {}).flat().map((a) => a.value)];
+        if (dbg) dbg.push({ id, labels: labels.slice(0, 4), plat: vals('P400') });
+        if (!labels.some((l) => gnorm(l) === want)) continue; // название должно совпасть точно
+        const plat = vals('P400');
+        if (!plat.length) return 'unknown';
+        if (plat.some((p) => WD_PS45.has(p))) return 'ps';
+        if (plat.some((p) => WD_PS_ANY.has(p))) return 'unknown'; // только старые PlayStation — не говорим «только ПК»
+        if (plat.every((p) => WD_PC.has(p))) return 'pc_only';
+        return 'other';
+      }
+    }
+  } catch { /* сеть/ответ — не уверены */ }
+  return 'unknown';
+}
+
 async function findGames(env, chat, text) {
   if (!text.trim()) return say(env, chat, '🔎 Напишите или скажите названия игр.');
   await remember(env, { task: `найти игры для клиента: ${text}`, mode: 'find' });
@@ -825,13 +869,15 @@ async function findGames(env, chat, text) {
         const r = await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: ch, message_id: x.id });
         if (r.ok) sent++;
       }
-    } else if (it.supplier) make.push(it); else none.push(it.official || it.asked);
+    } else if (it.supplier) make.push(it); else none.push(it);
   }
-  const notes = [];
-  if (none.length) notes.push(`❌ Данной игры нет в наличии: ${none.join(', ')}`);
+  const notes = [], pcOnly = [], absent = [];
+  for (const it of none) ((await platformCheck(env, [it.official, it.asked])) === 'pc_only' ? pcOnly : absent).push(it.official || it.asked);
+  if (pcOnly.length) notes.push(`❌ Данная игра на PlayStation не выходила, она вышла только на ПК: ${pcOnly.join(', ')}`);
+  if (absent.length) notes.push(`❌ Данной игры нет в наличии: ${absent.join(', ')}`);
   if (make.length) notes.push(`🛠 Нет в канале, но есть у поставщика — готовлю объявление: ${make.map((x) => x.supplier).join(', ')}. Пришлю, как будет готово.`);
   if (notes.length) await say(env, chat, notes.join('\n\n'));
-  await remember(env, { result: `переслал объявлений: ${sent}${none.length ? '; нет в наличии: ' + none.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.supplier).join(', ') : ''}` });
+  await remember(env, { result: `переслал объявлений: ${sent}${absent.length ? '; нет в наличии: ' + absent.join(', ') : ''}${pcOnly.length ? '; только ПК: ' + pcOnly.join(', ') : ''}${make.length ? '; готовлю: ' + make.map((x) => x.supplier).join(', ') : ''}` });
   if (make.length) {
     const task = 'Владелец ищет для клиента игры, которых нет в канале, но они есть у поставщика. Сделай объявление по шаблону для КАЖДОЙ игры (отдельная папка и отдельная строка в out/preview.txt). Название у поставщика указано точно.\n'
       + make.map((x) => `- ${x.supplier} (владелец сказал: «${x.asked}»)`).join('\n');
@@ -847,7 +893,10 @@ async function handleFindTest(req, env) {
   if (!key || u.searchParams.get('key') !== key) return json({ ok: false }, 403);
   if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
   const items = await resolveGames(env, u.searchParams.get('q') || '');
-  return json(items.map((x) => ({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null })), 200);
+  const out = [];
+  for (const x of items) out.push({ asked: x.asked, official: x.official, posts: x.posts.map((p) => `${p.id}: ${p.t}`), supplier: x.supplier ?? null,
+    platform: !x.posts.length && !x.supplier ? await platformCheck(env, [x.official, x.asked], u.searchParams.get('dbg') ? (x.dbg = []) : null) : undefined, dbg: x.dbg });
+  return json(out, 200);
 }
 
 async function handleAgentIndex(req, env) {
