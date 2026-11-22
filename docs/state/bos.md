@@ -40,18 +40,13 @@
 - 22.11 15:31: push sent «5h window reset». rate_limit_info now shows only seven_day (allowed_warning, reset 29.11 00:00) — the 5h resetsAt is visible only when 5h is the binding limit; re-arm on next owner msg / daily report.
 - (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
-## Задачи в работе
-- 22.11 Master: review third-party skill ponytail (github DietrichGebert/ponytail); if clean → trial 1 week for Saiter+Postik, compare in 30.11 token review. Owner approved.
-- Open Q to owner: L.A. Noire scheduled 23.11 14:00 (id 860) — keep or move to Dec?
-- 22.11 Postik #3: reschedule DONE — 10 posts → 10–31 Dec 14:00 (raw getScheduledHistory found 10, Telethon iter found 3). BG3 scheduled twice (858 on 19.12, 851 on 29.12) — asked owner whether to delete one.
-- 22.11 owner fired Постик #4 (archived). Постик #3 session_014Ko8oxQ1ysNFRULef8kw7b is Postik again, pinned; NO transfer until Master confirms reliable transfer (repos, memory, pins, verification step). Reschedule runs in Постик #3.
-- 22.11 Postik #4: owner confirmed Nov+Dec scheduled posts exist → apply directly across 10–31 Dec 14:00, report table.
-- 22.11 18:38 Postik transferred early (tokens $19) → «Постик #4» session_014Ko8ozNQ3wEMqhBdRooj3P. Reschedule: channel queue = 3 posts only; full-account scan run 45027761734 for Nov posts; #4 sends table, waits for my «apply».
-- 22.11 18:13 Postik: reschedule channel scheduled game posts evenly 10–31 Dec, daily 14:00 Tashkent (time chosen by Bos, owner can change). Awaiting table.
-- 22.11 Postik: «📰 Новость» DONE (sources ps-shop-autopost/data/news_sources.json, dedup news_offered.json). 2 test previews in owner bot: PS Store Black Friday, GTA VI record. Need from owner: 2–3 trusted Telegram news channels.
-- **Вопросы владельцу (очередь):** 1) Постик: ответ для игр Xbox/Switch — «❌ Данная игра на PlayStation не выходила (только Xbox/Switch/ПК).» подходит? 2) нажать «⛔️ Отмена» в боте и сказать, ответил ли «⛔️ Всё остановил»; 3) Дизайнер: верна ли шпаргалка; 4) Сайтер: где куплен домен psshop.uz (перенос на Cloudflare, задача 4Б); 5) Постик: подходит ли пример исправления поста Shrek 2 (видео проверить перед «Да»).
-- Постик: LoL-совпадение исправлено, ⛔️ сделано. Следующее (низкий приоритет): если нейросеть заметно поменяла название («Dead Reset» → RDR), бот спрашивает «Вы имели в виду …?» Да/Нет.
-- Мастер: результат экономии проверит 29.11.
+## Задачи в работе (на 23.11)
+- Team now: Сайтер #3 session_014Ko8ovvnMbxaBiKNTLtGF5; Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost only; memory there); Мастер #3 session_014Ko8ozTcaf294JXVpozb1n; Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t. Archived: Постик #4. Постик #3 unpinned.
+- Owner 23.11 00:25: «записать задачи для Сайтера, поэтапно выполнять, начнём с первой» — waiting for owner to dictate tasks; write them to docs/site-tasks.md via Сайтер, one at a time.
+- Master: ponytail skill installed for Saiter+Postik (pinned ebd8654c), trial result in 30.11 token review. Weekly token review 29–30.11.
+- Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
+- **Questions to owner (queue):** 1) L.A. Noire scheduled 23.11 14:00 (id 860) — keep or move to Dec? 2) domain psshop.uz registrar (Saiter task 4Б); 3) 2 test news previews in bot — publish/cancel; 4) 2–3 trusted Telegram news channels; 5) Xbox/Switch reply wording; 6) brandbook cheatsheet OK?; 7) Shrek 2 post-check example OK?
+- Triggers of Бос: daily report trig_01LABPq3uqbEGdX1uwxTGahB (18:37, bound to Бос #3) — new Бос must recreate on itself (same prompt via get_trigger) and disable old.
 
 ## Журнал
 - 22.11 ~20:00 final: Postik memory moved to ps-shop-autopost (Postik #N+1 source_url=ps-shop-autopost; Master syncs CLAUDE.md to him + weekly diff). Supervised transfer OK → «Постик #5» session_014Ko8p19yU3DL5iozNYAn3t (pinned, verified). Reschedule: 9 posts 10–31 Dec 14:00, BG3 dup removed; scheduled posts counted in index.
