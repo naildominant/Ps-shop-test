@@ -3,7 +3,7 @@
 Тема: настройка самого Claude для владельца PS SHOP — перенос рабочих чатов в новые, память между чатами, экономия лимитов.
 
 ## Current chats (23.11)
-- Бос #4 session_014Ko8ovmxXetwTVooX1LTHV · Сайтер #4 session_014Ko8oxakuJuMavdiYmLwLk · Постик #5 session_014Ko8p19yU3DL5iozNYAn3t (repo ps-shop-autopost) · Дизайнер #3 session_014Ko8p19FZ9xGgJ4a8NUV8t · Маркетолог #1 session_014Ko8ow3Pj9znwGG17DRV1X. IDs change daily — find by list_sessions.
+- Current ids: see docs/state/team.md (roster, owner rule 22.11). Мастер #4 = session_014Ko8oxKsCXiBjYiakVSKJE.
 - Open: weekly token review Mon 30.11 (+ ponytail verdict); Маркетолог needs owner-approved env change for olx.uz/birbir.uz; this file is 14.7k chars — trim to ~10k (move «Сделано» details to log).
 
 ## Как всё устроено
@@ -83,3 +83,4 @@
 
 ## Архив
 - Идея «перенос по расписанию в 5:31 / 7:31» — отменена: у запусков нет инструментов сессий.
+- 22.11 Мастер #4: owner complaint (via Бос #4) — chats messaged old #3. Fix: roster docs/state/team.md + CLAUDE.md rule «Кому писать» + transfer steps 6 (broadcast) and 7 (old chat forwards). Synced to Постик #5, broadcast to team.
