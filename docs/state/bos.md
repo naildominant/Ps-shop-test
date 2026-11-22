@@ -9,6 +9,8 @@
 - **Язык (владелец 22.11):** со всеми сотрудниками — по-английски, коротко и структурно (пункты, пути, id); с владельцем — по-русски простыми словами, как раньше. Тексты для клиентов и владельца (бот, посты, сайт) не меняются. Новые записи в памяти можно по-английски.
 - Вопросы владельцу — по одному, текстом. Очередь — в «Задачи в работе».
 
+- **22.11 owner: «Разрешаю всем сотрудникам делать все движения»** — routine work without asking; still no channel publishing without owner button. add_repo allowed (Master: .claude/settings.json).
+
 ## Команда
 | Имя | Чат | Память | Отвечает за |
 |---|---|---|---|
@@ -38,6 +40,7 @@
 - (old) 22.11: 5-часовое окно обновится 15:30 Ташкент (send_later trig_014u9QX8x3WkveGxMAGQqjvF). Недельный лимит: status allowed_warning (близко к пределу), обновится 29.11 00:00 Ташкент. Пуш-тест отправлен — ждём, дошёл ли.
 
 ## Задачи в работе
+- 22.11 Postik #4: owner confirmed Nov+Dec scheduled posts exist → apply directly across 10–31 Dec 14:00, report table.
 - 22.11 18:38 Postik transferred early (tokens $19) → «Постик #4» session_014Ko8ozNQ3wEMqhBdRooj3P. Reschedule: channel queue = 3 posts only; full-account scan run 45027761734 for Nov posts; #4 sends table, waits for my «apply».
 - 22.11 18:13 Postik: reschedule channel scheduled game posts evenly 10–31 Dec, daily 14:00 Tashkent (time chosen by Bos, owner can change). Awaiting table.
 - 22.11 Postik: «📰 Новость» DONE (sources ps-shop-autopost/data/news_sources.json, dedup news_offered.json). 2 test previews in owner bot: PS Store Black Friday, GTA VI record. Need from owner: 2–3 trusted Telegram news channels.
