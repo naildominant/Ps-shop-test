@@ -1,0 +1,310 @@
+<title>Офис PS SHOP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: вид сверху на этаж офиса — комнаты с рабочими столами; тап по столу открывает карточку сотрудника. Ниже — день по часам и открытые вопросы. Один тёмный «ночной» вид, как у сайта PS SHOP. */
+:root {
+  --night: #07061A;
+  --deep: #0E0C2A;
+  --floor: #100E30;
+  --edge: rgba(150, 138, 255, .22);
+  --edge-strong: rgba(150, 138, 255, .45);
+  --text: #F2EFFF;
+  --muted: #A9A3D4;
+  --faint: #6F6A9C;
+  --violet: #B24DFF;
+  --indigo: #6A55FF;
+  --cyan: #2BC8FF;
+  --gold: #FFCD78;
+  --pink: #FF6B95;
+  --green: #45E3A4;
+  --yellow: #FFC54D;
+  --grad: linear-gradient(100deg, #C35CFF, #6A55FF 55%, #2BC8FF);
+  --display: 'Unbounded', 'Manrope', system-ui, sans-serif;
+  --body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--night);
+  background-image: radial-gradient(600px 380px at 8% -5%, rgba(178, 77, 255, .22), transparent 70%), radial-gradient(700px 420px at 100% 10%, rgba(43, 200, 255, .12), transparent 70%);
+  background-repeat: no-repeat;
+  color: var(--text);
+  font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* шапка */
+.top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.top img { width: 52px; height: auto; }
+.top h1 { font-size: clamp(22px, 5vw, 34px); font-weight: 800; letter-spacing: -.01em; }
+.top h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.top .sub { color: var(--muted); font-size: 13px; width: 100%; }
+.lock { margin-left: auto; font-size: 12px; color: var(--gold); border: 1px solid rgba(255, 205, 120, .35); border-radius: 999px; padding: 4px 12px; letter-spacing: .04em; }
+
+/* этаж */
+.floor {
+  position: relative;
+  background-color: var(--floor);
+  background-image: linear-gradient(rgba(150, 138, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(150, 138, 255, .06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border: 2px solid var(--edge-strong);
+  border-radius: 22px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1.25fr 1fr;
+  grid-template-areas:
+    "owner hq manager"
+    "open open market";
+}
+.room { position: relative; border: 1.5px dashed var(--edge); border-radius: 16px; padding: 10px 10px 12px; display: grid; align-content: start; gap: 8px; min-width: 0; background: rgba(7, 6, 26, .35); }
+.room > h2 { padding-left: 2px; font-size: 10.5px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.room .desks { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.r-owner { grid-area: owner; } .r-hq { grid-area: hq; } .r-manager { grid-area: manager; }
+.r-open { grid-area: open; } .r-market { grid-area: market; }
+.r-hq { border-style: solid; border-color: rgba(178, 77, 255, .45); background: rgba(106, 85, 255, .08); }
+.r-owner { border-style: solid; border-color: rgba(255, 205, 120, .35); background: rgba(255, 205, 120, .04); }
+.room .door { position: absolute; bottom: -2px; left: 50%; width: 46px; height: 4px; margin-left: -23px; background: var(--floor); }
+
+/* стол (вид сверху) */
+.desk { width: 128px; display: grid; justify-items: center; gap: 0; padding: 6px 4px 8px; border: 0; background: none; cursor: pointer; border-radius: 14px; transition: background .15s; }
+.desk:hover { background: rgba(150, 138, 255, .08); }
+.desk[aria-pressed="true"] { background: rgba(43, 200, 255, .1); }
+.table { width: 100px; height: 40px; border-radius: 8px; background: linear-gradient(180deg, #221E52, #1A1744); border: 1px solid var(--edge); position: relative; }
+.table::before { content: ""; position: absolute; left: 50%; top: 6px; width: 44px; height: 8px; margin-left: -22px; border-radius: 3px; background: var(--c, var(--indigo)); box-shadow: 0 0 14px var(--c, var(--indigo)); opacity: .85; }
+.table::after { content: ""; position: absolute; left: 18px; bottom: 7px; width: 26px; height: 6px; border-radius: 2px; background: rgba(242, 239, 255, .18); }
+.chair { width: 46px; height: 46px; margin-top: -6px; border-radius: 50%; display: grid; place-items: center; font: 700 15px/1 var(--display); color: var(--night); background: var(--c, var(--indigo)); border: 3px solid var(--floor); box-shadow: 0 0 0 1.5px var(--c, var(--indigo)); }
+.desk.is-human .chair { background: var(--floor); color: var(--c); }
+.desk b { margin-top: 6px; font: 600 13px/1.2 var(--body); }
+.desk small { color: var(--muted); font-size: 11.5px; line-height: 1.3; text-align: center; min-height: 2.6em; }
+.tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+.tag { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid; line-height: 1.5; }
+.tag.auto { color: var(--cyan); border-color: rgba(43, 200, 255, .4); }
+.tag.btn { color: var(--gold); border-color: rgba(255, 205, 120, .4); }
+.tag.ask { color: var(--pink); border-color: rgba(255, 107, 149, .45); }
+.tag.block { color: var(--yellow); border-color: rgba(255, 197, 77, .45); }
+.legend { display: flex; gap: 8px 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-top: -14px; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.hint { color: var(--faint); font-size: 12px; }
+
+/* карточка */
+.scrim { position: fixed; inset: 0; background: rgba(4, 3, 16, .6); z-index: 20; }
+.card {
+  position: fixed; z-index: 21; top: 0; right: 0; bottom: 0; width: min(440px, 100%);
+  background: var(--deep); border-left: 1px solid var(--edge-strong);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 28px) 20px;
+  display: grid; align-content: start; gap: 16px;
+}
+.card-head { display: flex; gap: 14px; align-items: center; }
+.card-head .chair { margin: 0; width: 56px; height: 56px; font-size: 18px; flex: none; }
+.card-head h3 { font-size: 22px; font-weight: 700; }
+.card-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.close { margin-left: auto; align-self: start; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--edge-strong); background: transparent; cursor: pointer; font-size: 18px; line-height: 1; flex: none; }
+.sec { display: grid; gap: 6px; }
+.sec h4 { margin: 0; font: 500 10.5px/1.4 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.sec p, .sec ul { margin: 0; }
+.sec ul { padding-left: 18px; display: grid; gap: 4px; }
+.sec.s-btn { border: 1px solid rgba(255, 205, 120, .3); border-radius: 14px; padding: 12px 14px; background: rgba(255, 205, 120, .05); }
+.sec.s-btn h4 { color: var(--gold); }
+.sec.s-ask { border: 1px solid rgba(255, 107, 149, .35); border-radius: 14px; padding: 12px 14px; background: rgba(255, 107, 149, .06); }
+.sec.s-ask h4 { color: var(--pink); }
+.sec.s-block h4 { color: var(--yellow); }
+.sec.s-auto h4 { color: var(--cyan); }
+.times { display: grid; gap: 6px; }
+.times div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; font-size: 14px; }
+.times b { font-variant-numeric: tabular-nums; color: var(--cyan); font-weight: 600; }
+
+/* день по часам */
+.panel { display: grid; gap: 14px; }
+.panel > h2 { font-size: 20px; font-weight: 700; }
+.day { border: 1px solid var(--edge); border-radius: 18px; overflow: hidden; background: rgba(14, 12, 42, .6); }
+.day .row { display: grid; grid-template-columns: 128px 1fr auto; gap: 12px; align-items: center; padding: 11px 16px; border-top: 1px solid rgba(150, 138, 255, .1); width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; cursor: pointer; }
+.day .row:first-child { border-top: 0; }
+.day .row:hover { background: rgba(150, 138, 255, .07); }
+.day .t { font: 600 14px/1.3 var(--body); font-variant-numeric: tabular-nums; color: var(--cyan); }
+.day .w { min-width: 0; }
+.day .who { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: wrap; text-align: right; color: var(--muted); font-size: 12.5px; max-width: 220px; }
+.dot { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; font: 700 10px/1 var(--display); color: var(--night); background: var(--c); }
+.dot.is-human { background: var(--night); color: var(--c); box-shadow: inset 0 0 0 1.5px var(--c); }
+.qs { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: q; }
+.qs li { counter-increment: q; display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 12px 14px; border: 1px solid rgba(255, 107, 149, .28); border-radius: 14px; background: rgba(255, 107, 149, .05); }
+.qs li::before { content: counter(q); font: 700 13px/1.6 var(--display); color: var(--pink); }
+.tree { overflow-x: auto; border: 1px solid var(--edge); border-radius: 16px; padding: 14px 16px; background: rgba(14, 12, 42, .6); }
+.tree pre { margin: 0; font: 13px/1.55 ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted); }
+footer { color: var(--faint); font-size: 12px; }
+
+@media (max-width: 760px) {
+  .floor { grid-template-columns: 1fr 1fr; grid-template-areas: "hq hq" "owner manager" "open open" "market market"; padding: 10px; gap: 10px; }
+  .desk { width: 104px; }
+  .table { width: 84px; height: 34px; }
+  .chair { width: 40px; height: 40px; font-size: 13px; }
+  .card { top: auto; width: 100%; max-height: 86vh; border-left: 0; border-top: 1px solid var(--edge-strong); border-radius: 22px 22px 0 0; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+  .day .row { grid-template-columns: 1fr auto; gap: 4px 10px; padding: 11px 14px; }
+  .day .t { grid-column: 1 / -1; }
+  .lock { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <img src="LOGO_DATA_URI" alt="PS SHOP" width="52" height="59">
+    <h1>Офис <span>PS SHOP</span></h1>
+    <span class="lock">Только для владельца</span>
+    <p class="sub" id="ver"></p>
+  </header>
+
+  <section class="panel" aria-label="Карта офиса">
+    <div class="floor" id="floor"></div>
+    <div class="legend">
+      <span><i class="tag auto">авто</i> работает по расписанию</span>
+      <span><i class="tag btn">кнопки</i> ждёт нажатия владельца</span>
+      <span><i class="tag ask">❓</i> обсудить с менеджером</span>
+      <span><i class="tag block">мешает</i> что-то не подключено</span>
+    </div>
+    <p class="hint">Нажмите на стол, чтобы увидеть всё о сотруднике.</p>
+  </section>
+
+  <section class="panel">
+    <h2>День по часам</h2>
+    <div class="day" id="day"></div>
+    <p class="hint">Время ташкентское. Нажмите на строку, чтобы открыть того, кто отвечает.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Обсудить с менеджером</h2>
+    <ol class="qs" id="qs"></ol>
+  </section>
+
+  <section class="panel">
+    <h2>Кто кому подчиняется</h2>
+    <div class="tree"><pre id="tree"></pre></div>
+  </section>
+
+  <footer>Собрано из docs/team-structure.md. Документ поменялся — страницу пересобирают и выкладывают заново.</footer>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="card" id="card" hidden aria-modal="true" role="dialog" aria-labelledby="card-name"></aside>
+
+<script>
+const DATA = /*DATA*/null;
+
+// Где сидит каждый и его цвет. Новые сотрудники из документа сами попадают в опенспейс.
+const SEAT = {
+  'Владелец': { room: 'owner', c: '#FFCD78', role: 'Решения, цены, деньги' },
+  'Менеджер': { room: 'manager', c: '#45E3A4', role: 'Заказы и оплата' },
+  'Бос': { room: 'hq', c: '#C35CFF', role: 'Руководитель команды' },
+  'Сайтер': { room: 'open', c: '#2BC8FF', role: 'Сайт и заявки' },
+  'Постик': { room: 'open', c: '#6A55FF', role: 'Посты, канал, цены' },
+  'Дизайнер': { room: 'open', c: '#FF6B95', role: 'Вся графика' },
+  'Креатор': { room: 'open', c: '#FFC54D', role: 'Идеи, как работать лучше' },
+  'Мастер': { room: 'open', c: '#9C8CFF', role: 'Правила и переходы чатов' },
+  'Маркетолог': { room: 'market', c: '#FF50D2', role: 'Продвижение, OLX' },
+  'СММщик': { room: 'market', c: '#5FE0FF', role: 'Общение с клиентами' },
+};
+const ROOMS = [
+  ['owner', 'Кабинет владельца'], ['hq', 'Штаб'], ['manager', 'Стойка заказов'],
+  ['open', 'Опенспейс Claude-команды'], ['market', 'Маркетинг'],
+];
+const HUMANS = new Set(['Владелец', 'Менеджер']);
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const seat = (n) => SEAT[n] || { room: 'open', c: '#A9A3D4', role: '' };
+const initials = (n) => n.slice(0, 2);
+const field = (p, re) => p.fields.find((f) => re.test(f.label));
+const people = DATA.people;
+const byName = Object.fromEntries(people.map((p) => [p.name, p]));
+const hoursOf = (n) => DATA.hours.filter((h) => h.who.includes(n));
+
+function tagsOf(p) {
+  const t = [];
+  if (hoursOf(p.name).length || field(p, /автоматически|по расписанию/i)) t.push('<i class="tag auto">авто</i>');
+  if (field(p, /кнопки владельца|нужно согласие/i) || (p.name === 'Владелец')) t.push('<i class="tag btn">кнопки</i>');
+  if (p.ask.length) t.push(`<i class="tag ask">❓ ${p.ask.length}</i>`);
+  if (field(p, /мешает/i)) t.push('<i class="tag block">мешает</i>');
+  return t.join('');
+}
+
+function renderFloor() {
+  $('#ver').textContent = (DATA.version ? DATA.version + ' · ' : '') + people.length + ' сотрудников';
+  $('#floor').innerHTML = ROOMS.map(([id, label]) => {
+    const list = people.filter((p) => seat(p.name).room === id);
+    if (!list.length) return '';
+    return `<div class="room r-${id}"><h2>${label}</h2><div class="desks">${list.map((p) => {
+      const s = seat(p.name);
+      return `<button class="desk${HUMANS.has(p.name) ? ' is-human' : ''}" style="--c:${s.c}" data-p="${esc(p.name)}" aria-pressed="false">
+        <span class="table" aria-hidden="true"></span><span class="chair" aria-hidden="true">${esc(initials(p.name))}</span>
+        <b>${esc(p.name)}</b><small>${esc(s.role)}</small><span class="tags">${tagsOf(p)}</span></button>`;
+    }).join('')}</div><span class="door" aria-hidden="true"></span></div>`;
+  }).join('');
+}
+
+function list(arr) { return `<ul>${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`; }
+
+function openCard(name) {
+  const p = byName[name]; if (!p) return;
+  const s = seat(name);
+  const sec = (cls, title, body) => body ? `<div class="sec ${cls}"><h4>${title}</h4>${body}</div>` : '';
+  const f = (re) => field(p, re);
+  const txt = (x) => x ? (x.text ? `<p>${esc(x.text)}</p>` : '') + (x.sub.length ? list(x.sub) : '') : '';
+  const used = new Set();
+  const take = (re) => { const x = f(re); if (x) used.add(x); return x; };
+  const resp = take(/отвечает за/i), not = take(/не делает/i), rep = take(/отчитывается/i),
+    ok = take(/нужно согласие/i), btn = take(/кнопки владельца/i), sched = take(/по расписанию|автоматически/i), block = take(/мешает/i);
+  const other = p.fields.filter((x) => !used.has(x));
+  const hrs = hoursOf(name);
+  $('#card').innerHTML = `
+    <div class="card-head"><span class="chair" style="--c:${s.c}${HUMANS.has(name) ? ';background:var(--deep);color:' + s.c : ''}">${esc(initials(name))}</span>
+      <div><h3 id="card-name">${esc(name)}</h3><p>${esc(s.role)}${HUMANS.has(name) ? ' · человек' : ' · Claude'}</p></div>
+      <button class="close" id="close" aria-label="Закрыть">×</button></div>
+    ${sec('', 'Отвечает за', txt(resp) || (p.items.length ? list(p.items) : ''))}
+    ${resp && p.items.length ? sec('', 'Ещё', list(p.items)) : ''}
+    ${sec('', 'Не делает', txt(not))}
+    ${sec('', 'Отчитывается', txt(rep))}
+    ${sec('s-btn', 'Нужна кнопка или согласие владельца', txt(ok) + txt(btn))}
+    ${sec('s-auto', 'По расписанию', txt(sched) + (hrs.length ? `<div class="times">${hrs.map((h) => `<div><b>${esc(h.t)}</b><span>${esc(h.what)}</span></div>`).join('')}</div>` : ''))}
+    ${sec('s-block', 'Сейчас мешает', txt(block))}
+    ${other.map((x) => sec('', esc(x.label), txt(x))).join('')}
+    ${sec('s-ask', '❓ Обсудить с менеджером', p.ask.length ? list(p.ask) : '')}`;
+  $('#card').hidden = false; $('#scrim').hidden = false;
+  document.querySelectorAll('.desk').forEach((d) => d.setAttribute('aria-pressed', String(d.dataset.p === name)));
+  $('#close').addEventListener('click', closeCard);
+  $('#close').focus();
+}
+function closeCard() {
+  $('#card').hidden = true; $('#scrim').hidden = true;
+  document.querySelectorAll('.desk').forEach((d) => d.setAttribute('aria-pressed', 'false'));
+}
+
+function renderDay() {
+  $('#day').innerHTML = DATA.hours.map((h) => {
+    const who = people.filter((p) => h.who.includes(p.name));
+    const first = who[0] ? who[0].name : '';
+    return `<button class="row" data-p="${esc(first)}"><span class="t">${esc(h.t)}</span><span class="w">${esc(h.what)}</span>
+      <span class="who">${who.map((p) => `<span class="dot${HUMANS.has(p.name) ? ' is-human' : ''}" style="--c:${seat(p.name).c}" title="${esc(p.name)}">${esc(initials(p.name))}</span>`).join('')}<span>${esc(h.who)}</span></span></button>`;
+  }).join('');
+  $('#qs').innerHTML = DATA.questions.map((q) => `<li><span>${esc(q)}</span></li>`).join('');
+  $('#tree').textContent = DATA.tree;
+}
+
+renderFloor(); renderDay();
+document.addEventListener('click', (e) => {
+  const d = e.target.closest('[data-p]');
+  if (d && d.dataset.p) openCard(d.dataset.p);
+});
+$('#scrim').addEventListener('click', closeCard);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCard(); });
+</script>
