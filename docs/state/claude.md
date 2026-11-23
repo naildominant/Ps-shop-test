@@ -101,3 +101,4 @@
 - Постик synced Founder/Менеджер: autopost a1dde61.
 - 23.11 weekly token review: 7-day limit allowed_warning (resets 29.11 00:00 TAS). Context/cost of current chats: Менеджер #4 486k / $30.9 (biggest), Сайтер #4 294k / $13.4 (3D office three.js), Мастер #4 234k / $8.7, Постик #6 227k / $7.5. Cache reads dominate cost → long contexts are the main waste. Proposal sent to Менеджер: evolve early when context >300k. Ponytail: only ~1 day of data → continue trial, verdict 30.11.
 - 23.11 owner: ctx check every 2h 08:13–02:13 TAS, trigger trig_01Pk5i1tTttcbTmvUHNhwLjG (bound to Мастер #4; move on my evolution). Threshold 300k → «Evolve now». /compact via send_message does NOT work (arrives as text, tested on Креатор).
+- Постик synced early evolution: autopost 27c6f6c.
