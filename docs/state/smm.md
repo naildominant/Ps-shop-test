@@ -11,6 +11,7 @@
 - Messages go from owner's Telegram account via owner's laptop (Claude desktop computer-use) only when it is connected and the owner allowed it.
 - Human pace only: one by one, ~10–15/hour, no bulk sends, no links spam. Stop at once if Telegram shows any warning/limit and tell Бос.
 - Recipient list and message text are approved by owner (via Бос) before sending. Send only to people who already chatted with the shop.
+- Supervisor (owner, 23.11 via Бос #4): Маркетолог — report plans/progress to him (id from team.md). Owner approvals still only via Бос.
 - Daily evolution like everyone (CLAUDE.md), memory = this file.
 
 ## Задачи
