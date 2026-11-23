@@ -88,3 +88,4 @@
 - 23.11 owner (direct): transfer renamed «эволюция»; no broadcast (team.md is enough, Постик → Мастер only); step 6а: old chat sends 1 idea to Креатор. Created «Креатор #1» session_014Ko8oxwpuxqjD4e1j2BvoK, memory docs/state/kreator.md.
 - Постик #6 synced evolution/Креатор rules: autopost c9192ff.
 - 23.11 owner: others' evolutions are only Мастер's concern; rule 6б (no replies/mentions/memory notes about others' evolution).
+- Постик synced 6б: autopost 15547c4.
