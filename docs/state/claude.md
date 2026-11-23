@@ -91,3 +91,4 @@
 - Постик synced 6б: autopost 15547c4.
 - 23.11 step 5 → report to Мастер (67a6053); Постик synced 5a08f93.
 - 23.11 (Бос): worker deploy rule — keep bindings incl. ai + verify after deploy (AI binding lost 23.11).
+- Постик synced bindings rule: autopost 25f39f4; reported to Бос.
