@@ -46,9 +46,9 @@ def save(bg, name):
 
 P = {n: fix(f"rent_0{n}.jpg", lift) for n, lift in [(1, .1), (2, .1), (3, .1), (4, .1), (5, .45), (6, .1), (7, .45)]}
 L = {"ru": {"hero": ("Аренда PS5", "PS5 Slim + 2 джойстика"), "kit": ("Комплект аренды", "PS5 · 2 джойстика · все кабели"),
-            "pair": ("2 джойстика", "в комплекте"), "pick": ("Можно выбрать джойстики", None)},
+            "pair": ("2 джойстика", "в комплекте"), "pick": ("Можно выбрать джойстики", None), "choice": ("PS5 Slim или PS5", "на выбор")},
      "uz": {"hero": ("PS5 ijara", "PS5 Slim + 2 joystik"), "kit": ("Ijara to‘plami", "PS5 · 2 joystik · barcha kabellar"),
-            "pair": ("2 ta joystik", "to‘plamda"), "pick": ("Joystiklarni tanlash mumkin", None)}}
+            "pair": ("2 ta joystik", "to‘plamda"), "pick": ("Joystik rangini tanlash mumkin", None), "choice": ("PS5 Slim yoki PS5", "tanlovingiz")}}
 for lg, t in L.items():
     # 1 hero: console tall left + controllers right
     bg = base(); panel(bg, P[4], (60, 60, 500, 840)); panel(bg, P[2], (540, 60, 1140, 510))
@@ -59,8 +59,12 @@ for lg, t in L.items():
     # 3 white pair close-up
     bg = base(); panel(bg, P[5].rotate(90, expand=True), (60, 50, 1140, 700)); caption(bg, *t["pair"], y=730); mark(bg); save(bg, f"03_pair_{lg}")
     # 4 black+purple — only if owner confirms
-    if "--pick" in sys.argv:
-        bg = base(); panel(bg, P[7], (60, 50, 1140, 720)); caption(bg, t["pick"][0], y=760); mark(bg); save(bg, f"04_pick_{lg}")
+    bg = base(); panel(bg, P[7], (60, 50, 1140, 720)); caption(bg, t["pick"][0], y=760); mark(bg); save(bg, f"04_choose_pads_{lg}")
+    # 8 choice card: Slim vs standard
+    bg = base(); panel(bg, P[4], (60, 50, 580, 690)); panel(bg, P[6], (620, 50, 1140, 690))
+    for tx, lab in ((80, "PS5 Slim"), (640, "PS5")): highlight(bg, (tx, 70), lab, font("manrope", 28, "Bold"), bg=GOLD, fg=(20, 12, 40), padx=16, pady=8)
+    caption(bg, *t["choice"], y=725); mark(bg); save(bg, f"08_choice_{lg}")
 # 5–6 console alone (no text → one version)
 for i, n in ((5, 1), (6, 4)):  # both PS5 Slim; rent_06 (standard PS5) not used — different model
     bg = base(); panel(bg, P[n], (300, 40, 900, 840)); mark(bg); save(bg, f"0{i}_console")
+bg = base(); panel(bg, P[6], (300, 40, 900, 840)); mark(bg); save(bg, "07_console_fat")
