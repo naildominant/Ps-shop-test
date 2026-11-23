@@ -42,7 +42,7 @@ def main():
     kv = next(n['id'] for n in call('GET', f'/accounts/{acc}/storage/kv/namespaces?per_page=100')['result'] if n['title'] == 'psshop-store')
     bindings = [{'type': 'kv_namespace', 'name': 'STORE', 'namespace_id': kv}]
     bindings += [{'type': 'plain_text', 'name': k, 'text': v} for k, v in {**VARS, **extra}.items()]
-    meta = {'main_module': 'worker.js', 'compatibility_date': '2024-09-23', 'bindings': bindings, 'keep_bindings': ['secret_text']}
+    meta = {'main_module': 'worker.js', 'compatibility_date': '2024-09-23', 'bindings': bindings, 'keep_bindings': ['secret_text', 'ai']}
     b = uuid.uuid4().hex
     code = open(os.path.join(ROOT, 'worker', 'worker.js'), 'rb').read()
     body = (f'--{b}\r\nContent-Disposition: form-data; name="metadata"; filename="metadata.json"\r\nContent-Type: application/json\r\n\r\n'.encode()
