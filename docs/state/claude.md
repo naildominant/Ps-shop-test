@@ -38,3 +38,4 @@
 ## Архив
 - Старое содержимое (22–23.11) — claude-log.md, запись 24.11.
 - 24.11 00:15 Мастер #5 took over (transfer check OK, pinned). Ctx-check task recreated: trig_013ovFqEvt6KTagVm63pwc9T (old trig_01Pk5i1tTttcbTmvUHNhwLjG disabled).
+- 24.11 00:16 Сайтер #5 verified: team.md row OK, task trig_01VL9RteYFwqNXGYLd9UyYzx bound+enabled (old disabled). Waiting: Маркетолог #2.
