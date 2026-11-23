@@ -96,3 +96,4 @@
 - Постик synced СММщик/Маркетолог: autopost 4abc37d.
 - 23.11 owner: Маркетолог supervises СММщик + owns OLX; СММщик reports to Маркетолог.
 - Постик synced Маркетолог/СММщик duties: autopost 59a4155.
+- 23.11 team structure: docs/team-structure.md (3126819) + Дизайнер PNGs designer/output/team/ (873c5b2), sent to Бос.
