@@ -85,3 +85,4 @@
 - Идея «перенос по расписанию в 5:31 / 7:31» — отменена: у запусков нет инструментов сессий.
 - 22.11 Мастер #4: owner complaint (via Бос #4) — chats messaged old #3. Fix: roster docs/state/team.md + CLAUDE.md rule «Кому писать» + transfer steps 6 (broadcast) and 7 (old chat forwards). Synced to Постик #5, broadcast to team.
 - Постик #5 applied roster rules: autopost bc85e2e. Reported to Бос #4.
+- 23.11 owner (direct): transfer renamed «эволюция»; no broadcast (team.md is enough, Постик → Мастер only); step 6а: old chat sends 1 idea to Креатор. Created «Креатор #1» session_014Ko8oxwpuxqjD4e1j2BvoK, memory docs/state/kreator.md.
