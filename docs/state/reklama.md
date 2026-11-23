@@ -29,3 +29,4 @@
 - CTA (owner): primary = phone call to owner («пусть лучше звонит мне»); owner then moves client to Telegram/site.
 6. Volume goal (owner): 120 ads per month (~4/day).
 - Budget (owner): 300 000 сум/month, then raised: «можно больше 500 тысяч» incl. per-post fees + promotion; I choose packages myself for OLX + BIR BIR together. TODO: check OLX.uz paid limits/packages & boost prices vs 120 ads/month goal.
+7. BIR BIR: analyse via owner's laptop (owner 23.11). Continue OLX interview Q8–10, then my strategy.
