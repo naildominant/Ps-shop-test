@@ -33,6 +33,8 @@
 - 23.11 Дизайнер: every routine image goes full loop via Менеджер/owner → 5–6 brand-locked templates (psfx) from 1-line brief, Постик/Сайтер call directly; owner approves set once. ~1 day.
 - 23.11 Маркетолог: no ad→call data → weekly OLX snapshot (views + search position for 7 queries) to CRM «Реклама»; owner logs calls/day. ~1–2 h + weekly task.
 
+- 23.11 Мастер (evolution idea): `scripts/evolve.sh <role>` does git part (log, team.md row, commit/push) in 1 call + prompt template per role → ~3 tool calls instead of ~10, nothing forgotten. Pairs with my «evolve by need» + Мастер's slim CLAUDE.md → one package for weekly digest.
+
 ## Предложения (отправлены Менеджеру)
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
