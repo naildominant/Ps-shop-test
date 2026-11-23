@@ -48,3 +48,4 @@
 - 23.11 POSTED: PS Plus (ru) + promo «Турбо продажа» 46 500 сум (TOP 30 days, 9 bumps, VIP 7 days).
 - OLX promo prices (23.11, from owner screenshot): cheapest ~7 800; «Быстрая продажа» 17 200 (TOP 7d + 3 bumps); «Турбо продажа» 46 500 (TOP 30d + 9 bumps + VIP 7d). Budget 500k/mo ≈ 10 Turbo.
 - 23.11 GTA 6 set v2: cover olx_gta_{ru,uz}_v2.jpg (bigger art/text per owner) + R1/R2 review cards + S1/S2 screenshots. Delivery to owner: send images directly in chat (SendUserFile, numbered GTA6_ru_1..8) — owner: links too slow. RU order: cover v2, 01_title, R1, S1, 02_gameplay, R2, S2, 03_gameplay.
+- 23.11 POSTED GTA 6 (ru) + Turbo promo (till 23.12). Bug: price shown «100 у.е.» → told owner to set 50 000 сум (verify!). UZ versions (rent, plus, gta) prepared: photos sent as files + texts; owner posts tonight, ~40 min apart.
