@@ -11,6 +11,10 @@
 - Одобренное изменение правил (CLAUDE.md, процесс) делает Мастер — Креатор пишет ему через Боса или напрямую с пометкой «owner approved via Бос».
 - Сам код/сайт/посты не трогает. Память держать короткой (до ~10 тыс. знаков), старое — в «Архив».
 
+## Ожидается (от Боса 23.11)
+- After Маркетолог finishes OLX/BIR BIR, Бос triggers staff: each proposes 1 idea to improve own work → routed to me. I consolidate (problem / idea / effect for shop / effort) → ranked shortlist to Бос for owner.
+- Until then: collect evolution ideas; report to Бос only when worth owner's time.
+
 ## Входящие идеи
 (пусто)
 
