@@ -37,6 +37,8 @@
 
 - 23.11 Сайтер (evolution idea): `scripts/deploy_worker.py` guard for all chats — auto-download live worker, refuse deploy if live has code missing locally, keep bindings + verify after. Cause: 23.11 lost `ai` binding + near-overwrite of Постик code. High priority (prevents outages), pairs with Сайтер+Постик worker ideas #1/#2.
 
+- 23.11 Маркетолог (evolution idea): deliverables owner must save/post (images, banners, post texts) → send as files in chat (SendUserFile), numbered in posting order, not GitHub links (owner: links slow on phone). Caveat: owner reads Менеджер chat → staff passes repo paths to Менеджер, Менеджер sends files. Cheap rule change, quick win.
+
 ## Предложения (отправлены Менеджеру)
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
