@@ -11,12 +11,16 @@
 - Одобренное изменение правил (CLAUDE.md, процесс) делает Мастер — Креатор пишет ему через Боса или напрямую с пометкой «owner approved via Бос».
 - Сам код/сайт/посты не трогает. Память держать короткой (до ~10 тыс. знаков), старое — в «Архив».
 
-## Ожидается (от Боса 23.11)
+## Ideas round (Бос, owner OK 23.11 ~13:30 Tashkent)
+- Waiting: Сайтер, Постик, Мастер, Дизайнер, Маркетолог — 1 idea each (problem / idea / effect / effort).
+- Deadline: all 5 in or 18:00 Tashkent (13:00Z) → ranked shortlist to Бос (top 3 + rest one line each, plain words for owner). Fallback send_later set.
+
+## Ожидается (от Боса 23.11, done → round started)
 - After Маркетолог finishes OLX/BIR BIR, Бос triggers staff: each proposes 1 idea to improve own work → routed to me. I consolidate (problem / idea / effect for shop / effort) → ranked shortlist to Бос for owner.
 - Until then: collect evolution ideas; report to Бос only when worth owner's time.
 
 ## Входящие идеи
-(пусто)
+- 23.11 Креатор (own): problem: daily evolution of every chat costs ~10–15 tool calls each (memory, create_session, check, pin, triggers) even for quiet chats / idea: evolve by need — only if chat is from an earlier day AND had real work or long context; idle chats stay / effect: fewer tokens, less risk of lost tasks in transfer / effort: 1 rule edit by Мастер.
 
 ## Предложения (отправлены Босу)
 (пусто)
