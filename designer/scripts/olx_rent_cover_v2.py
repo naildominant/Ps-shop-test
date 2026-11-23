@@ -2,8 +2,8 @@
 import sys; sys.path.insert(0, "scripts")
 from psfx import *
 W, H = 1200, 900; GOLD, TXT = (255, 205, 120), (242, 239, 255)
-T = {"ru": (["Аренда", "PS5"], "без залога", "Доставка · 2 джойстика · GTA 6"),
-     "uz": (["PS5", "ijara"], "garovsiz", "Yetkazib berish · 2 joystik · GTA 6")}
+T = {"ru": (["Аренда", "PS5"], "без залога", "2 джойстика · GTA 6"),
+     "uz": (["PS5", "ijara"], "garovsiz", "2 joystik · GTA 6")}
 for lg, (head, big2, ben) in T.items():
     art = Image.open("assets/covers/gta6-jason-lucia.jpg").convert("RGB")
     k = max(W / art.width, H / art.height); art = art.resize((int(art.width * k) + 1, int(art.height * k) + 1), Image.LANCZOS)
