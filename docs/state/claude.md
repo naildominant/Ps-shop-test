@@ -99,3 +99,4 @@
 - 23.11 team structure: docs/team-structure.md (3126819) + Дизайнер PNGs designer/output/team/ (873c5b2), sent to Бос.
 - 23.11 owner: «Я FOUNDER (БОС). А бос станет Менеджером». Renamed Бос→Менеджер in CLAUDE.md, team.md, team-structure.md v2, kreator/smm/reklama; memory stays bos.md; owner handles orders/payment himself (@Gaynullin_Nail).
 - Постик synced Founder/Менеджер: autopost a1dde61.
+- 23.11 weekly token review: 7-day limit allowed_warning (resets 29.11 00:00 TAS). Context/cost of current chats: Менеджер #4 486k / $30.9 (biggest), Сайтер #4 294k / $13.4 (3D office three.js), Мастер #4 234k / $8.7, Постик #6 227k / $7.5. Cache reads dominate cost → long contexts are the main waste. Proposal sent to Менеджер: evolve early when context >300k. Ponytail: only ~1 day of data → continue trial, verdict 30.11.
