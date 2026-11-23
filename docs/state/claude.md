@@ -98,3 +98,4 @@
 - Постик synced Маркетолог/СММщик duties: autopost 59a4155.
 - 23.11 team structure: docs/team-structure.md (3126819) + Дизайнер PNGs designer/output/team/ (873c5b2), sent to Бос.
 - 23.11 owner: «Я FOUNDER (БОС). А бос станет Менеджером». Renamed Бос→Менеджер in CLAUDE.md, team.md, team-structure.md v2, kreator/smm/reklama; memory stays bos.md; owner handles orders/payment himself (@Gaynullin_Nail).
+- Постик synced Founder/Менеджер: autopost a1dde61.
