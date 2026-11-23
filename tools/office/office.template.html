@@ -305,13 +305,13 @@ function openCard(name) {
     ${sec('s-block', 'Сейчас мешает', txt(block))}
     ${other.map((x) => sec('', esc(x.label), txt(x))).join('')}
     ${sec('s-ask', '❓ Обсудить с Менеджером', p.ask.length ? list(p.ask) : '')}`;
-  $('#card').hidden = false; $('#scrim').hidden = false;
+  $('#card').hidden = false; $('#scrim').hidden = false; if (window.__officePause) window.__officePause(true);
   document.querySelectorAll('.desk').forEach((d) => d.setAttribute('aria-pressed', String(d.dataset.p === name)));
   $('#close').addEventListener('click', closeCard);
   $('#close').focus();
 }
 function closeCard() {
-  $('#card').hidden = true; $('#scrim').hidden = true;
+  $('#card').hidden = true; $('#scrim').hidden = true; if (window.__officePause) window.__officePause(false);
   document.querySelectorAll('.desk').forEach((d) => d.setAttribute('aria-pressed', 'false'));
 }
 
@@ -433,25 +433,39 @@ function start3D() {
     const g = new THREE.Group(); g.position.set(x, 0, z); g.userData.name = p.name;
     const s = opt.scale || 1; g.scale.setScalar(s);
     const shirt = M(opt.suit ? 0x111116 : c);
-    const skin = M(SKIN[i % SKIN.length]);
-    // ноги (сидя)
-    box(0.22, 0.2, 0.7, M(0x24204f), -0.15, 0.78, 0.25, g); box(0.22, 0.2, 0.7, M(0x24204f), 0.15, 0.78, 0.25, g);
-    box(0.2, 0.62, 0.2, M(0x24204f), -0.15, 0.4, 0.58, g); box(0.2, 0.62, 0.2, M(0x24204f), 0.15, 0.4, 0.58, g);
-    // туловище и руки
-    cyl(0.3, 0.36, 0.85, shirt, 0, 1.28, 0, g);
-    if (opt.suit) { box(0.12, 0.5, 0.02, M(0xFFCD78), 0, 1.38, 0.33, g); }
-    [-1, 1].forEach((sd) => { const a = cyl(0.09, 0.09, 0.62, shirt, sd * 0.43, 1.32, 0.18, g, 8); a.rotation.x = -0.9; const h = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), skin); h.position.set(sd * 0.43, 1.12, 0.45); g.add(h); });
+    const skin = M(SKIN[i % SKIN.length]); const pants = M(0x24204f);
+    const stand = !!opt.stand;
+    // ноги: шарнир в бедре
+    const legs = [-1, 1].map((sd) => {
+      const hip = new THREE.Group(); hip.position.set(sd * 0.15, stand ? 0.92 : 0.78, stand ? 0 : 0.0); g.add(hip);
+      if (stand) { box(0.2, 0.9, 0.2, pants, 0, -0.45, 0, hip); box(0.22, 0.1, 0.32, M(0x111116), 0, -0.88, 0.06, hip); }
+      else { box(0.22, 0.2, 0.7, pants, 0, 0, 0.25, hip); box(0.2, 0.62, 0.2, pants, 0, -0.38, 0.58, hip); }
+      return hip;
+    });
+    const torsoY = stand ? 1.42 : 1.28;
+    cyl(0.3, 0.36, 0.85, shirt, 0, torsoY, 0, g);
+    if (opt.suit) box(0.12, 0.5, 0.02, M(0xFFCD78), 0, torsoY + 0.1, 0.33, g);
+    // руки: шарнир в плече, кисть на конце
+    const arms = [-1, 1].map((sd) => {
+      const sh = new THREE.Group(); sh.position.set(sd * 0.42, torsoY + 0.32, 0); g.add(sh);
+      cyl(0.09, 0.09, 0.62, shirt, 0, -0.31, 0, sh, 8);
+      const hand = new THREE.Group(); hand.position.set(0, -0.64, 0); sh.add(hand);
+      hand.add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), skin));
+      return { sh, hand };
+    });
     // голова
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 14), skin); head.position.set(0, 1.98, 0); g.add(head);
-    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.315, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), M(HAIR[i % HAIR.length])); hair.position.copy(head.position); hair.rotation.x = -0.35; g.add(hair);
+    const head = new THREE.Group(); head.position.set(0, torsoY + 0.7, 0); g.add(head);
+    head.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 14), skin));
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.315, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), M(HAIR[i % HAIR.length])); hair.rotation.x = -0.35; head.add(hair);
     const eyeM = M(0x101018);
-    [-0.1, 0.1].forEach((ex) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), eyeM); e.position.set(ex, 2.0, 0.27); g.add(e); });
-    // кольцо цвета роли на полу
+    [-0.1, 0.1].forEach((ex) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), eyeM); e.position.set(ex, 0.02, 0.27); head.add(e); });
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.88, 32), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.7, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
     scene.add(g);
-    people3d.push({ g, name: p.name, top: new THREE.Vector3(x, 2.55 * s + 0.1, z) });
+    const pp = { g, name: p.name, s, head, arms, legs, top: new THREE.Vector3(x, 2.55 * s + 0.1 + (stand ? 0.14 : 0), z), ph: i * 1.7, ev: null, evT: 3 + (i * 2.3) % 7, talk: false };
+    people3d.push(pp); return pp;
   }
+  const prop = (hand, geo, color, pos) => { const m = new THREE.Mesh(geo, M(color)); m.position.set(...pos); hand.add(m); return m; };
 
   // рассадка (на узком экране опенспейс в два ряда, чтобы подписи не налезали)
   if (narrow()) SPOTS.market = [[5.4, -4.6], [10.4, -6.2]];
@@ -467,11 +481,21 @@ function start3D() {
       desk(x, z, 0xFFCD78, 3.4);
       box(1.2, 0.08, 0.5, M(0xFFCD78), x + 0.9, 1.1, z + 0.9);
       chair(x, z - 0.15, c, true);
-      person(p, x, z, c, i, { suit: true, scale: 1.08 });
+      const f = person(p, x, z, c, i, { suit: true, scale: 1.08 }); f.role = 'boss';
+      f.cup = prop(f.arms[1].hand, new THREE.CylinderGeometry(0.1, 0.08, 0.2, 10), 0xF2EFFF, [0, -0.08, 0.1]);
+      prop(f.cup, new THREE.CylinderGeometry(0.085, 0.085, 0.02, 10), 0x5a3418, [0, 0.1, 0]);
+      f.phone = prop(f.arms[0].hand, new THREE.BoxGeometry(0.08, 0.3, 0.16), 0x0b0b0e, [0, -0.05, 0.08]);
+    } else if (p.name === 'Менеджер') {
+      desk(x, z, c);
+      chair(x, z - 0.15, c, false);
+      const m = person(p, x + 1.4, z + 0.4, c, i, { stand: true }); m.role = 'walker'; m.home = [x + 1.4, z + 0.4];
     } else {
       desk(x, z, c);
       chair(x, z - 0.15, c, false);
-      person(p, x, z, c, i);
+      const w = person(p, x, z, c, i);
+      w.role = p.name === 'Дизайнер' ? 'draw' : p.name === 'Постик' ? 'phone' : 'type';
+      if (w.role === 'draw') prop(w.arms[1].hand, new THREE.CylinderGeometry(0.02, 0.02, 0.3, 6), 0xFFC54D, [0, -0.1, 0.05]);
+      if (w.role === 'phone') w.phone = prop(w.arms[0].hand, new THREE.BoxGeometry(0.08, 0.28, 0.15), 0x0b0b0e, [0, -0.05, 0.08]);
     }
   });
   // растения для уюта
@@ -508,10 +532,104 @@ function start3D() {
   controls.addEventListener('change', () => { dirty = true; });
   window.addEventListener('resize', size);
   size();
-  (function tick() {
-    controls.update();
-    if (dirty && !stage.hidden) { renderer.render(scene, cam); place(); dirty = false; }
+  /* ---------- движение ---------- */
+  const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease = (a, b, k) => a + (b - a) * k;
+  const setArm = (a, rx, rz = 0, k = 0.2) => { a.sh.rotation.x = ease(a.sh.rotation.x, rx, k); a.sh.rotation.z = ease(a.sh.rotation.z, rz, k); };
+  // работа за столом
+  function animWorker(pp, t, dt) {
+    const [L, R] = pp.arms;
+    pp.evT -= dt;
+    if (!pp.ev && pp.evT < 0) { pp.ev = Math.random() < 0.5 ? 'stretch' : 'look'; pp.evEnd = t + 1.6; pp.lookDir = Math.random() < 0.5 ? -0.7 : 0.7; }
+    if (pp.ev && t > pp.evEnd) { pp.ev = null; pp.evT = 7 + Math.random() * 9; }
+    let hy = 0, hx = 0.18;
+    if (pp.talk) { setArm(L, -0.3); setArm(R, -0.9 + Math.sin(t * 5) * 0.25); hy = pp.faceY || 0; hx = 0; }
+    else if (pp.ev === 'stretch') { setArm(L, -3.0, -0.25, 0.15); setArm(R, -3.0, 0.25, 0.15); hx = -0.25; }
+    else {
+      if (pp.ev === 'look') hy = pp.lookDir;
+      if (pp.role === 'draw') { setArm(L, -1.15); setArm(R, -1.15 + Math.sin(t * 3) * 0.18, Math.cos(t * 3) * 0.2, 0.3); }
+      else if (pp.role === 'phone' && Math.sin(t * 0.25 + pp.ph) > 0.3) { setArm(L, -1.9, 0.35); setArm(R, -1.2 + Math.sin(t * 8) * 0.05); hx = 0.35; }
+      else { const k = t * 9 + pp.ph; setArm(L, -1.25 + Math.sin(k) * 0.08, 0, 0.35); setArm(R, -1.25 + Math.sin(k + 1.6) * 0.08, 0, 0.35); }
+    }
+    pp.head.rotation.y = ease(pp.head.rotation.y, hy, 0.1); pp.head.rotation.x = ease(pp.head.rotation.x, hx, 0.1);
+  }
+  // Founder: кофе и телефон по очереди
+  function animBoss(pp, t) {
+    const [L, R] = pp.arms; const cyc = (t % 16) / 16; const coffee = cyc < 0.5;
+    pp.phone.visible = !coffee;
+    if (pp.talk) { setArm(L, -0.4); setArm(R, -0.4); pp.head.rotation.y = ease(pp.head.rotation.y, pp.faceY || 0, 0.1); return; }
+    if (coffee) {
+      const sip = Math.max(0, Math.sin(t * 1.3)) ;
+      setArm(R, ease(-0.9, -2.35, sip), ease(0, -0.55, sip), 0.25); setArm(L, -0.5);
+      pp.head.rotation.x = ease(pp.head.rotation.x, -0.15 * sip, 0.2); pp.head.rotation.y = ease(pp.head.rotation.y, 0, 0.1);
+    } else {
+      setArm(L, -2.6, 0.75, 0.2); setArm(R, -0.6 + Math.sin(t * 2.2) * 0.35, 0.2);
+      pp.head.rotation.z = Math.sin(t * 1.7) * 0.08; pp.head.rotation.y = ease(pp.head.rotation.y, -0.25 + Math.sin(t * 0.9) * 0.2, 0.1); pp.head.rotation.x = ease(pp.head.rotation.x, 0, 0.1);
+    }
+  }
+  // Менеджер ходит от стола к столу
+  const AISLE = 0.7;
+  const walker = people3d.find((pp) => pp.role === 'walker');
+  const stops = people3d.filter((pp) => pp !== walker).map((pp) => {
+    const [x, z] = [pp.g.position.x, pp.g.position.z];
+    const room = seat(pp.name).room;
+    const off = pp.role === 'boss' ? 2.4 : 1.35;
+    return { pp, x: x + off, z: z + 0.2, door: room === 'owner' ? -7.9 : room === 'market' ? 8 : null };
+  }).sort((a, b) => (a.z < -1.6) - (b.z < -1.6) || a.x - b.x);
+  // порядок: сначала кабинет Founder, потом все остальные по кругу
+  stops.sort((a, b) => (b.pp.role === 'boss') - (a.pp.role === 'boss'));
+  let si = 0, path = [], wait = 0, current = null, paused = false;
+  const bubble = document.createElement('span'); bubble.className = 'lbl'; bubble.style.setProperty('--c', '#C35CFF'); bubble.textContent = '…'; bubble.style.pointerEvents = 'none'; bubble.hidden = true; lbls.appendChild(bubble);
+  function planTo(st) {
+    const p0 = walker.g.position; path = [];
+    const inRoom = (z) => z < -1.6;
+    if (inRoom(p0.z)) path.push([walker.exitX ?? p0.x, p0.z], [walker.exitX ?? p0.x, AISLE]); else path.push([p0.x, AISLE]);
+    const gx = st.door ?? st.x;
+    path.push([gx, AISLE]);
+    if (inRoom(st.z)) { path.push([gx, st.z + (st.door != null ? 0 : 1.2)]); walker.exitX = gx; } else walker.exitX = null;
+    path.push([st.x, st.z]);
+  }
+  function animWalker(t, dt) {
+    const g = walker.g; const [L, R] = walker.arms;
+    if (paused) { setArm(L, 0); setArm(R, 0); return; }
+    if (wait > 0) {
+      wait -= dt; bubble.hidden = false;
+      setArm(R, -0.8 + Math.sin(t * 5) * 0.3, 0.1); setArm(L, -0.2);
+      walker.legs.forEach((l) => { l.rotation.x = ease(l.rotation.x, 0, 0.2); });
+      if (wait <= 0) { if (current) current.pp.talk = false; bubble.hidden = true; si = (si + 1) % stops.length; planTo(stops[si]); }
+      return;
+    }
+    if (!path.length) { planTo(stops[si]); }
+    const [tx, tz] = path[0]; const dx = tx - g.position.x, dz = tz - g.position.z; const d = Math.hypot(dx, dz);
+    const sp = 2.4 * dt;
+    if (d < sp) { g.position.x = tx; g.position.z = tz; path.shift();
+      if (!path.length) { current = stops[si]; wait = 2.6; const o = current.pp.g.position;
+        g.rotation.y = Math.atan2(o.x - g.position.x, o.z - g.position.z);
+        current.pp.talk = true; current.pp.faceY = Math.atan2(g.position.x - o.x, g.position.z - o.z); }
+    } else { g.position.x += dx / d * sp; g.position.z += dz / d * sp; g.rotation.y = Math.atan2(dx, dz); }
+    const sw = Math.sin(t * 9) * 0.55;
+    walker.legs[0].rotation.x = sw; walker.legs[1].rotation.x = -sw; setArm(L, -sw * 0.7, 0, 0.5); setArm(R, sw * 0.7, 0, 0.5);
+    walker.top.set(g.position.x, 2.71, g.position.z);
+  }
+  window.__officePause = (v) => { paused = v; };
+  let last = performance.now(), acc = 0;
+  (function tick(now) {
     requestAnimationFrame(tick);
+    if (stage.hidden || document.hidden) { last = now || performance.now(); return; }
+    now = now || performance.now(); const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    const moved = controls.update();
+    if (!still) {
+      acc += dt; if (acc < 1 / 30 && !moved && !dirty) return; // ~30 кадров в секунду хватает
+      const t = now / 1000, step = acc; acc = 0;
+      people3d.forEach((pp) => { if (pp.role === 'boss') animBoss(pp, t); else if (pp.role !== 'walker') animWorker(pp, t, step); });
+      if (walker && stops.length) {
+        animWalker(t, step);
+        v.copy(walker.top).project(cam); const w = stage.clientWidth, h = stage.clientHeight;
+        bubble.style.transform = `translate(${(v.x + 1) / 2 * w + 34}px, ${(1 - v.y) / 2 * h - 26}px) translate(-50%, -100%)`;
+      }
+      dirty = true;
+    }
+    if (dirty) { renderer.render(scene, cam); place(); dirty = false; }
   })();
 
   // тап по человечку
