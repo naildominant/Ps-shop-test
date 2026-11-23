@@ -47,3 +47,4 @@
 - 23.11 POSTED: Аренда PS5 (ru). No promo yet — no PS5 available now (all rented); promo rental when consoles free.
 - 23.11 POSTED: PS Plus (ru) + promo «Турбо продажа» 46 500 сум (TOP 30 days, 9 bumps, VIP 7 days).
 - OLX promo prices (23.11, from owner screenshot): cheapest ~7 800; «Быстрая продажа» 17 200 (TOP 7d + 3 bumps); «Турбо продажа» 46 500 (TOP 30d + 9 bumps + VIP 7d). Budget 500k/mo ≈ 10 Turbo.
+- 23.11 GTA 6 set v2: cover olx_gta_{ru,uz}_v2.jpg (bigger art/text per owner) + R1/R2 review cards + S1/S2 screenshots. Delivery to owner: send images directly in chat (SendUserFile, numbered GTA6_ru_1..8) — owner: links too slow. RU order: cover v2, 01_title, R1, S1, 02_gameplay, R2, S2, 03_gameplay.
