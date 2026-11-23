@@ -65,7 +65,7 @@ def parse(md):
         if m:
             t = strip_md(m[1])
             if t.startswith('❓'):
-                cur['ask'].append(re.sub(r'^❓\s*обсудить с менеджером:\s*', '', t))
+                cur['ask'].append(re.sub(r'^❓\s*обсудить с менеджером:\s*', '', t, flags=re.I))
             else:
                 cur['items'].append(t)
     # кто кому отчитывается — из дерева в начале документа

@@ -64,7 +64,7 @@ button { font: inherit; color: inherit; }
   gap: 12px;
   grid-template-columns: 1fr 1.25fr 1fr;
   grid-template-areas:
-    "owner hq manager"
+    "owner hq hq"
     "open open market";
 }
 .room { position: relative; border: 1.5px dashed var(--edge); border-radius: 16px; padding: 10px 10px 12px; display: grid; align-content: start; gap: 8px; min-width: 0; background: rgba(7, 6, 26, .35); }
@@ -145,7 +145,7 @@ button { font: inherit; color: inherit; }
 footer { color: var(--faint); font-size: 12px; }
 
 @media (max-width: 760px) {
-  .floor { grid-template-columns: 1fr 1fr; grid-template-areas: "hq hq" "owner manager" "open open" "market market"; padding: 10px; gap: 10px; }
+  .floor { grid-template-columns: 1fr 1fr; grid-template-areas: "owner hq" "open open" "market market"; padding: 10px; gap: 10px; }
   .desk { width: 104px; }
   .table { width: 84px; height: 34px; }
   .chair { width: 40px; height: 40px; font-size: 13px; }
@@ -170,7 +170,7 @@ footer { color: var(--faint); font-size: 12px; }
     <div class="legend">
       <span><i class="tag auto">авто</i> работает по расписанию</span>
       <span><i class="tag btn">кнопки</i> ждёт нажатия владельца</span>
-      <span><i class="tag ask">❓</i> обсудить с менеджером</span>
+      <span><i class="tag ask">❓</i> обсудить с Менеджером</span>
       <span><i class="tag block">мешает</i> что-то не подключено</span>
     </div>
     <p class="hint">Нажмите на стол, чтобы увидеть всё о сотруднике.</p>
@@ -183,7 +183,7 @@ footer { color: var(--faint); font-size: 12px; }
   </section>
 
   <section class="panel">
-    <h2>Обсудить с менеджером</h2>
+    <h2>Обсудить с Менеджером</h2>
     <ol class="qs" id="qs"></ol>
   </section>
 
@@ -203,9 +203,8 @@ const DATA = /*DATA*/null;
 
 // Где сидит каждый и его цвет. Новые сотрудники из документа сами попадают в опенспейс.
 const SEAT = {
-  'Владелец': { room: 'owner', c: '#FFCD78', role: 'Решения, цены, деньги' },
-  'Менеджер': { room: 'manager', c: '#45E3A4', role: 'Заказы и оплата' },
-  'Бос': { room: 'hq', c: '#C35CFF', role: 'Руководитель команды' },
+  'Founder': { room: 'owner', c: '#FFCD78', role: 'Решения, заказы и оплата', ini: 'F' },
+  'Менеджер': { room: 'hq', c: '#C35CFF', role: 'Руководитель Claude-команды', ini: 'Ме' },
   'Сайтер': { room: 'open', c: '#2BC8FF', role: 'Сайт и заявки' },
   'Постик': { room: 'open', c: '#6A55FF', role: 'Посты, канал, цены' },
   'Дизайнер': { room: 'open', c: '#FF6B95', role: 'Вся графика' },
@@ -215,15 +214,15 @@ const SEAT = {
   'СММщик': { room: 'market', c: '#5FE0FF', role: 'Общение с клиентами' },
 };
 const ROOMS = [
-  ['owner', 'Кабинет владельца'], ['hq', 'Штаб'], ['manager', 'Стойка заказов'],
+  ['owner', 'Кабинет владельца'], ['hq', 'Штаб'],
   ['open', 'Опенспейс Claude-команды'], ['market', 'Маркетинг'],
 ];
-const HUMANS = new Set(['Владелец', 'Менеджер']);
+const HUMANS = new Set(['Founder']);
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const seat = (n) => SEAT[n] || { room: 'open', c: '#A9A3D4', role: '' };
-const initials = (n) => n.slice(0, 2);
+const initials = (n) => (SEAT[n] && SEAT[n].ini) || n.slice(0, 2);
 const field = (p, re) => p.fields.find((f) => re.test(f.label));
 const people = DATA.people;
 const byName = Object.fromEntries(people.map((p) => [p.name, p]));
@@ -232,7 +231,7 @@ const hoursOf = (n) => DATA.hours.filter((h) => h.who.includes(n));
 function tagsOf(p) {
   const t = [];
   if (hoursOf(p.name).length || field(p, /автоматически|по расписанию/i)) t.push('<i class="tag auto">авто</i>');
-  if (field(p, /кнопки владельца|нужно согласие/i) || (p.name === 'Владелец')) t.push('<i class="tag btn">кнопки</i>');
+  if (field(p, /кнопки владельца|нужно согласие/i) || (p.name === 'Founder')) t.push('<i class="tag btn">кнопки</i>');
   if (p.ask.length) t.push(`<i class="tag ask">❓ ${p.ask.length}</i>`);
   if (field(p, /мешает/i)) t.push('<i class="tag block">мешает</i>');
   return t.join('');
@@ -278,7 +277,7 @@ function openCard(name) {
     ${sec('s-auto', 'По расписанию', txt(sched) + (hrs.length ? `<div class="times">${hrs.map((h) => `<div><b>${esc(h.t)}</b><span>${esc(h.what)}</span></div>`).join('')}</div>` : ''))}
     ${sec('s-block', 'Сейчас мешает', txt(block))}
     ${other.map((x) => sec('', esc(x.label), txt(x))).join('')}
-    ${sec('s-ask', '❓ Обсудить с менеджером', p.ask.length ? list(p.ask) : '')}`;
+    ${sec('s-ask', '❓ Обсудить с Менеджером', p.ask.length ? list(p.ask) : '')}`;
   $('#card').hidden = false; $('#scrim').hidden = false;
   document.querySelectorAll('.desk').forEach((d) => d.setAttribute('aria-pressed', String(d.dataset.p === name)));
   $('#close').addEventListener('click', closeCard);
