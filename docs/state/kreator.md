@@ -12,7 +12,7 @@
 - Сам код/сайт/посты не трогает. Память держать короткой (до ~10 тыс. знаков), старое — в «Архив».
 
 ## Ideas round (Бос, owner OK 23.11 ~13:30 Tashkent)
-- Waiting: Сайтер, Постик, Мастер, Дизайнер, Маркетолог — 1 idea each (problem / idea / effect / effort).
+- All 5 received 23.11 13:30 Tashkent; shortlist sent to Бос same time. Deadline trigger trig_01DgsfPrvL3wMPDzD7tycnQ2 deleted.
 - Deadline: all 5 in or 18:00 Tashkent (13:00Z) → ranked shortlist to Бос (top 3 + rest one line each, plain words for owner). Fallback send_later set.
 
 ## Ожидается (от Боса 23.11, done → round started)
@@ -22,7 +22,13 @@
 ## Входящие идеи
 - 23.11 Креатор (own): problem: daily evolution of every chat costs ~10–15 tool calls each (memory, create_session, check, pin, triggers) even for quiet chats / idea: evolve by need — only if chat is from an earlier day AND had real work or long context; idle chats stay / effect: fewer tokens, less risk of lost tasks in transfer / effort: 1 rule edit by Мастер.
 
+- 23.11 Сайтер: refusals 7/17 in CRM, reasons unknown → on ❌ bot asks 1-tap reason → CRM «Причина»; «В обработке» >24h → one reminder; weekly top reasons in «Сводка». Worker only, ~1–2 h.
+- 23.11 Постик: searches in bot ending «нет в наличии» are lost → worker logs searches in KV; Monday message to owner «Top-5 searched games without a post» + ✅ button. ~30 lines, 1 evening.
+- 23.11 Мастер: CLAUDE.md ~6k tokens in every call, ~8k bytes = evolution protocol → slim to core, protocol to docs/rules/evolution.md; GitHub Action mirrors rules to ps-shop-autopost (needs repo token from owner). ~1 session.
+- 23.11 Дизайнер: every routine image goes full loop via Бос/owner → 5–6 brand-locked templates (psfx) from 1-line brief, Постик/Сайтер call directly; owner approves set once. ~1 day.
+- 23.11 Маркетолог: no ad→call data → weekly OLX snapshot (views + search position for 7 queries) to CRM «Реклама»; owner logs calls/day. ~1–2 h + weekly task.
+
 ## Предложения (отправлены Босу)
-(пусто)
+- 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Бос.
 
 ## Архив
