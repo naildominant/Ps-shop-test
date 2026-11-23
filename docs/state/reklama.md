@@ -44,3 +44,4 @@
 - 23.11 Rent addendum done (04_choose_pads, 07_console_fat, 08_choice). Brief #4 sent: GTA 6 photos (designer/output/olx/gta/) + fun shots FC/MK1 (designer/output/olx/fun/) from owner gameplay photos (reklama/photos/games on my branch); blur faces.
 - 23.11 All flagship photo sets ready: designer/output/olx/{rent,plus,gta,fun}/ + covers. Links sent to owner. Next: owner posts 6 flagships manually + pays promo → tell me package/price; then laptop setup; then read OLX rules + start 3–4 ads/day.
 - OLX RULE (owner 23.11): phone number NOT allowed in description → phone only in «Телефон» field; also removed Telegram handle from texts. CTA line instead: «Звоните — кнопка «Позвонить» в объявлении».
+- 23.11 POSTED: Аренда PS5 (ru). No promo yet — no PS5 available now (all rented); promo rental when consoles free.
