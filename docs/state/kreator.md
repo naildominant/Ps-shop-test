@@ -19,6 +19,8 @@
 - After Маркетолог finishes OLX/BIR BIR, Менеджер triggers staff: each proposes 1 idea to improve own work → routed to me. I consolidate (problem / idea / effect for shop / effort) → ranked shortlist to Менеджер for owner.
 - Until then: collect evolution ideas; report to Менеджер only when worth owner's time.
 
+- 23.11 evening Founder (via Менеджер): praise for shortlist, «keep collecting», keep tokens lean until 29.11. No decision yet on which ideas to implement.
+
 ## Входящие идеи
 - 23.11 Креатор (own): problem: daily evolution of every chat costs ~10–15 tool calls each (memory, create_session, check, pin, triggers) even for quiet chats / idea: evolve by need — only if chat is from an earlier day AND had real work or long context; idle chats stay / effect: fewer tokens, less risk of lost tasks in transfer / effort: 1 rule edit by Мастер.
 
