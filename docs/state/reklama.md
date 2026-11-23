@@ -32,3 +32,4 @@
 7. BIR BIR: analyse via owner's laptop (owner 23.11). Continue OLX interview Q8–10, then my strategy.
 9. KPI (owner): inbound calls + Telegram messages. Baseline now: 2–8 calls/day depending on weekday.
 10. Photos: OLX doesn't take video; owner can collect real reviews/chat screenshots. Interview done → next: my strategy.
+- 23.11 Strategy v1 proposed: https://claude.ai/artifact/1KAsvPxfeLLcchKdwRgvU6 (reports/olx-strategiya.html on branch claude/intelligent-clarke-juo1gm). Analysis: https://claude.ai/artifact/UxwuvedA3GJpQFpHZCGhD7. Core: 3 flagships (PS5 rental, PS Plus, GTA 6) ru+uz with TOP; 3–4 new per-game ads/day (half uz); rework ~18 duplicates (don't delete); keyword titles; target 10–15 calls/day in a month. PS Plus site prices: Essential 269k/429k/629k, Extra 309k/629k/979k, Deluxe 389k/699k/1 268k (1/3/12 mo); EA Play 179k/659k. Waiting owner OK on strategy.
