@@ -1,20 +1,10 @@
 ---
 name: token-optimization
 description: >
-  Use when you need to reduce token usage, lower API cost, fit work within a
-  context window, or speed up an expensive/slow agent loop. Triggers on
-  phrases like "optimize tokens", "reduce token usage", "save on cost",
-  "fit in context", "context too long", "running out of tokens", "prompt
-  caching", "compact the context", "agent is too expensive", "shrink the
-  prompt", "cheaper model", "tokens-per-task". Provides a layered tactic
-  catalog — measurement (heuristic counting and budget allocation),
-  prompt-side levers (caching, system-prompt diet, tool-definition pruning),
-  context management (compression, observation masking, file-system
-  offload), agent-loop patterns (parallel tool calls, batch operations,
-  model routing by complexity), and output-side controls (depth tiers, stop
-  sequences, structured output). Project-agnostic and provider-agnostic;
-  works across Claude Code, Codex CLI, Cursor, Gemini CLI, and Copilot.
-
+  Use for hard token-optimization work: diagnosing where context tokens go
+  (system prompt, history, tool results, MCP tool definitions), prompt caching,
+  compaction and observation masking, model routing, and techniques for large
+  projects. Not for routine short tasks or general brevity habits.
 extensions:
   claude: {}
   copilot: {}
@@ -48,13 +38,14 @@ then compress, then route, then trim output.
 - ✅ User says they're hitting context limits, billing surprises, or slow loops
 - ✅ User asks how to use prompt caching, compaction, or extended thinking budgets
 - ✅ User wants to choose a cheaper model or split work across models
-- ✅ Agent itself notices a long-running session crossing roughly 70% context-window utilization (rule-of-thumb trigger; use exact counts when available, heuristic estimate otherwise — trigger earlier on long-running sessions where headroom matters more, later on short tasks)
+- ✅ A long-running session nears its context limit (roughly 70%+): use it to pick compaction tactics (Step 4), not to re-run the whole audit
 - ✅ Reviewing a system prompt, CLAUDE.md, or memory file that "feels heavy"
 
 **Do NOT activate when:**
 - The topic is a specific tokenizer library (use a `tokenization-*` skill)
 - "Token" refers to auth/JWT/payment tokens, or UI design tokens
 - The user only wants pricing math (point at provider pricing pages)
+- The task is ordinary and short, or only needs general brevity habits (see `token-efficiency`)
 
 ## Workflow
 
@@ -197,6 +188,28 @@ summaries, shortcut decisions, "let me finalize" mid-task. Counter it with:
 This is model-side behavior, not host-side — applies on any host running
 a context-aware model.
 
+**When to compact.** Compact at phase boundaries, never mid-task:
+
+| Phase transition | Compact? | Why |
+|---|---|---|
+| Research → planning | Yes | Research is bulky; the plan is the distilled output |
+| Planning → implementation | Yes | Once the plan is written to a file, free the context for code |
+| Implementation → testing | Maybe | Keep if tests reference recent code; compact if the focus changes |
+| Debugging → next feature | Yes | Debug traces pollute unrelated work |
+| After a failed approach | Yes | Drop the dead-end reasoning before trying another |
+| Mid-task (e.g. a deploy in progress) | No | File paths, variable names and partial state are lost |
+
+| Survives compaction | Lost |
+|---|---|
+| `CLAUDE.md` instructions | Intermediate reasoning and analysis |
+| Files on disk, incl. the chat's memory in `docs/state/` | File contents read earlier in the chat |
+| Git state (pushed commits also outlive the container) | Tool call history |
+| | Preferences stated only verbally in the chat |
+
+Before compacting, write the plan and decisions to the chat's `docs/state/` file (see
+`token-efficiency` §5). Then run `/compact <what to do next>`, e.g.
+`/compact Next: apply the approved change to docs/evolution.md; keep the file paths`.
+
 ### Step 5 — Mask verbose tool observations
 
 Tool output is the largest unbounded source of tokens. Replace verbose
@@ -227,24 +240,20 @@ call is the most common single source of overspend.
 | Architecture, multi-step planning, deep refactors, very long context | top tier (e.g., Opus-class) |
 
 Keep a fallback chain (top → mid → small) for rate-limit or latency
-backoff. When sub-agents are available, **delegate** narrow searches and
-file scans to a cheaper-model sub-agent and return only the synthesis to
-the main loop — the main loop never pays for the raw search output.
+backoff. Delegating narrow searches to a cheaper-model sub-agent: see
+`token-efficiency` §4–§5 and CLAUDE.md.
 
 ### Step 7 — Cut agent-loop overhead
 
 Each loop iteration re-transmits the full conversation context. Reducing
 iterations is multiplicative.
 
-- **Batch tool calls.** Issue independent tool calls in **parallel** in
-  one assistant turn, not sequentially across turns.
+- **Batch independent calls, avoid speculative reads:** see `token-efficiency` §4 and CLAUDE.md.
 - **Combine small tasks.** Process N files in one iteration instead of
   spawning N iterations.
 - **Set iteration caps.** Cap retries on a single failing operation
   (e.g., ~5) with a clean "summarize and stop" exit, while leaving room
   for legitimately multi-step plans to run their length.
-- **Avoid speculative reads.** Read what the task needs, not "everything
-  related". Use `glob`/`grep` to narrow before opening files.
 - **Background long jobs.** Don't keep the model in a polling loop on a
   multi-minute task — schedule a wake-up or use the host's background
   primitive.
@@ -257,14 +266,13 @@ sub-agent delegation in Claude Code, Task tools in Codex), see
 
 Output tokens are typically priced higher than input. Tactics:
 
-- **Depth tiers.** Offer "essential / moderate / detailed / exhaustive"
-  before answering long-form questions; default to the smallest tier the
-  user clearly implied. When intent is ambiguous, err one tier higher
-  rather than under-answering.
-- **Cut filler, keep orientation.** Skip pure throat-clearing ("Sure, here
-  is …", "Great question!"). A one-line orientation ("Updated X to Y
-  because Z") is fine and often helpful — the goal is to cut filler, not
-  strip context.
+- **Depth by task complexity.** Pick the depth yourself (essential / moderate /
+  detailed / exhaustive) from the task's complexity and answer right away; show
+  the tier menu only if the user asks for it. Default to the smallest tier the
+  user clearly implied; when intent is ambiguous, err one tier higher rather
+  than under-answering.
+- **Cut filler, keep a one-line orientation** ("Updated X to Y because Z"). The filler rules
+  are in `token-efficiency` §2 and CLAUDE.md.
 - **Structured output for machine consumption.** JSON / tool-use schemas
   are usually shorter than equivalent prose and don't need filler.
 - **Stop sequences.** When a known terminator delimits the useful output,
@@ -309,30 +317,22 @@ come from layering, not from squeezing one lever harder.
 
 ## Cross-agent invocation
 
-The tactics above are agent-agnostic; the *commands* to apply them differ per
-host runtime. Use this table to translate a tactic into the host you're in.
+Commands for Claude Code, the only host used in this project. (The original table also
+covered Codex CLI, Cursor, Gemini CLI and Copilot CLI; it is kept in the backup copy.)
 
-| Tactic | Claude Code | Codex CLI | Cursor | Gemini CLI | Copilot CLI |
-|---|---|---|---|---|---|
-| Reset context (Step 4) | `/clear` | `/clear` | New chat | `/clear` | New session |
-| Manual compaction (Step 4) | `/compact` | manual summary only | n/a | n/a | n/a |
-| Auto-compaction threshold (Step 4) | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=<pct>` (env) | n/a | n/a | n/a | n/a |
-| Switch model (Step 6) | `/model sonnet\|opus\|haiku` | `--model <id>` flag | model picker | `/model <id>` | `--model <id>` |
-| Subagent / delegated model (Step 6) | `CLAUDE_CODE_SUBAGENT_MODEL=<id>` (env) | per-Task model arg | n/a | sub-agent config | n/a |
-| Cap thinking budget (Step 8) | `MAX_THINKING_TOKENS=<n>` (env) | reasoning-effort flag | n/a | thinking config | n/a |
-| Token spend check (Steps 1, 9) | `/cost` | session footer | status bar | `/stats` | `gh copilot usage` |
-| Prefix cache (Step 2) | automatic + `cache_control` SDK flag | automatic on exact prefix | automatic | implicit context cache | via provider |
+| Tactic | Claude Code |
+|---|---|
+| Reset context (Step 4) | `/clear` |
+| Manual compaction (Step 4) | `/compact` |
+| Auto-compaction threshold (Step 4) | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=<pct>` (env) |
+| Switch model (Step 6) | `/model sonnet\|opus\|haiku` |
+| Subagent / delegated model (Step 6) | `CLAUDE_CODE_SUBAGENT_MODEL=<id>` (env) |
+| Cap thinking budget (Step 8) | `MAX_THINKING_TOKENS=<n>` (env) |
+| Token spend check (Steps 1, 9) | `/cost` |
+| Prefix cache (Step 2) | automatic + `cache_control` SDK flag |
 
-Notes:
-
-- Env vars apply to the host runtime's settings file (e.g.,
-  `~/.claude/settings.json`'s `env` block for Claude Code). Other hosts have
-  their own settings location.
-- `n/a` means the feature is not exposed on that host's CLI surface today —
-  the underlying tactic may still apply via direct provider SDK use.
-- MCP-style tool servers count against tool-definition tokens on every host
-  that supports them. Keep enabled count modest (around 10 per project is a
-  reasonable working ceiling); see Step 3 for the broader instruction-file diet.
+Env vars go in the `env` block of the settings file (e.g. `~/.claude/settings.json`).
+MCP tool servers count against tool-definition tokens every turn; see Step 3.
 
 ## Rules
 
@@ -403,15 +403,3 @@ Heavy detail lives in subfolders, loaded only on demand:
 No `assets/` or `scripts/` ship in v1. Token estimation is heuristic and
 described inline; if a project later wants exact counts, call the host
 provider's `count_tokens` endpoint directly.
-
-## Body budget
-
-Soft targets — not hard caps. Grow the body when the topic genuinely
-warrants it; move overflow to `references/<topic>-extras.md` rather
-than truncating signal.
-
-- `description`: agentskills.io spec caps this at 1,024 chars; that one
-  is an external hard limit, not a soft target.
-- Body: aim for ~500 lines / ~5,000 tokens as a comfortable read.
-- Total file size: stay well below ~30,000 chars so the body still
-  parses cleanly when re-rendered as a Copilot custom agent.

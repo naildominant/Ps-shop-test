@@ -8,11 +8,11 @@ Loaded during Steps 8–9 of the token-optimization workflow: trimming generated
 
 Output tokens are typically priced 3–5× input tokens (provider-dependent). Trimming output usually pays back faster than trimming input. Tactics in priority order:
 
-### 8.1 Depth tiers (offer before answering)
+### 8.1 Depth tiers (choose yourself, no menu)
 
-Default behavior most agents accidentally adopt: maximum verbosity for every question. Counter with an explicit depth picker for any answer ≥ 200 words. Phrase the picker once, then default to the smallest tier the user implied.
+Default behavior most agents accidentally adopt: maximum verbosity for every question. Counter it by choosing the depth yourself from the task's complexity (essential / moderate / detailed / exhaustive) and answering right away. Do not show a depth menu before answering; offer the picker below only when the user asks to choose a depth.
 
-**Template:**
+**Template (use only when the user asks to choose a depth):**
 
 ```
 Depth options:
@@ -33,7 +33,7 @@ Default: essential. Reply "moderate" / "detailed" / "exhaustive" to expand.
 | "compare X and Y" / "design X" | detailed |
 | "I'm building X and need to choose between …" | exhaustive |
 
-When in doubt, drop a tier. User can always ask for more.
+When the signal is clear, take the smallest tier that fits; when intent is ambiguous, go one tier higher rather than under-answering. The user can always ask for a different depth.
 
 ### 8.2 Cut filler, keep orientation
 

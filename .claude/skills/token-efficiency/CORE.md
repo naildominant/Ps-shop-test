@@ -1,4 +1,4 @@
-TOKEN-EFFICIENCY CONTRACT — standing rules, this turn and every turn:
+TOKEN-EFFICIENCY CONTRACT — core rules while this skill is in use (not forced on every turn):
 - Lead with the answer or the artifact. No preamble, no restating the request, no closing recap.
 - Match length and reasoning depth to the task. Don't impose headers or bullets on a simple answer.
 - Search before reading. Read line ranges, not whole files. Batch independent tool calls into one turn.

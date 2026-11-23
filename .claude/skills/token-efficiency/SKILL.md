@@ -1,16 +1,15 @@
 ---
 name: token-efficiency
-description: Apply this skill to EVERY response, in every conversation, on every surface, regardless of topic — writing, research, analysis, planning, casual chat, and agentic tool-use work (file reads, greps, subagent calls, bash commands) alike, not just code. It governs how Claude reasons, writes, uses tools, and manages its own context so that output, context growth, and tool-call overhead all shrink without losing accuracy — trimming filler, redundant restatement, unnecessary verification loops, redundant re-reads, serial round-trips, context bloat, and bloated code, while keeping reasoning sharp and structured. Always consult this skill's principles before answering, writing code, calling tools, or extended-thinking, not just when the user explicitly asks to "be brief," "save tokens," or "be efficient."
+description: Use for complex or long agentic tasks, context-window audits, Claude Code cost and limit optimization, or when the user explicitly asks to save tokens or be brief. Covers concise reasoning and replies, efficient tool use (search before reading, batching, targeted output) and context management. Not needed for ordinary short tasks.
 ---
 
 # Token Efficiency & Sharper Thinking
 
-A cross-cutting skill: not a workflow for one task type, but a set of standing habits
-that apply to *every* response — prose, code, tool use, context management, and
-internal reasoning alike. The audience is everyone, not just developers: the same
-principles govern drafting an email, summarizing research, analyzing a spreadsheet,
-or answering a one-off question in chat. When no tools are available (a plain
-conversation), §4–§5 simply don't apply; §1–§3 and §6–§7 always do.
+Habits for work where tokens matter: complex or long agentic tasks, context audits,
+Claude Code cost and limit optimization, and any request to save tokens or be brief.
+Not needed for routine short tasks; the basic rules in CLAUDE.md are enough there.
+Covers reasoning, prose, code, tool use and the context window. With no tools (plain
+conversation) §4–§5 don't apply; §1–§3 and §6–§7 do.
 
 **Core principle:** the goal is never "say less." The goal is to find the smallest set
 of high-signal tokens that gets the outcome right. Cutting a needed clarification to
@@ -21,23 +20,11 @@ user, or with a tool — don't make it.
 
 ## How this skill is delivered
 
-Three tiers, deliberately separated so the always-on layer stays cheap:
-
-| Tier | What | When it loads |
-|---|---|---|
-| Core contract | [`CORE.md`](CORE.md) — ~8 lines, the non-negotiables | Every turn, injected by the `UserPromptSubmit` hook |
-| This file | The full principles, §1–§7 | When the model invokes the skill |
-| References | [`references/examples.md`](references/examples.md) — worked before/after | On demand, when you want the pattern shown end-to-end |
-
-A skill body cannot be "always on" — skills are model-invoked, so a long one drifts out
-of effect over a session. The hook in [`hooks/`](hooks/) fixes that deterministically:
-it re-injects the core contract every turn and flags concrete tool-use waste as it
-happens. See [`hooks/README.md`](hooks/README.md) for installation.
-
-The hooks are an *optional enhancement, not a requirement* — they only exist on Claude
-Code, where a harness runs them. On claude.ai, mobile, Cowork, or the API, the skill is
-fully functional as-is: the description triggers it, the body carries the principles,
-and nothing below depends on the hooks being present.
+Companion files: `CORE.md` (short core contract) and `references/examples.md`
+(before/after examples, read on demand). `CORE.md` and `CORE_SHORT.md` were written for
+an optional `UserPromptSubmit` hook; no such hook is installed in this project, so
+nothing is injected automatically. The skill is invoked only for the situations in its
+description.
 
 ## 1. Reasoning efficiently (thinking blocks and step-by-step work)
 
@@ -69,12 +56,9 @@ and nothing below depends on the hooks being present.
 
 ## 2. Writing efficient prose responses
 
-- **No preamble, no postamble.** Don't open with "Great question!" or restate the
-  user's request back to them. Don't close with a summary of what was just said
-  unless the response is long enough that a summary adds real navigation value.
-- **Answer first, justify second — briefly.** Lead with the conclusion or the
-  requested artifact. Supporting reasoning follows only as needed for the user to
-  trust or use the answer, not as a full derivation by default.
+- **Answer first, no preamble or restated request (also in CLAUDE.md).** Skip the closing
+  summary unless the response is long enough that it aids navigation. Supporting
+  reasoning only as needed for the user to trust or use the answer.
 - **Cut hedges and filler.** "It's worth noting that," "in order to," "as mentioned,"
   "I hope this helps," "please let me know if..." — remove unless they carry real
   content. See the filler table in `references/examples.md` for more.
@@ -119,21 +103,9 @@ cost independent of the final answer: the fixed overhead of a model turn plus wh
 the tool returns into context. The habits above apply to what you *say*; these apply
 to what you *do*.
 
-- **Search before you read.** Use grep/glob to find the right location before reading
-  a whole file. If you already know the line range — from a prior search, an error
-  trace, or a line-numbered result — read just that range instead of the file from
-  the top.
-- **Trust what a tool already confirmed.** After a file edit or write succeeds, don't
-  re-read the file to check it landed — the tool would have errored if it hadn't.
-  Re-verify only when something *downstream* of the edit needs checking (e.g. running
-  the code that uses it), not the edit itself.
-- **Batch independent calls.** When two or more tool calls don't depend on each
-  other's output, issue them in the same turn instead of serially — each serial
-  round-trip re-pays the fixed cost of a model turn for no new information.
-- **Prefer targeted output over full dumps.** A search for a symbol beats reading an
-  entire file to find it; a scoped log query beats fetching the whole log and
-  eyeballing it. Pipe long command output through a filter or a line cap rather than
-  letting the whole thing land in context.
+- **Already required by CLAUDE.md in this project, not repeated here:** batch independent
+  calls, filter long output, search before reading and read only needed lines, don't
+  re-read after a successful edit.
 - **Delegate to move bulk data out of context, not to offload thinking.** Spawning a
   subagent to search a large codebase and return a distilled answer is worth the
   dispatch cost because it keeps the raw search results out of the main context.
@@ -176,13 +148,10 @@ the failure mode that only shows up in long sessions.
 - **Prune what you're carrying.** Once a search result, a log dump, or an exploratory
   read has served its purpose and its conclusion is recorded, don't keep re-quoting it
   forward into later turns. Reference the conclusion, not the raw evidence.
-- **Isolate exploration in subagents.** A wide search, a noisy build log, a survey of
-  twenty files — run it in a subagent so only the distilled answer enters the main
-  context. This is the highest-leverage single move available for long sessions, and
-  it is a *context* decision, not just a parallelism one.
-- **Give tools the narrowest scope that answers the question.** Scoped queries, line
-  ranges, `head`/filters, and specific globs are not just faster — they keep the
-  attention budget intact for the actual reasoning.
+- **Isolate exploration and use the narrowest tool scope.** Wide searches, noisy logs and
+  multi-file surveys go to a subagent so only the distilled answer enters the main
+  context (a *context* decision, not just parallelism); scoped queries, line ranges and
+  filters protect the attention budget (see CLAUDE.md).
 
 ## 6. Guardrails — where NOT to cut
 
@@ -213,7 +182,7 @@ from a tool call that comes back short of what's needed — and a longer one tha
 it right the first time, prefer the version that avoids the second round-trip. That's
 the actually cheaper option in total tokens.
 
-## 7. Before sending a response, self-check
+## 7. Self-check (when this skill is active)
 
 A response is efficient when every sentence would be missed if deleted. Quick pass
 before finalizing:
