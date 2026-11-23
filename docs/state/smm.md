@@ -25,6 +25,13 @@
 5. Log progress for Бос: sent / skipped (why) / replies that need the manager. Replies with questions → don't invent answers; forward to owner/manager via Бос.
 6. Final report to Бос: totals + who replied.
 
+### Дополнения Маркетолога (23.11, approved plan)
+- Ramp-up: day 1 max ~20–25 sends; check replies/TG warnings; then up to ~40/day. Window 11:00–21:00 Tashkent only.
+- Exclude: open problem/complaint in chat; «не пишите»/blocked; last msg = unanswered client question (answer first via owner).
+- Max 1 message per client, no follow-ups.
+- Daily one-line metrics to Маркетолог: sent / skipped(why) / replies / reviews in group / leads.
+- Before first send: send Маркетолог final owner-approved text + list size; he signs off pace.
+
 ## Состояние
 - 23.11: created. Owner chose to wait for laptop (via Бос #4); plan above ready. Waiting for laptop + owner's text (ru + uz).
 
