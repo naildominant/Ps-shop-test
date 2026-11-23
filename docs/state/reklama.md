@@ -1,6 +1,7 @@
 # База знаний — «Маркетолог #N»
 
 Роль: реклама PS SHOP — объявления OLX и BIR BIR. Создан 22.11 владельцем (первый чат «Маркетолог #1», session_014Ko8ow3Pj9znwGG17DRV1X).
+**23.11 role change (owner via Бос):** «Маркетолог должен заняться стратегией и глобальными задачами». Now: promotion strategy & global tasks (OLX, BIR BIR, etc.). Client communication moved to «СММщик #N» (docs/state/smm.md).
 
 ## Правила (brief from Бос #4, 22.11)
 - All owner contact via Бос (send_message). No publishing ads / account changes without owner OK via Бос.
