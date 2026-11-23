@@ -144,6 +144,22 @@ button { font: inherit; color: inherit; }
 .tree pre { margin: 0; font: 13px/1.55 ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted); }
 footer { color: var(--faint); font-size: 12px; }
 
+/* 3D */
+.view-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--edge); border-radius: 999px; background: rgba(14, 12, 42, .7); justify-self: start; }
+.view-tabs button { border: 0; background: none; padding: 7px 16px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); }
+.view-tabs button[aria-selected="true"] { background: var(--grad); color: #fff; }
+.stage { position: relative; height: min(64vh, 600px); min-height: 380px; border: 2px solid var(--edge-strong); border-radius: 22px; overflow: hidden; background: radial-gradient(circle at 50% 30%, #1B1748, var(--night) 75%); touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.labels { position: absolute; inset: 0; pointer-events: none; }
+.lbl { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); pointer-events: auto; cursor: pointer; border: 1px solid var(--c); background: rgba(7, 6, 26, .82); color: var(--text); border-radius: 999px; padding: 3px 10px 3px 6px; font: 600 12px/1.3 var(--body); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.lbl i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.lbl.is-big { font-size: 13px; border-width: 1.5px; }
+.lbl em { font-style: normal; color: var(--pink); font-size: 11px; }
+.stage-hint { position: absolute; left: 12px; bottom: 10px; font-size: 11.5px; color: var(--muted); background: rgba(7, 6, 26, .7); padding: 4px 10px; border-radius: 999px; pointer-events: none; }
+.stage.is-narrow .lbl { font-size: 10.5px; padding: 2px 7px 2px 5px; gap: 4px; }
+.stage.is-narrow .lbl em { display: none; }
+.stage-reset { position: absolute; right: 10px; bottom: 10px; border: 1px solid var(--edge-strong); background: rgba(7, 6, 26, .8); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+
 @media (max-width: 760px) {
   .floor { grid-template-columns: 1fr 1fr; grid-template-areas: "owner hq" "open open" "market market"; padding: 10px; gap: 10px; }
   .desk { width: 104px; }
@@ -166,6 +182,15 @@ footer { color: var(--faint); font-size: 12px; }
   </header>
 
   <section class="panel" aria-label="Карта офиса">
+    <div class="view-tabs" role="tablist" id="tabs" hidden>
+      <button role="tab" id="tab-3d" aria-selected="true">3D офис</button>
+      <button role="tab" id="tab-2d" aria-selected="false">План этажа</button>
+    </div>
+    <div class="stage" id="stage" hidden>
+      <div class="labels" id="labels"></div>
+      <span class="stage-hint">Крутите и приближайте пальцами</span>
+      <button class="stage-reset" id="reset">Вид сверху</button>
+    </div>
     <div class="floor" id="floor"></div>
     <div class="legend">
       <span><i class="tag auto">авто</i> работает по расписанию</span>
@@ -198,6 +223,8 @@ footer { color: var(--faint); font-size: 12px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="card" id="card" hidden aria-modal="true" role="dialog" aria-labelledby="card-name"></aside>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const DATA = /*DATA*/null;
 
@@ -300,6 +327,219 @@ function renderDay() {
 }
 
 renderFloor(); renderDay();
+
+/* ---------- 3D офис ---------- */
+// Места: x влево-вправо, z вглубь (стена сзади z=-8). Новые сотрудники из документа садятся на свободные места опенспейса.
+const SPOTS = {
+  owner: [[-7.6, -5.4]],
+  hq: [[0, -5.2]],
+  market: [[6.4, -5.2], [9.6, -5.2]],
+  open: [[-8.4, 3.2], [-4.2, 3.2], [0, 3.2], [4.2, 3.2], [8.4, 3.2], [-6.3, 6.4], [-2.1, 6.4], [2.1, 6.4], [6.3, 6.4]],
+};
+function start3D() {
+  if (!window.THREE || !THREE.OrbitControls) return false;
+  const stage = $('#stage'); stage.hidden = false;
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    if (!renderer.getContext()) throw 0;
+  } catch (e) { stage.hidden = true; return false; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
+  const narrow = () => stage.clientWidth < 600;
+  const HOME = new THREE.Vector3(11, 19, 22), HOME_M = new THREE.Vector3(3, 27, 22);
+  const home = () => (narrow() ? HOME_M : HOME);
+  cam.position.copy(home());
+  const controls = new THREE.OrbitControls(cam, renderer.domElement);
+  controls.target.set(0, 0, 0); controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.minDistance = 8; controls.maxDistance = 46; controls.maxPolarAngle = Math.PI * 0.46; controls.screenSpacePanning = false;
+
+  scene.add(new THREE.HemisphereLight(0xcfc8ff, 0x1a1640, 0.85));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(8, 18, 10); scene.add(sun);
+  const glowC = new THREE.PointLight(0xb24dff, 0.6, 30); glowC.position.set(-8, 5, -6); scene.add(glowC);
+  const glowB = new THREE.PointLight(0x2bc8ff, 0.5, 30); glowB.position.set(9, 5, 4); scene.add(glowB);
+
+  const M = (c, o = {}) => new THREE.MeshLambertMaterial({ color: c, ...o });
+  const box = (w, h, d, mat, x, y, z, parent = scene) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); parent.add(m); return m; };
+  const cyl = (rt, rb, h, mat, x, y, z, parent, seg = 14) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat); m.position.set(x, y, z); parent.add(m); return m; };
+
+  // пол, стены, перегородки
+  box(26, 0.3, 18, M(0x141136), 0, -0.15, 0);
+  const grid = new THREE.GridHelper(26, 26, 0x3a3480, 0x25215a); grid.position.y = 0.01; scene.add(grid);
+  const wallM = M(0x1d1950);
+  box(26, 4.2, 0.3, wallM, 0, 2.1, -9);
+  box(0.3, 4.2, 18, wallM, -13, 2.1, 0);
+  const glass = new THREE.MeshLambertMaterial({ color: 0x8f86ff, transparent: true, opacity: 0.18 });
+  const rim = M(0x5d4dff);
+  const pane = (w, x, z, rot) => { const g = new THREE.Group(); box(w, 2.2, 0.08, glass, 0, 1.1, 0, g); box(w, 0.08, 0.12, rim, 0, 2.2, 0, g); g.position.set(x, 0, z); g.rotation.y = rot || 0; scene.add(g); };
+  pane(4.2, -10.6, -1.6); pane(4.2, -5.2, -1.6); pane(7.4, -3.4, -5.3, Math.PI / 2);
+  pane(7.4, 3.4, -5.3, Math.PI / 2); pane(3.6, 5.2, -1.6); pane(3.6, 10.8, -1.6);
+  // ковры зон
+  const rug = (w, d, x, z, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), M(c, { transparent: true, opacity: 0.55 })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.02, z); scene.add(m); };
+  rug(8.6, 6.4, -8.2, -5.3, 0x3a2a12); rug(6, 6.4, 0, -5.3, 0x2a1c52); rug(8.6, 6.4, 8.2, -5.3, 0x3b1240);
+
+  // вывеска на стене
+  const sign = (draw, w, h, x, y, z) => {
+    const c = document.createElement('canvas'); c.width = w * 128; c.height = h * 128;
+    const ctx = c.getContext('2d'); draw(ctx, c.width, c.height);
+    const t = new THREE.CanvasTexture(c); t.anisotropy = 4;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
+    m.position.set(x, y, z); scene.add(m); return t;
+  };
+  const logo = new Image();
+  const logoTex = sign((ctx, W, H) => { ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, W, H); }, 2.2, 2.4, -7.6, 2.5, -8.83);
+  logo.onload = () => { const c = logoTex.image, ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); ctx.drawImage(logo, 0, 0, c.width, c.height); logoTex.needsUpdate = true; dirty = true; };
+  logo.src = document.querySelector('.top img').src;
+  const label = (txt, x, z, w) => sign((ctx, W, H) => {
+    ctx.fillStyle = '#A9A3D4'; ctx.font = `600 ${H * 0.55}px Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt.toUpperCase(), W / 2, H / 2);
+  }, w, 0.8, x, 3.55, z);
+  label('Кабинет Founder', -7.6, -8.83, 6); label('Штаб', 0, -8.83, 3.2); label('Маркетинг', 8.2, -8.83, 5);
+  const big = sign((ctx, W, H) => {
+    const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#C35CFF'); g.addColorStop(0.55, '#6A55FF'); g.addColorStop(1, '#2BC8FF');
+    ctx.fillStyle = g; ctx.font = `800 ${H * 0.62}px Unbounded, Manrope, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('PS SHOP', W / 2, H / 2);
+  }, 6, 1.2, 0, 2.4, -8.83);
+
+  // мебель
+  const deskM = M(0x3a3378), legM = M(0x221d4a), screenM = (c) => new THREE.MeshBasicMaterial({ color: c });
+  function desk(x, z, c, w = 2.2) {
+    const g = new THREE.Group(); g.position.set(x, 0, z);
+    box(w, 0.12, 1.1, deskM, 0, 1.0, 0.75, g);
+    [[-w / 2 + 0.1, 0.3], [w / 2 - 0.1, 0.3], [-w / 2 + 0.1, 1.2], [w / 2 - 0.1, 1.2]].forEach(([lx, lz]) => box(0.08, 1.0, 0.08, legM, lx, 0.5, lz, g));
+    box(0.9, 0.55, 0.06, M(0x0b0a20), 0, 1.45, 1.05, g);
+    box(0.82, 0.47, 0.02, screenM(c), 0, 1.45, 1.02, g);
+    box(0.5, 0.03, 0.2, M(0x55508f), 0, 1.08, 0.55, g);
+    scene.add(g); return g;
+  }
+  function chair(x, z, c, bossy) {
+    const g = new THREE.Group(); g.position.set(x, 0, z);
+    const leather = bossy ? new THREE.MeshPhongMaterial({ color: 0x0b0b0e, shininess: 70, specular: 0x444455 }) : M(0x2a2560);
+    const s = bossy ? 1.35 : 1;
+    cyl(0.05, 0.05, 0.55, legM, 0, 0.28, 0, g, 8);
+    cyl(0.45 * s, 0.45 * s, 0.06, legM, 0, 0.04, 0, g, 5);
+    box(0.95 * s, 0.18, 0.9 * s, leather, 0, 0.62, 0, g);
+    box(0.95 * s, bossy ? 2.3 : 0.9, 0.2, leather, 0, bossy ? 1.8 : 1.15, -0.42 * s, g);
+    if (bossy) {
+      box(0.16, 0.35, 0.85, leather, -0.62, 0.9, 0, g); box(0.16, 0.35, 0.85, leather, 0.62, 0.9, 0, g);
+      box(1.45, 0.55, 0.26, leather, 0, 3.0, -0.58, g);
+    }
+    scene.add(g); return g;
+  }
+  const SKIN = [0xF1C9A5, 0xE0AC85, 0xC68B63, 0xF5D3B6];
+  const HAIR = [0x1b1420, 0x3b2416, 0x0e0e12, 0x5a3a22];
+  const people3d = [];
+  function person(p, x, z, c, i, opt = {}) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.userData.name = p.name;
+    const s = opt.scale || 1; g.scale.setScalar(s);
+    const shirt = M(opt.suit ? 0x111116 : c);
+    const skin = M(SKIN[i % SKIN.length]);
+    // ноги (сидя)
+    box(0.22, 0.2, 0.7, M(0x24204f), -0.15, 0.78, 0.25, g); box(0.22, 0.2, 0.7, M(0x24204f), 0.15, 0.78, 0.25, g);
+    box(0.2, 0.62, 0.2, M(0x24204f), -0.15, 0.4, 0.58, g); box(0.2, 0.62, 0.2, M(0x24204f), 0.15, 0.4, 0.58, g);
+    // туловище и руки
+    cyl(0.3, 0.36, 0.85, shirt, 0, 1.28, 0, g);
+    if (opt.suit) { box(0.12, 0.5, 0.02, M(0xFFCD78), 0, 1.38, 0.33, g); }
+    [-1, 1].forEach((sd) => { const a = cyl(0.09, 0.09, 0.62, shirt, sd * 0.43, 1.32, 0.18, g, 8); a.rotation.x = -0.9; const h = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), skin); h.position.set(sd * 0.43, 1.12, 0.45); g.add(h); });
+    // голова
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 14), skin); head.position.set(0, 1.98, 0); g.add(head);
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.315, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), M(HAIR[i % HAIR.length])); hair.position.copy(head.position); hair.rotation.x = -0.35; g.add(hair);
+    const eyeM = M(0x101018);
+    [-0.1, 0.1].forEach((ex) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), eyeM); e.position.set(ex, 2.0, 0.27); g.add(e); });
+    // кольцо цвета роли на полу
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.88, 32), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.7, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
+    scene.add(g);
+    people3d.push({ g, name: p.name, top: new THREE.Vector3(x, 2.55 * s + 0.1, z) });
+  }
+
+  // рассадка (на узком экране опенспейс в два ряда, чтобы подписи не налезали)
+  if (narrow()) SPOTS.market = [[5.4, -4.6], [10.4, -6.2]];
+  if (narrow()) SPOTS.open = [[-7, 2.4], [0, 2.4], [7, 2.4], [-3.5, 6.4], [3.5, 6.4], [-9, 6.4], [9, 6.4], [-7, 7.8], [7, 7.8]];
+  const used = { owner: 0, hq: 0, market: 0, open: 0 };
+  people.forEach((p, i) => {
+    const st = seat(p.name); let room = st.room; if (!SPOTS[room]) room = 'open';
+    let spot = SPOTS[room][used[room]++];
+    if (!spot) { room = 'open'; spot = SPOTS.open[used.open++] || [0, 7.5]; }
+    const [x, z] = spot; const c = new THREE.Color(st.c).getHex();
+    const isBoss = p.name === 'Founder';
+    if (isBoss) {
+      desk(x, z, 0xFFCD78, 3.4);
+      box(1.2, 0.08, 0.5, M(0xFFCD78), x + 0.9, 1.1, z + 0.9);
+      chair(x, z - 0.15, c, true);
+      person(p, x, z, c, i, { suit: true, scale: 1.08 });
+    } else {
+      desk(x, z, c);
+      chair(x, z - 0.15, c, false);
+      person(p, x, z, c, i);
+    }
+  });
+  // растения для уюта
+  const plant = (x, z) => { cyl(0.28, 0.22, 0.5, M(0x3a3378), x, 0.25, z, scene); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), M(0x2fae7f)); l.position.set(x, 0.85, z); scene.add(l); };
+  plant(-12, -8); plant(-3.9, -8); plant(12, -8); plant(-12, 7.8); plant(12, 7.8);
+  // диван у Founder
+  box(2.4, 0.5, 0.9, new THREE.MeshPhongMaterial({ color: 0x0b0b0e, shininess: 50 }), -11.6, 0.35, -3.6).rotation.y = Math.PI / 2;
+
+  // подписи (HTML над головами)
+  const lbls = $('#labels');
+  people3d.forEach((pp) => {
+    const p = byName[pp.name]; const st = seat(pp.name);
+    const el = document.createElement('button');
+    el.className = 'lbl' + (pp.name === 'Founder' ? ' is-big' : ''); el.style.setProperty('--c', st.c); el.dataset.p = pp.name;
+    el.innerHTML = `<i></i>${esc(pp.name)}${p.ask.length ? ` <em>❓${p.ask.length}</em>` : ''}`;
+    lbls.appendChild(el); pp.el = el;
+  });
+
+  let dirty = true;
+  const v = new THREE.Vector3();
+  function size() {
+    const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false);
+    stage.classList.toggle('is-narrow', w < 600); cam.aspect = w / h; cam.fov = w < 600 ? 52 : 40; cam.updateProjectionMatrix(); dirty = true;
+  }
+  function place() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    people3d.forEach((pp) => {
+      v.copy(pp.top).project(cam);
+      const vis = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+      pp.el.style.display = vis ? '' : 'none';
+      if (vis) pp.el.style.transform = `translate(${(v.x + 1) / 2 * w}px, ${(1 - v.y) / 2 * h}px) translate(-50%, -100%)`;
+    });
+  }
+  controls.addEventListener('change', () => { dirty = true; });
+  window.addEventListener('resize', size);
+  size();
+  (function tick() {
+    controls.update();
+    if (dirty && !stage.hidden) { renderer.render(scene, cam); place(); dirty = false; }
+    requestAnimationFrame(tick);
+  })();
+
+  // тап по человечку
+  const ray = new THREE.Raycaster(); const ptr = new THREE.Vector2(); let down = null;
+  renderer.domElement.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', (e) => {
+    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
+    const r = renderer.domElement.getBoundingClientRect();
+    ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, cam);
+    const hit = ray.intersectObjects(people3d.map((pp) => pp.g), true)[0];
+    if (hit) { let o = hit.object; while (o && !o.userData.name) o = o.parent; if (o) openCard(o.userData.name); }
+  });
+  $('#reset').addEventListener('click', () => { cam.position.copy(home()); controls.target.set(0, 0, 0); controls.update(); dirty = true; });
+
+  // переключатель 3D / план
+  const tabs = $('#tabs'); tabs.hidden = false;
+  const show = (three) => {
+    stage.hidden = !three; $('#floor').hidden = three;
+    $('#tab-3d').setAttribute('aria-selected', String(three)); $('#tab-2d').setAttribute('aria-selected', String(!three));
+    if (three) size();
+  };
+  $('#tab-3d').addEventListener('click', () => show(true));
+  $('#tab-2d').addEventListener('click', () => show(false));
+  show(true);
+  return true;
+}
+try { start3D(); } catch (e) { $('#stage').hidden = true; $('#floor').hidden = false; }
 document.addEventListener('click', (e) => {
   const d = e.target.closest('[data-p]');
   if (d && d.dataset.p) openCard(d.dataset.p);
