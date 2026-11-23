@@ -89,3 +89,4 @@
 - Постик #6 synced evolution/Креатор rules: autopost c9192ff.
 - 23.11 owner: others' evolutions are only Мастер's concern; rule 6б (no replies/mentions/memory notes about others' evolution).
 - Постик synced 6б: autopost 15547c4.
+- 23.11 step 5 → report to Мастер (67a6053); Постик synced 5a08f93.
