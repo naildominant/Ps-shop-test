@@ -20,6 +20,7 @@
 | Мастер | «Мастер #N» | claude.md | CLAUDE.md, правила, скиллы, перенос чатов, расписание; **экономия токенов команды — раз в неделю** (напоминание по понедельникам в моём отчёте), журнал в claude.md |
 | Дизайнер | «Дизайнер #N» | design.md | весь дизайн: картинки постов/новостей/сторис, баннеры, графика сайта. Брендбук designer/brand-kit/ (BRANDBOOK.md, cheatsheet.png). Автообложки игр — у Постика |
 | Маркетолог | «Маркетолог #N» | reklama.md | реклама: объявления OLX и BIR BIR (с 22.11, создан владельцем). Картинки — через Дизайнера |
+| Креатор | «Креатор #N» | kreator.md | собирает идеи всех чатов, предлагает мне улучшения процесса (дешевле, креативнее); ничего не внедряет без «да» владельца через меня (с 23.11) |
 Общее: перед деплоем воркера — живая версия; при поломке пишут мне. Всё это есть в CLAUDE.md (раздел «Команда»).
 Найти чаты: list_sessions mine:true → тег ui:pinned + названия. Номера растут каждый день (перенос — CLAUDE.md).
 
@@ -46,6 +47,7 @@
 - Owner 23.11: 3 Saiter tasks sent to Сайтер #3 (one at a time, report to me): T1 GTA 6 default Ultimate (catalog "+" too); T2 resend all past orders via @psshop_zayavki_bot with bought/not-bought buttons → CRM status; T3 order number offset +1100 (17→1117). T1 DONE live (PR #37). T2 DONE (17 marked; 7 bought, 7 964 000 uzs). T3 DONE live (next order №1118, old №1101–1117). All 3 closed; ask owner for next Saiter task.
 - Master: ponytail skill installed for Saiter+Postik (pinned ebd8654c), trial result in 30.11 token review. Weekly token review 29–30.11.
 - Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
+- 23.11 Master: transfer renamed «эволюция»; no broadcast (team.md only); step 6а: at each evolution every chat (me too) sends 1 idea to Креатор.
 - Owner 23.11 (queued, AFTER Маркетолог OLX/BIR BIR work is done): «нужно что бы ты каждому задачу дал придумать неимоверно хорошую идею как улучшить их работу» → send each staff (Сайтер, Постик, Мастер, Дизайнер, Маркетолог) task: propose 1 outstanding idea to improve their own work (problem, idea, effect for shop, effort); collect → show owner.
 - Owner 23.11: notify him (PushNotification) as soon as Маркетолог sends DONE or NEED OWNER.
 - **Questions to owner (queue):** 1) [answered 23.11: «На декабрь» → sent to Постик] 2) domain psshop.uz registrar (Saiter task 4Б); 3) 2 test news previews in bot — publish/cancel; 4) 2–3 trusted Telegram news channels; 5) Xbox/Switch reply wording; 6) brandbook cheatsheet OK?; 7) Shrek 2 post-check example OK?; 8) OLX claims to confirm (Маркетолог audit 23.11): «Гарантия 5 лет», «без залога», rental PS5 300k/1d 750k/3d 1.1M/5d 1.4M/7d, PS4 150k/375k/550k/700k, «24/7», «с выездом»; 9) BIR BIR link for Маркетолог
