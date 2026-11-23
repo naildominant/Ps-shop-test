@@ -45,3 +45,5 @@
 - 23.11 All flagship photo sets ready: designer/output/olx/{rent,plus,gta,fun}/ + covers. Links sent to owner. Next: owner posts 6 flagships manually + pays promo → tell me package/price; then laptop setup; then read OLX rules + start 3–4 ads/day.
 - OLX RULE (owner 23.11): phone number NOT allowed in description → phone only in «Телефон» field; also removed Telegram handle from texts. CTA line instead: «Звоните — кнопка «Позвонить» в объявлении».
 - 23.11 POSTED: Аренда PS5 (ru). No promo yet — no PS5 available now (all rented); promo rental when consoles free.
+- 23.11 POSTED: PS Plus (ru) + promo «Турбо продажа» 46 500 сум (TOP 30 days, 9 bumps, VIP 7 days).
+- OLX promo prices (23.11, from owner screenshot): cheapest ~7 800; «Быстрая продажа» 17 200 (TOP 7d + 3 bumps); «Турбо продажа» 46 500 (TOP 30d + 9 bumps + VIP 7d). Budget 500k/mo ≈ 10 Turbo.
