@@ -31,3 +31,4 @@
 - Budget (owner): 300 000 сум/month, then raised: «можно больше 500 тысяч» incl. per-post fees + promotion; I choose packages myself for OLX + BIR BIR together. TODO: check OLX.uz paid limits/packages & boost prices vs 120 ads/month goal.
 7. BIR BIR: analyse via owner's laptop (owner 23.11). Continue OLX interview Q8–10, then my strategy.
 9. KPI (owner): inbound calls + Telegram messages. Baseline now: 2–8 calls/day depending on weekday.
+10. Photos: OLX doesn't take video; owner can collect real reviews/chat screenshots. Interview done → next: my strategy.
