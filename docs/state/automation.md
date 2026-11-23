@@ -18,8 +18,8 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 
 | Креатор | Weekly ideas digest → Менеджер | Sun 19:41 | task | trig_01CNd5jJyAgPRi7i5G66jLjR |
 | Сайтер | Weekly CRM/site summary → Менеджер | Mon 11:07 | task | trig_01VL9RteYFwqNXGYLd9UyYzx |
-| Маркетолог | OLX stats snapshot → Менеджер | Mon 10:40 | task | trig_01GLwP93GqTny9rwiDa3cgHJ |
-| Маркетолог | Weekly marketing report | Sun 20:40 | task | trig_01KPXkkE2Lb448Vp7NkeXf17 |
+| Маркетолог | OLX stats snapshot → Менеджер | Mon 10:40 | task | trig_01T9y8fG2KpiTJUSt8JXyYdb |
+| Маркетолог | Weekly marketing report | Sun 20:40 | task | trig_01MV4HuHdbqNWf3HNzvs9K8R |
 | Менеджер | Limit-reset push (one-shot) | 29.11 00:01 | task | trig_0181sEwFa1WczSR36kuGoxLc |
 | Мастер | Weekly token review | Mon (reminder in Менеджер's report) | task | via trig_013WZ2BgBM8CHVSHsjq9tLmQ |
 | Сайтер | Site + worker health (bindings ai) → owner bot on failure | daily 09:13 | action | TODO Сайтер (asked 24.11) |
