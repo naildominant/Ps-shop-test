@@ -35,6 +35,8 @@
 
 - 23.11 Мастер (evolution idea): `scripts/evolve.sh <role>` does git part (log, team.md row, commit/push) in 1 call + prompt template per role → ~3 tool calls instead of ~10, nothing forgotten. Pairs with my «evolve by need» + Мастер's slim CLAUDE.md → one package for weekly digest.
 
+- 23.11 Сайтер (evolution idea): `scripts/deploy_worker.py` guard for all chats — auto-download live worker, refuse deploy if live has code missing locally, keep bindings + verify after. Cause: 23.11 lost `ai` binding + near-overwrite of Постик code. High priority (prevents outages), pairs with Сайтер+Постик worker ideas #1/#2.
+
 ## Предложения (отправлены Менеджеру)
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
