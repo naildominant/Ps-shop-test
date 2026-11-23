@@ -46,3 +46,9 @@
 ## В работе
 
 ## Архив
+
+## OLX (23.11, briefs from Маркетолог via Бос)
+- Covers 1200×900: `designer/output/olx/` (rent/plus/gta × ru/uz), script `scripts/olx_covers.py`.
+- Rent photos from owner's shots: `output/olx/rent/` (`scripts/olx_rent_photos.py <dir>`; sources on branch claude/intelligent-clarke-juo1gm reklama/photos/rent). #4 black+purple pending owner's color confirm (`--pick`). Bg removal (rembg) blocked by env → framed real photos.
+- PS Plus: `output/olx/plus/` (`scripts/olx_plus.py <dir>`): quote cards, blurred screenshots, tariffs. Never use ref_*_DO_NOT_USE.
+- Idea sent to Креатор 23.11: ready-made brand template set run from a one-line brief.
