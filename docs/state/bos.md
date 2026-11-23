@@ -49,6 +49,8 @@
 - Postik done 22.11: ⛔️ Отмена, «только ПК», «Вы имели в виду», 📰 Новость, reschedule 9 posts 10–31 Dec 14:00 (BG3 dup removed), scheduled posts in index, «📅 Другая дата» + calendar with 📌.
 - 23.11 owner: «Передай маркетологу что он проделал шикарную работу! Дальше с ним я сам» → owner works with Маркетолог directly; I only route designer briefs + log milestones. OLX strategy v1 delivered.
 - 23.11 owner: «нам нужен новый сотрудник сммщик он будет отвечать за общение с клиентами»; Маркетолог → strategy/global. Asked Мастер to create «СММщик #1». First task: personal msg (owner's text) to GTA 6 buyers (~50–100, only in owner's TG chats) via laptop: search «GTA» → list → owner OK → send ~10–15/h. Blocker: laptop not connected (owner 23.11: «Ноутбука пока нет» → chose wait for laptop; ping СММщик when connected). Don't take account passwords. СММщик #1 created by Мастер (id in team.md).
+- 23.11 owner: «Я FOUNDER (БОС). А бос станет Менеджером» → owner = Founder (Бос); this chat role renamed «Менеджер #N» (title set «Менеджер #4»); Мастер applying across rules/team.md/structure/office site.
+- 23.11 owner: internal «virtual office» site (owner-only, private Artifact) → Сайтер. Structure doc docs/team-structure.md + PNGs designer/output/team/ sent to owner.
 - 23.11 owner: «Обязанности Маркетолога следить за смм специалистами и самому куррировать Olx» → Маркетолог supervises СММщик + owns OLX; СММщик reports to Маркетолог; owner approvals via me. Мастер updating rules.
 - 23.11 Постик: «🎯 Подбор по жанру» live. Сайтер's T3 deploy dropped worker AI binding (fixed, rule added).
 - 23.11 Master: transfer renamed «эволюция»; no broadcast (team.md only); step 6а: at each evolution every chat (me too) sends 1 idea to Креатор.
