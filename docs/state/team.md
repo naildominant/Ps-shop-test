@@ -8,7 +8,7 @@ On evolution (transfer): new chat updates its own row here in step 1 (same commi
 | Менеджер | Менеджер #4 | session_014Ko8ovmxXetwTVooX1LTHV | Ps-shop-test |
 | Сайтер | Сайтер #5 | (pending) | Ps-shop-test |
 | Постик | Постик #6 | session_014Ko8oy9qymjNriuRe39cCm | ps-shop-autopost (can't read this file → list_sessions) |
-| Мастер | Мастер #4 | session_014Ko8oxKsCXiBjYiakVSKJE | Ps-shop-test |
+| Мастер | Мастер #5 | (pending) | Ps-shop-test |
 | Дизайнер | Дизайнер #4 | session_014Ko8owBDWyasHngmZMRm7v | Ps-shop-test |
 | Маркетолог | Маркетолог #1 | session_014Ko8ow3Pj9znwGG17DRV1X | Ps-shop-test |
 | Креатор | Креатор #1 | session_014Ko8oxwpuxqjD4e1j2BvoK | Ps-shop-test |
