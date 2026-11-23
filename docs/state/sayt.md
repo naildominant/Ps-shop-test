@@ -1,6 +1,6 @@
 # База знаний — чаты «САЙТ PS SHOP»
 
-Обновлено: 23.11.2026 (конец чата «САЙТ PS SHOP #3», дальше «Сайтер #4»). Подробный список задач: `docs/site-tasks.md`.
+Обновлено: 24.11.2026 (эволюция «Сайтер #4» → «Сайтер #5»). Подробный список задач: `docs/site-tasks.md`. Журнал: `docs/state/sayt-log.md`.
 
 ## Команда (утверждено владельцем 22.11)
 - Я — **Сайтер** (чаты «САЙТ PS SHOP #N», название не меняется). Обязанности: сайт psshop.uz и /ru/, заявки (бот @psshop_zayavki_bot, /orderbot, handleOrder, CRM), задачи docs/site-tasks.md по одной, проверка сайта после выкладки, живая версия воркера перед деплоем, обновлять этот файл после каждого шага.
@@ -37,13 +37,6 @@
 - Любит наглядность: карточки, графики, значки, цвет, а не простыни текста. Колонки в таблицах — широкие, текст переносится.
 - Перед выкладкой на сайт показать результат и спросить.
 
-## Сделано (21–22.11)
-- Аватар бота заявок (файл в scratchpad, установлен владельцем), бот переименован в «PSSHOP BOT».
-- Задача 1: кнопки статуса + скидка + номера + колонки/выпадающий список/цвета + выручка в «Сводке», колонки «Заявок» расширены. PR #34.
-- Задача 2: подтверждение клиенту через бота, PR #34.
-- Задача 3: проверка телефона, подсказка под кнопкой заказа про бота. PR #35.
-- Задача 4, часть А: сервис-воркер `/sw.js` (кэш psshop-v1: static/ из памяти + фоновое обновление, страницы из сети с запасной копией через 3 с, catalog.json из сети). PR #36. Повторный заход ~0,05 с.
-
 ## В работе и планы
 - **Задача 4, часть Б (в работе):** перенос на Cloudflare. Владелец сел за ноутбук; ждём: на каком сайте куплен домен psshop.uz, и вход в dash.cloudflare.com. Шаги: владелец добавляет psshop.uz в Cloudflare (Free) → меняет NS у регистратора → Claude настраивает (вариант: проксировать GitHub Pages через Cloudflare с кэшированием или раздавать dist из воркера; нужен доступ к зоне — проверить права ключа после добавления).
 - 5. Убрать ссылку «Отзывы клиентов» рядом с заголовком «Гарантии» (ru и uz).
@@ -60,7 +53,6 @@
 - 23.11 T1 DONE: PR #37 merged after owner OK, live-checked (catalog.json "d", game page uz/ru Ultimate). Card price stays "от 978 000" (owner). Next: T2.
 - 23.11 T2 DONE: owner marked all 17 (5 Купил, 2 Скидка, 3 В обработке, 7 Отказался; paid 7 964 000). Resend route kept for reuse.
 - 23.11 T3 DONE (deployed 21:55Z after owner OK): mapping CRM/visible № = KV n + 1100 (ON(n) in worker). Old 1–17 → 1101–1117 (KV row[10]+html, CRM K2:K18). Next order №1118 (order:seq=17 internal). ON(n)=n+1100 in all visible numbers; internal n stays in KV order:<n>, ordc, callback ord:<n>. CRM «№ заявки» = n+1100. On publish: fetch live worker → apply ON patch → deploy; KV order:1..17 row[10]=n+1100 & html №n→№n+1100; CRM K2:K18 = 1101..1117.
-- (old) 23.11 T2: worker route GET /orderbot/resend?key=<orderbot:secret>&from=&to= (resends order:n to owner with status kb, sets quiet=1 → no client msgs). KV order:1..14 created from CRM. SENT 1–17 at 19:48Z after owner OK; waiting owner taps; check trigger trig_01N5nXnwXTiZPUwUsb1cc3mD (30 min, re-schedule until all 17 marked), then summary to Бос, then T3 (owner OK before publish).
 
 ## Проблемы и открытые вопросы
 - Старые 14 заявок в боте без кнопок — статус только через таблицу.
