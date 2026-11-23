@@ -20,3 +20,9 @@ Specific title (game/offer/service) median 78 vs generic «игры на PS4/PS5
 Same-age (≈2 wks) newest: rental 101 & 56, CoD MW4 57, generic 44 & 11.
 No ads in TOP (no paid promo). PS Plus ad only 25 views.
 Hosts added: production-graphql.eu-sharedservices.olxcdn.com (view counter), app.birbir.uz. BIR BIR: Cloudflare bot check — not bypassing; need screenshots or owner's laptop.
+
+## 2026-11-23 — Маркетолог #1: OLX competitors
+Positions p1 (~50 cards): аренда ps5 41/57 total; аренда playstation 42; ps plus — absent; gta 6 ps5 47; игры на ps5 18; o'yinlar ps5 12; установка игр 5 (15 of 50 slots ours).
+Cause: freshness — 10–15 of top20 refreshed 20–23.11; ours 2–7.11.
+Leaders: rental ID2SygH 37 824 views, ID3cOOU 25 903 (keyword-stuffed titles RU+latin: arenda/prokat/ijara/пракат); discs ID3bdWc 55 337 @50 000. GTA 6 used as rental hook (350 000). PS Plus competitors show prices 99 000–899 000. No paid TOP ads in results.
+Section added to report artifact v2.
