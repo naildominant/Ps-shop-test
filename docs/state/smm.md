@@ -32,6 +32,8 @@
 - Daily one-line metrics to Маркетолог: sent / skipped(why) / replies / reviews in group / leads.
 - Before first send: send Маркетолог final owner-approved text + list size; he signs off pace.
 
+- Scheduled tasks (Мастер #4, 24.11 rule): 3 campaign actions registered as pending — send batches 11:00, replies check 13:00/19:00, metrics 20:45. When laptop connected + campaign approved → tell Мастер, he creates them (don't create myself).
+
 ## Состояние
 - 23.11: created. Owner chose to wait for laptop (via Менеджер #4); plan above ready. Waiting for laptop + owner's text (ru + uz).
 
