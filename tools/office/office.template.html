@@ -578,7 +578,9 @@ function start3D() {
   }).sort((a, b) => (a.z < -1.6) - (b.z < -1.6) || a.x - b.x);
   // порядок: сначала кабинет Founder, потом все остальные по кругу
   stops.sort((a, b) => (b.pp.role === 'boss') - (a.pp.role === 'boss'));
-  let si = 0, path = [], wait = 0, current = null, paused = false;
+  // после круга Менеджер возвращается на своё место в Штабе и стоит там 5 с
+  if (walker) stops.push({ home: true, x: walker.home[0], z: walker.home[1], door: null });
+  let si = 0, path = [], wait = walker ? 4 : 0, current = null, paused = false;
   const bubble = document.createElement('span'); bubble.className = 'lbl'; bubble.style.setProperty('--c', '#C35CFF'); bubble.textContent = '…'; bubble.style.pointerEvents = 'none'; bubble.hidden = true; lbls.appendChild(bubble);
   function planTo(st) {
     const p0 = walker.g.position; path = [];
@@ -593,19 +595,21 @@ function start3D() {
     const g = walker.g; const [L, R] = walker.arms;
     if (paused) { setArm(L, 0); setArm(R, 0); return; }
     if (wait > 0) {
-      wait -= dt; bubble.hidden = false;
+      wait -= dt; bubble.hidden = !current || !!current.home;
       setArm(R, -0.8 + Math.sin(t * 5) * 0.3, 0.1); setArm(L, -0.2);
       walker.legs.forEach((l) => { l.rotation.x = ease(l.rotation.x, 0, 0.2); });
-      if (wait <= 0) { if (current) current.pp.talk = false; bubble.hidden = true; si = (si + 1) % stops.length; planTo(stops[si]); }
+      if (wait <= 0) { if (current && current.pp) current.pp.talk = false; bubble.hidden = true; si = (si + 1) % stops.length; planTo(stops[si]); }
       return;
     }
     if (!path.length) { planTo(stops[si]); }
     const [tx, tz] = path[0]; const dx = tx - g.position.x, dz = tz - g.position.z; const d = Math.hypot(dx, dz);
     const sp = 2.4 * dt;
     if (d < sp) { g.position.x = tx; g.position.z = tz; path.shift();
-      if (!path.length) { current = stops[si]; wait = 2.6; const o = current.pp.g.position;
-        g.rotation.y = Math.atan2(o.x - g.position.x, o.z - g.position.z);
-        current.pp.talk = true; current.pp.faceY = Math.atan2(g.position.x - o.x, g.position.z - o.z); }
+      if (!path.length) { current = stops[si];
+        if (current.home) { wait = 5; g.rotation.y = 0; }
+        else { wait = 2.6; const o = current.pp.g.position;
+          g.rotation.y = Math.atan2(o.x - g.position.x, o.z - g.position.z);
+          current.pp.talk = true; current.pp.faceY = Math.atan2(g.position.x - o.x, g.position.z - o.z); } }
     } else { g.position.x += dx / d * sp; g.position.z += dz / d * sp; g.rotation.y = Math.atan2(dx, dz); }
     const sw = Math.sin(t * 9) * 0.55;
     walker.legs[0].rotation.x = sw; walker.legs[1].rotation.x = -sw; setArm(L, -sw * 0.7, 0, 0.5); setArm(R, sw * 0.7, 0, 0.5);
