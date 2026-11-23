@@ -9,6 +9,7 @@
 
 ## Правила
 - **Адресаты:** перед каждым send_message — `git pull` и id из `docs/state/team.md`, не из памяти. Журнал чатов: `docs/state/design-log.md`.
+- **Роли (владелец, 23.11):** «Я FOUNDER (БОС). А бос станет Менеджером». Owner = Founder; former «Бос» = «Менеджер» (Claude team lead, same session id; see team.md). Everywhere below «Бос» = Менеджер.
 - **Эволюция (23.11, CLAUDE.md шаги 6–6а):** переход в новый чат = «эволюция»; рассылки нет (хватает строки в team.md); старый чат при эволюции шлёт Креатору одну идею «Idea from Дизайнер #N: …» (id Креатора из team.md).
 - **Language (owner, 22.11):** messages to Bos and other agents in English, terse, structured (bullets, paths, ids). Text on images and anything the owner sees stays Russian/Uzbek.
 - **Экономия токенов (Мастер, 22.11):** большие навыки и брендбук не читать целиком — grep нужного раздела; картинки смотреть уменьшенными (~800 px) и только финальные; изучение папок отдавать помощнику (Agent Explore, model haiku). Качество дизайна не урезать.
