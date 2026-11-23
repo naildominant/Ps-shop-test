@@ -1,0 +1,52 @@
+# Ежедневная проверка сайта (24.11, Сайтер). Без Claude, бесплатно.
+# 09:13 Ташкент = 04:13 UTC. Пишет владельцу в Telegram только если что-то сломалось.
+name: site-health
+
+on:
+  schedule:
+    - cron: '13 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_OWNER_CHAT_ID: ${{ secrets.TELEGRAM_OWNER_CHAT_ID }}
+      WORKER: https://psshop.psshop.workers.dev
+    steps:
+      - name: Check site and worker
+        run: |
+          python3 - <<'EOF'
+          import json, os, time, urllib.request, email.utils
+          bad = []
+          def get(url):
+              req = urllib.request.Request(url, headers={'User-Agent': 'psshop-health'})
+              return urllib.request.urlopen(req, timeout=30)
+          for path in ['/', '/ru/', '/catalog/', '/ru/game/grand-theft-auto-vi/']:
+              try:
+                  if get('https://psshop.uz' + path).status != 200: bad.append(f'страница {path} не открывается')
+              except Exception as e:
+                  bad.append(f'страница {path} не открывается ({e})')
+          try:
+              r = get(f'https://psshop.uz/static/catalog.json?t={int(time.time())}')
+              lm = email.utils.parsedate_to_datetime(r.headers['Last-Modified']).timestamp()
+              if time.time() - lm > 2 * 3600: bad.append(f'каталог не обновлялся {int((time.time() - lm) / 3600)} ч')
+              if len(json.loads(r.read())) < 50: bad.append('в каталоге слишком мало игр')
+          except Exception as e:
+              bad.append(f'каталог не читается ({e})')
+          try:
+              h = json.loads(get(os.environ['WORKER'] + '/health').read())
+              for k, name in [('ai', 'ИИ (поиск и голос бота постов)'), ('store', 'хранилище'), ('orderbot', 'бот заявок'), ('sheet', 'CRM-таблица')]:
+                  if not h.get(k): bad.append(f'сервер: не подключено — {name}')
+          except Exception as e:
+              bad.append(f'сервер Cloudflare не отвечает ({e})')
+          print('\n'.join(bad) or 'OK')
+          if bad:
+              tok, chat = os.environ.get('TELEGRAM_BOT_TOKEN'), os.environ.get('TELEGRAM_OWNER_CHAT_ID')
+              if tok and chat:
+                  body = json.dumps({'chat_id': chat, 'text': 'Проверка сайта: ' + '; '.join(bad)}).encode()
+                  urllib.request.urlopen(urllib.request.Request(f'https://api.telegram.org/bot{tok}/sendMessage', data=body, headers={'Content-Type': 'application/json'}), timeout=30)
+              raise SystemExit(1)
+          EOF

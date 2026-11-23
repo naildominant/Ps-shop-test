@@ -457,6 +457,28 @@ async function handleOrderBotResend(req, env) {
   }
   return new Response(out.join('\n'), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }
+// 24.11 (Сайтер): заявки без статуса или «В обработке» дольше суток → одно напоминание владельцу в бот заявок. Тишина, если таких нет.
+async function remindStuckOrders(env) {
+  if (!env.STORE || !env.BOT_TOKEN) return;
+  const keys = [];
+  let cursor;
+  do { const r = await env.STORE.list({ prefix: 'order:', cursor }); keys.push(...r.keys.map((k) => k.name)); cursor = r.list_complete ? null : r.cursor; } while (cursor);
+  const day = 24 * 3600 * 1000, now = Date.now(), stuck = [];
+  for (const k of keys) {
+    const m = /^order:(\d+)$/.exec(k); if (!m) continue;
+    const o = JSON.parse(await env.STORE.get(k) || 'null'); if (!o || !o.row) continue;
+    const t = Number(o.row[0]) || 0;
+    if ((!o.status || o.status === 'wait') && t && now - t > day) stuck.push({ n: Number(m[1]), o, t });
+  }
+  if (!stuck.length) return;
+  stuck.sort((a, b) => a.n - b.n);
+  const lines = stuck.map(({ n, o, t }) => `• №${ON(n)} — ${esc(o.name || '')}, ${money(Number(o.row[5]) || 0)} uzs, ${o.status === 'wait' ? '⏳ в обработке' : '🆕 без статуса'}, ${Math.floor((now - t) / day)} дн.`);
+  await ordTg(env, 'sendMessage', { chat_id: env.CHAT_ID, parse_mode: 'HTML', text: [`⏰ <b>Заявки ждут решения больше суток: ${stuck.length}</b>`, '', ...lines, '', 'Отметьте статус кнопками под заявкой (✅ Купил / ❌ Отказался).'].join('\n') });
+}
+// 24.11 (Сайтер): проверка здоровья для ежедневной проверки GitHub Actions. Только да/нет, без секретов.
+function handleHealth(env) {
+  return json({ ok: true, ai: !!env.AI, store: !!env.STORE, orderbot: !!env.BOT_TOKEN, sheet: !!env.SHEET_URL, time: new Date().toISOString() }, 200, { 'Cache-Control': 'no-store' });
+}
 async function handleOrderBotSetup(req, env) {
   const url = new URL(req.url);
   const secret = env.STORE && await env.STORE.get('orderbot:secret');
@@ -570,6 +592,14 @@ async function handleTgPost(req, env, ctx) {
     await setStatus(env, post, { status: 'deleted' });
     await tg(env, 'editMessageText', { chat_id: chat, message_id: mid, text: '🗑 Пост отменён. Ничего не публикую.' });
     return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Отменено' }, 200);
+  }
+  if (action === 'gp') { // «🎯 Подбор по жанру»: кнопка игры → как «🔎 Найти игру» (переслать пост / сделать у поставщика / нет в наличии)
+    const list = JSON.parse(await env.STORE.get(`tgpost:gp:${idsPart}`) || 'null');
+    const it = list?.[Number(post)];
+    if (!it) return json({ method: 'answerCallbackQuery', callback_query_id: q.id, text: 'Подборка устарела — нажмите «🎯 Подбор по жанру» ещё раз', show_alert: true }, 200);
+    const r = it.id ? await tg(env, 'forwardMessage', { chat_id: chat, from_chat_id: env.TGPOST_CHANNEL || '@psshopgo', message_id: it.id }) : null;
+    if (!r?.ok) await findGames(env, chat, it.t, { sure: true });
+    return json({ method: 'answerCallbackQuery', callback_query_id: q.id }, 200);
   }
   if (action === 'dym' || action === 'dyn') { // «Вы имели в виду …?»
     const d = JSON.parse(await env.STORE.get(`tgpost:dym:${idsPart}`) || 'null');
@@ -699,8 +729,8 @@ async function publishAsOwner(env, q, chat, mid, post) {
 }
 
 // ── Ассистент в боте: меню и задачи агенту (закрытый репозиторий, workflow agent.yml) ──
-const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '⛔️ Отмена', BTN_CANCEL_OLD = '🛑 Отменить всё', BTN_CANCEL_OLD2 = '🛑 Отмена', BTN_FIND = '🔎 Найти игру', BTN_NEWS = '📰 Новость';
-const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_NEW_GAME }], [{ text: BTN_NEWS }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
+const BTN_NEW_GAME = '🆕 Игра от поставщика', BTN_NEW_POST = '✍️ Новый пост', BTN_PRICES = '💰 Цены', BTN_CANCEL = '⛔️ Отмена', BTN_CANCEL_OLD = '🛑 Отменить всё', BTN_CANCEL_OLD2 = '🛑 Отмена', BTN_FIND = '🔎 Найти игру', BTN_NEWS = '📰 Новость', BTN_GENRE = '🎯 Подбор по жанру';
+const MENU = { keyboard: [[{ text: BTN_FIND }], [{ text: BTN_GENRE }], [{ text: BTN_NEW_GAME }], [{ text: BTN_NEWS }], [{ text: BTN_CANCEL }]], resize_keyboard: true, is_persistent: true }; // «Новый пост» и «Цены» убраны (владелец 22.11)
 
 // ── «🔎 Найти игру»: владелец пишет названия → бот пересылает посты из канала (для клиента).
 // Нет в канале → проверка у поставщика: нет → «нет в наличии»; есть → агент готовит объявление (обычное превью).
@@ -965,12 +995,63 @@ async function findGames(env, chat, text, opts = {}) {
     await waitMark(env, chat);
   }
 }
+// ── «🎯 Подбор по жанру» (владелец 23.11): жанр → топ-5 игр этого жанра + похожие. Сначала то, что есть в канале (с ценой),
+// потом известные игры, которых в канале нет (помечаем «есть у поставщика» / «нет в наличии»). Цены только из постов канала.
+function priceOf(t) {
+  const m = [...String(t || '').matchAll(/(PS ?[45])\D{0,12}?(\d{1,3}(?:[ .\u00a0]\d{3})+|\d{5,7})/g)].map((x) => [x[1].replace(' ', ''), x[2].replace(/\D/g, '').replace(/\B(?=(\d{3})+$)/g, ' ')]);
+  if (!m.length) return '';
+  const u = [...new Map(m).entries()];
+  return (new Set(u.map((x) => x[1])).size === 1 ? `${u[0][1]}` : u.map(([k, v]) => `${k} ${v}`).join(' / ')) + ' сум';
+}
+async function genreSelect(env, genre) {
+  const idx = uniqueCatalog(JSON.parse(await env.STORE.get('tgpost:chindex') || '[]'));
+  const sup = JSON.parse(await env.STORE.get('tgpost:supindex') || '[]');
+  const arr = await llmJson(env, `Ты консультант магазина игр PlayStation. Владелец просит подобрать игры по жанру (текст мог быть распознан из голоса).
+Запрос: «${genre.slice(0, 200)}»
+Наш каталог (номер: название):
+${idx.map((x, i) => `${i}: ${x.t}`).join('\n')}
+Задача: "top" — 5 лучших и самых популярных игр ИМЕННО этого жанра; "similar" — 3–5 игр соседних/похожих жанров (например для «шутер» — тактические шутеры, королевская битва). Сначала бери игры из нашего каталога (поле "n" = номер из списка); если подходящих в каталоге мало — добавь известные игры для PS4/PS5 без номера ("n": null, "title" — официальное английское название). Бери игру, только если её основной жанр ТОЧНО подходит (файтинг — не шутер, спорт — не гонки, экшен — не хоррор); лучше меньше, чем неподходящие. Похожие — близкий поджанр того же типа игр (гонки → ралли, внедорожники, аркадные гонки, но НЕ спорт; хоррор → выживание в ужасах, мрачные триллеры, но НЕ обычный экшен; шутер → тактические, королевская битва, шутеры от 3-го лица), а не любые. Игры вне каталога — только реальные отдельные игры (не серии и не «Lego Games»). Внутри списка — самые известные и лучшие первыми. Не выдумывай игры и не бери игры, которых нет на PlayStation. "g" — точный жанр игры по-русски, 1–3 слова, с маленькой буквы.
+Ответ — только JSON-массив: [{"list": "top"|"similar", "n": 12, "title": "...", "g": "..."}]`, 900);
+  const out = [], seen = new Set();
+  for (const x of Array.isArray(arr) ? arr : []) {
+    const c = Number.isInteger(x?.n) && idx[x.n] ? idx[x.n] : null;
+    let t = c ? c.t : String(x?.title || '').trim();
+    if (!t) continue;
+    let id = c ? c.id : 0, p = c?.p || '', s = c?.s || '';
+    if (!c) { const h = matchTitles(t, idx.map((y) => y.t), { strict: true }); if (h.length) ({ id, t, p = '', s = '' } = idx[h[0]]); } // нейросеть не дала номер, а игра в канале есть
+    const k = gnorm(t);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push({ list: x.list === 'similar' ? 'similar' : 'top', t: t.slice(0, 100), g: String(x.g || '').slice(0, 30), id, p, s, sup: !id && sup.some((y) => sameGame(y, [t])) });
+  }
+  const top = out.filter((x) => x.list === 'top').sort((a, b) => !!b.id - !!a.id).slice(0, 5);
+  return [...top, ...out.filter((x) => x.list === 'similar').sort((a, b) => !!b.id - !!a.id).slice(0, 5)];
+}
+async function genrePick(env, chat, genre) {
+  if (!genre.trim()) return say(env, chat, '🎯 Напишите или скажите жанр.');
+  if (!env.AI) return say(env, chat, '⚠️ Подбор сейчас недоступен.');
+  await remember(env, { task: `подбор по жанру: ${genre}`, mode: 'genre' });
+  let list;
+  try { list = await genreSelect(env, genre); } catch (e) { return say(env, chat, '⚠️ Не получилось подобрать, попробуйте ещё раз.'); }
+  if (!list.length) return say(env, chat, 'Не понял жанр 🤔 Скажите по-другому, например «гонки» или «хоррор».');
+  const key = String(Date.now()).slice(-9) + Math.floor(Math.random() * 90 + 10);
+  await env.STORE.put(`tgpost:gp:${key}`, JSON.stringify(list.map(({ t, id }) => ({ t, id }))), { expirationTtl: 60 * 60 * 24 * 3 });
+  const line = (x, i) => `${i + 1}. ${x.t}${x.g ? ` (${x.g})` : ''} — ${x.id ? (x.s ? `🕒 в отложенных на ${fmtTashkent(Date.parse(x.s))}` : `✅ в канале${x.p ? ', ' + x.p : ''}`) : x.sup ? '🛠 нет в канале, есть у поставщика' : '❌ нет в наличии'}`;
+  const top = list.filter((x) => x.list === 'top'), sim = list.filter((x) => x.list === 'similar');
+  const text = [`🎯 ${genre}: топ-5`, ...top.map(line), ...(sim.length ? ['', '🔁 Похожие варианты', ...sim.map((x, i) => line(x, top.length + i))] : []),
+    '', 'Нажмите игру: ✅ — пришлю пост из канала, 🛠 — сделаю объявление.'].join('\n');
+  const btns = list.map((x, i) => [x, i]).filter(([x]) => (x.id && !x.s) || x.sup).map(([x, i]) => [{ text: `${x.id ? '📨' : '🛠'} ${i + 1}. ${x.t}`.slice(0, 60), callback_data: `gp:${key}:${i}` }]);
+  await tg(env, 'sendMessage', { chat_id: chat, text, link_preview_options: { is_disabled: true }, ...(btns.length ? { reply_markup: kb(btns) } : {}) });
+  await remember(env, { result: `подбор «${genre}»: ${list.map((x) => x.t).join(', ')}` });
+}
+// Проверка подбора без Telegram: GET /tgpost/findtest?key=…&genre=шутер
 // Проверка поиска без отправки в Telegram: GET /tgpost/findtest?key=<KV tgpost:testkey>&q=...
 async function handleFindTest(req, env) {
   const u = new URL(req.url);
   const key = await env.STORE.get('tgpost:testkey');
   if (!key || u.searchParams.get('key') !== key) return json({ ok: false }, 403);
   if (u.searchParams.get('intent')) return json({ find: await isFindRequest(env, u.searchParams.get('q') || '') }, 200);
+  if (u.searchParams.get('genre')) { try { return json({ list: await genreSelect(env, u.searchParams.get('genre')) }, 200); } catch (e) { return json({ error: String(e?.stack || e) }, 200); } }
   const items = await resolveGames(env, u.searchParams.get('q') || '');
   const out = [];
   for (const x of items) out.push({ asked: x.asked, official: x.official, ask: doubtful(x.asked, x.official) || undefined, posts: x.posts.map((p) => `${p.id}: ${p.t}${p.s ? ' [отложен ' + p.s + ']' : ''}`), supplier: x.supplier ?? null,
@@ -981,7 +1062,7 @@ async function handleFindTest(req, env) {
 async function handleAgentIndex(req, env) {
   if (!(await agentAuth(req, env))) return json({ ok: false }, 403);
   const b = await req.json().catch(() => ({}));
-  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150), ...(x.s ? { s: String(x.s).slice(0, 40) } : {}) })).filter((x) => x.id && x.t)));
+  if (Array.isArray(b.channel) && b.channel.length) await env.STORE.put('tgpost:chindex', JSON.stringify(b.channel.map((x) => ({ id: Number(x.id), t: String(x.t || '').slice(0, 150), ...(x.s ? { s: String(x.s).slice(0, 40) } : {}), ...(x.p ? { p: String(x.p).slice(0, 60) } : {}) })).filter((x) => x.id && x.t)));
   if (Array.isArray(b.sched)) await env.STORE.put('tgpost:schedtimes', JSON.stringify(b.sched.map((x) => ({ ms: Date.parse(x.d), t: String(x.t || '').slice(0, 80) })).filter((x) => x.ms > Date.now())));
   if (Array.isArray(b.supplier) && b.supplier.length) await env.STORE.put('tgpost:supindex', JSON.stringify(b.supplier.map((t) => String(t).slice(0, 150))));
   return json({ ok: true }, 200);
@@ -999,7 +1080,8 @@ async function indexChannelPost(env, cp) {
   const title = listingTitle(cp.text || cp.caption || '');
   const idx = JSON.parse(await env.STORE.get('tgpost:chindex') || '[]').filter((x) => x.id !== cp.message_id);
   if (!title) { await env.STORE.put('tgpost:chindex', JSON.stringify(idx)); return; }
-  idx.unshift({ id: cp.message_id, t: title });
+  const p = priceOf(cp.text || cp.caption || '');
+  idx.unshift({ id: cp.message_id, t: title, ...(p ? { p } : {}) });
   await env.STORE.put('tgpost:chindex', JSON.stringify(idx));
 }
 const PRICE_TABLE = 'https://claude.ai/artifact/1HecKDQKSoeNU2APs897rk';
@@ -1081,7 +1163,7 @@ async function ownerMessage(env, m) {
     let text = '';
     try { text = await transcribe(env, voice.file_id); } catch (e) { return say(env, chat, `⚠️ Не получилось разобрать голосовое: ${e.message}. Попробуйте ещё раз или напишите текстом.`); }
     if (!text) return say(env, chat, '🎤 Не расслышал 🤔 Скажите ещё раз или напишите текстом.');
-    if (!(await env.STORE.get('tgpost:find'))) await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
+    if (!(await env.STORE.get('tgpost:find')) && !(await env.STORE.get('tgpost:genre'))) await tg(env, 'sendMessage', { chat_id: chat, reply_to_message_id: m.message_id, text: `🎤 ${text}` });
     return ownerMessage(env, { ...m, voice: undefined, audio: undefined, video_note: undefined, text, caption: undefined, entities: [] });
   }
   const t = (m.text || m.caption || '').trim();
@@ -1095,7 +1177,17 @@ async function ownerMessage(env, m) {
     const err = await dispatchAgent(env, { mode: 'news', task: 'Кнопка «📰 Новость»: найди одну свежую интересную новость PlayStation и сделай пост с картинкой (AGENT.md, режим news).' });
     return err ? say(env, chat, `⚠️ Не получилось запустить: ${err}`) : waitMark(env, chat);
   }
+  if (t === BTN_GENRE) {
+    await env.STORE.delete('tgpost:find');
+    await env.STORE.put('tgpost:genre', '1', { expirationTtl: 60 * 30 });
+    return say(env, chat, '🎯 Напишите или скажите жанр. Например: «шутер», «гонки», «хоррор», «на двоих», «как GTA».');
+  }
+  if (t && ![BTN_NEW_GAME, BTN_NEW_POST, BTN_PRICES, BTN_CANCEL, BTN_FIND, BTN_NEWS].includes(t) && !t.startsWith('/') && !photo && !m.forward_origin && await env.STORE.get('tgpost:genre')) {
+    await env.STORE.delete('tgpost:genre');
+    return genrePick(env, chat, t);
+  }
   if (t === BTN_FIND) {
+    await env.STORE.delete('tgpost:genre');
     await env.STORE.put('tgpost:find', '1', { expirationTtl: 60 * 30 });
     return say(env, chat, '🔎 Напишите названия игр — через запятую или каждую с новой строки. Например: «Spider-Man, FC 26, GTA 5».');
   }
@@ -1216,7 +1308,7 @@ async function cancelAll(env, chat) {
       }
     }
   }
-  for (const k of ['tgpost:await', 'tgpost:awaittime', 'tgpost:find', 'tgpost:pendtask', 'tgpost:pending']) await env.STORE.delete(k);
+  for (const k of ['tgpost:await', 'tgpost:awaittime', 'tgpost:find', 'tgpost:genre', 'tgpost:pendtask', 'tgpost:pending']) await env.STORE.delete(k);
   const list = JSON.parse(await env.STORE.get('tgpost:waitmsgs') || '[]');
   await env.STORE.delete('tgpost:waitmsgs');
   for (const [c, id] of list) await tg(env, 'deleteMessage', { chat_id: c, message_id: id });
@@ -1661,6 +1753,7 @@ export default {
     if (req.method === 'POST' && pathname === '/orderbot') return handleOrderBot(req, env, ctx);
     if (req.method === 'GET' && pathname === '/orderbot/setup') return handleOrderBotSetup(req, env);
     if (req.method === 'GET' && pathname === '/orderbot/resend') return handleOrderBotResend(req, env);
+    if (req.method === 'GET' && pathname === '/health') return handleHealth(env);
     if (req.method === 'POST' && pathname === '/order') return handleOrder(req, env, h, ctx);
     if (req.method === 'POST' && pathname === '/event') return handleEvent(req, env, h);
     if (req.method === 'POST' && pathname === '/visit') return handleVisit(req, env, h, ctx);
@@ -1670,6 +1763,7 @@ export default {
   },
   async scheduled(event, env, ctx) {
     if (event.cron === '0 2 * * *') return ctx.waitUntil(sendPriceReport(env)); // 7:00 Ташкент — отчёт по ценам
+    if (event.cron === '23 5 * * *') return ctx.waitUntil(remindStuckOrders(env)); // 10:23 Ташкент — зависшие заявки (Сайтер)
     ctx.waitUntil(runCatalogUpdate(env));
   },
 };
