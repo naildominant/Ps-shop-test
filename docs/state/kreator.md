@@ -21,6 +21,9 @@
 
 - 23.11 evening Founder (via Менеджер): praise for shortlist, «keep collecting», keep tokens lean until 29.11. No decision yet on which ideas to implement.
 
+## Evolution settings
+- Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. Next evolution: create_session model "sonnet", effort "medium".
+
 ## Scheduled tasks
 - trig_01WETm5Vh2HfRtGSjBerRvyp (Креатор #2; old trig_01CNd5jJyAgPRi7i5G66jLjR disabled 24.11) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
