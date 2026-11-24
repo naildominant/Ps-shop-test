@@ -39,6 +39,12 @@
 
 - 23.11 Маркетолог (evolution idea): deliverables owner must save/post (images, banners, post texts) → send as files in chat (SendUserFile), numbered in posting order, not GitHub links (owner: links slow on phone). Caveat: owner reads Менеджер chat → staff passes repo paths to Менеджер, Менеджер sends files. Cheap rule change, quick win.
 
+- 24.11 Постик (evolution idea): KV `deploy:lock` (who/what/time, 15-min TTL) checked before any psshop deploy + marked worker sections per owner chat (`// ── tgpost`, `// ── orderbot`). ~10 lines. MERGE with Сайтер's deploy_worker.py guard → one «safe worker deploy» package (guard script + lock + sections).
+- 24.11 Креатор #1 (own, at evolution): receive-only chats with small context (Креатор, maybe СММщик) skip daily calendar evolution; evolve only on Мастер's «Evolve now» length check (trig_013ovFqEvt6KTagVm63pwc9T already exists). Saves ~10–15 tool calls/day per idle chat. Fits evolution package (my evolve-by-need + Мастер evolve.sh + slim CLAUDE.md).
+
+## Digest plan (next Sunday)
+Packages: A) safe worker deploy (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
+
 ## Предложения (отправлены Менеджеру)
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
