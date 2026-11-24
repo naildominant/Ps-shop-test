@@ -91,3 +91,6 @@ Full previous memory text (before compaction) archived below.
 - Script: reklama/scripts/olx_stats.js (branch claude/intelligent-clarke-juo1gm) → reklama/stats/olx_DATE.csv + _pos.csv. 23.11 evening: 43 ads, 5 273 views; best pos: аренда ps5 17 (was 41), ps plus 11 (was absent), gta 6 ps5 12 (was 47), установка 2.
 
 </details>
+
+## 2026-11-24 — Маркетолог #2
+- Took over from #1 (23.11 evening): transfer check OK, triggers moved (trig_01T9y8fG2KpiTJUSt8JXyYdb, trig_01MV4HuHdbqNWf3HNzvs9K8R), Мастер notified. No owner messages. 24.11 Менеджер: staff on Sonnet/medium. Daily evolution → #3.

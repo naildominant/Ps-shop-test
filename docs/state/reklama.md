@@ -1,6 +1,6 @@
 # База знаний — «Маркетолог #N»
 
-Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2 session_014Ko8ozYq81Hjs6Fxgu1vTL. Details/history: reklama-log.md.
+Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2 session_014Ko8ozYq81Hjs6Fxgu1vTL; #3 (24.11). Details/history: reklama-log.md.
 
 ## Role (owner decisions 23.11)
 - Promotion strategy & global tasks: OLX (I personally own), BIR BIR, other platforms.
@@ -35,6 +35,9 @@ Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2
 - Stats 23.11: 43 ads, 5 273 views; best pos аренда ps5 17 (was 41), ps plus 11 (absent), gta 6 ps5 12 (47), установка 2 (5). Script reklama/scripts/olx_stats.js → reklama/stats/.
 - Next: owner laptop → I post 3–4/day + read OLX.uz rules first; BIR BIR audit via laptop; СММщик task 1 (GTA 6 buyers message) waits laptop — I approved plan with: day1 ≤20–25 msgs, 11–21h, exclusions, 1 msg/client, daily metrics to me, my sign-off before first send.
 - Cancelled by owner 23.11: follow-up/review messages task (don't revive).
+
+## Rules from Менеджер
+- 24.11 owner: all staff model Sonnet, effort medium — create_session model "sonnet", effort "medium" at each evolution.
 
 ## Scheduled tasks (mine)
 - OLX stats Mon 10:40 Tashkent; weekly marketing report Sun 20:40 (#2 ids: trig_01T9y8fG2KpiTJUSt8JXyYdb stats, trig_01MV4HuHdbqNWf3HNzvs9K8R report; old #1 ones disabled; move at each evolution). Pending/blocked: daily posting, СММщик check-in 21:30, BIR BIR stats.
