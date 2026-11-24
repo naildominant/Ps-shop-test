@@ -1,6 +1,6 @@
 # База знаний — «Маркетолог #N»
 
-Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2 session_014Ko8ozYq81Hjs6Fxgu1vTL; #3 (24.11). Details/history: reklama-log.md.
+Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2 session_014Ko8ozYq81Hjs6Fxgu1vTL; #3 (24.11) session_014Ko8ox3H4V8oeNnpp42Lm6. Details/history: reklama-log.md.
 
 ## Role (owner decisions 23.11)
 - Promotion strategy & global tasks: OLX (I personally own), BIR BIR, other platforms.
@@ -40,4 +40,4 @@ Created 22.11 by owner (Founder). Chats: #1 session_014Ko8ow3Pj9znwGG17DRV1X; #2
 - 24.11 owner: all staff model Sonnet, effort medium — create_session model "sonnet", effort "medium" at each evolution.
 
 ## Scheduled tasks (mine)
-- OLX stats Mon 10:40 Tashkent; weekly marketing report Sun 20:40 (#2 ids: trig_01T9y8fG2KpiTJUSt8JXyYdb stats, trig_01MV4HuHdbqNWf3HNzvs9K8R report; old #1 ones disabled; move at each evolution). Pending/blocked: daily posting, СММщик check-in 21:30, BIR BIR stats.
+- OLX stats Mon 10:40 Tashkent; weekly marketing report Sun 20:40 (#3 ids, created 24.11: trig_01YbnmtgnVi1JsTvDudSUvoi stats, trig_018xKbkm19e2LMAkvmyxxb8M report; #2 ones trig_01T9y8fG2KpiTJUSt8JXyYdb, trig_01MV4HuHdbqNWf3HNzvs9K8R to be disabled after transfer check; move at each evolution). Pending/blocked: daily posting, СММщик check-in 21:30, BIR BIR stats.
