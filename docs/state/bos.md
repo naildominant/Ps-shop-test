@@ -8,6 +8,8 @@
 - Задачи без адресата распределяю сам. Явные ошибки сотрудников могу поручить исправить сам; решения о внешнем виде, текстах для клиентов, деньгах — спрашиваю владельца.
 - **Язык (владелец 22.11):** со всеми сотрудниками — по-английски, коротко и структурно (пункты, пути, id); с владельцем — по-русски простыми словами, как раньше. Тексты для клиентов и владельца (бот, посты, сайт) не меняются. Новые записи в памяти можно по-английски.
 - Owner 22.11: «нет-нет проверяй их работу» — while tasks are open, check staff every ~10 min via send_later + get_session (cheap), don't just wait for reports.
+- **24.11 owner: «Нужно использовать модель sunnet средний всегда запомни это»** → all staff chats (me too) = Sonnet, effort medium. Evolution create_session: model "sonnet", effort "medium". Sent to all + Мастер (updates CLAUDE.md, applies to existing chats).
+- 23.11 owner approved early evolution (>300k context; Мастер trig_01Pk5i1tTttcbTmvUHNhwLjG checks every 2h).
 - Вопросы владельцу — по одному, текстом. Очередь — в «Задачи в работе».
 
 - **22.11 owner: «Разрешаю всем сотрудникам делать все движения»** — routine work without asking; still no channel publishing without owner button. add_repo allowed (Master: .claude/settings.json).
@@ -62,6 +64,7 @@
 - Triggers of Бос: daily report trig_013WZ2BgBM8CHVSHsjq9tLmQ (18:37, bound to Бос #4) — new Бос must recreate on itself (same prompt via get_trigger) and disable old.
 
 ## Журнал
+- 24.11 evolution → Менеджер #5 (Sonnet medium). Open at handover: (a) Сайтер #5 auto-checks ready on branch sayt/auto-checks (9675445): daily 09:13 site health + 10:23 stuck-orders reminder; BLOCKED — owner must write «выкладывай проверки» in Сайтер's chat; I asked owner «Включаем?» — no answer yet. (b) Owner choice on Креатор top-3 ideas pending. (c) СММщик task waits laptop. (d) 23.11 evening: praise + team results sent to all. (e) Мастер collects recurring actions → scheduled tasks (mine: only 18:37 report). New staff: Аналитик #1 (team.md).
 - 23.11 18:37 report #2: Сайтер T1–T3 done + office site (3D in progress); Постик genre picker live; Маркетолог OLX visuals done, owner posting; Дизайнер 5 OLX briefs + structure v2; Мастер roles rename, СММщик & Креатор created; СММщик blocked (laptop); Креатор waits owner choice on 5 ideas. Limit: weekly warning, reset 29.11 00:00 (push scheduled).
 - 22.11 ~20:00 final: Postik memory moved to ps-shop-autopost (Postik #N+1 source_url=ps-shop-autopost; Master syncs CLAUDE.md to him + weekly diff). Supervised transfer OK → «Постик #5» session_014Ko8p19yU3DL5iozNYAn3t (pinned, verified). Reschedule: 9 posts 10–31 Dec 14:00, BG3 dup removed; scheduled posts counted in index.
 - 22.11 18:37 daily report #1 (trigger has session tools ✔): Saiter blocked on domain registrar; Postik — news button done, reschedule plan pending (more Nov posts); Designer idle after brandbook; Master idle. Weekly limit allowed_warning, reset 29.11 00:00.

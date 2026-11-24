@@ -7,3 +7,6 @@
 - Postik: many bot features (see bos.md). Token alert $19 → early transfer; Постик #4 failed (no private repo) → fired/archived; Master moved Postik memory to ps-shop-autopost, verified transfer → Постик #5.
 - Owner granted broad permission («разрешаю всем сотрудникам делать все движения»), but classifier blocks permission/settings changes via relay — owner must do those directly.
 - ponytail skill reviewed by Master, trial for Saiter+Postik.
+
+## 2026-11-24 — Менеджер #4
+- 23.11: Сайтер T1–T3, OLX package, office v4, workout page, СММщик/Креатор created, praise sent to all. 24.11 owner: all staff Sonnet medium. Evolved → #5.
