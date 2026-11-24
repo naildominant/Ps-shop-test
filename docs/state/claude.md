@@ -8,6 +8,8 @@
 - Недельная проверка лимитов: понедельник (напоминание в отчёте Менеджера 18:37). Следующая 30.11 + вердикт ponytail (Сайтер/Постик, установлен 22.11: Ps-shop-test 0292b78, autopost 0ffd2c1; сравнить стоимость задач с 22–29.11, оставить или убрать).
 - Лимит 7 дней: allowed_warning до 29.11 00:00 TAS — экономить.
 
+- Порог досрочной эволюции: 200k (owner 24.11 «Да»; was 300k). Owner asked for auto /compact at 200k — impossible (slash commands only typed by human), replaced by threshold.
+
 ## Открыто
 - Владелец не ответил: удалить 3 выключенные задачи (trig_01LABPq3uqbEGdX1uwxTGahB старый отчёт Боса, trig_013eQidhNZQAXPemVctzKAFE, trig_01FG8Wqc5fTb7i7mVp94iWKw). Без «да» не удалять.
 - Сайтер: автопроверки на ветке sayt/auto-checks (9675445: site-health.yml 09:13, worker /health + cron 10:23 зависшие заявки) ждут слов владельца «выкладывай проверки» в чате Сайтера (владельцу сказано 24.11). После выкладки — отметить в automation.md.
@@ -43,3 +45,4 @@
 - 24.11 02:13 ctx check: none (max Дизайнер #4 285k, Постик #6 264k — near limit). Tasks audit OK.
 - 24.11 08:13 ctx check: none (all ≤300k; Дизайнер #4 285k, Постик #6 264k unchanged since 02:13). Tasks audit OK.
 - 24.11 10:13 ctx check: none (all ≤300k, max Дизайнер #4 285k). Tasks audit OK (7 enabled, all on current chats).
+- 24.11 owner: threshold 300k→200k; trigger prompt + CLAUDE.md updated, sent to Постик.
