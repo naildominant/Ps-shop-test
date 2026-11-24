@@ -22,7 +22,7 @@
 - 23.11 evening Founder (via Менеджер): praise for shortlist, «keep collecting», keep tokens lean until 29.11. No decision yet on which ideas to implement.
 
 ## Scheduled tasks
-- trig_01CNd5jJyAgPRi7i5G66jLjR — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
+- trig_01WETm5Vh2HfRtGSjBerRvyp (Креатор #2; old trig_01CNd5jJyAgPRi7i5G66jLjR disabled 24.11) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
 ## Входящие идеи
 - 23.11 Креатор (own): problem: daily evolution of every chat costs ~10–15 tool calls each (memory, create_session, check, pin, triggers) even for quiet chats / idea: evolve by need — only if chat is from an earlier day AND had real work or long context; idle chats stay / effect: fewer tokens, less risk of lost tasks in transfer / effort: 1 rule edit by Мастер.
