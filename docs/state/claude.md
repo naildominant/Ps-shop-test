@@ -14,6 +14,9 @@
 
 - Model (owner 24.11 via Менеджер, «Нужно использовать модель sunnet средний всегда запомни это»): all team chats + helpers = claude-sonnet-5-5, effort medium. Existing chats can only switch via evolution (create_session model+effort).
 
+- Аналитик #1 (session_014Ko8ovwgBcCT1ARmm18GiH): 9th employee (owner 24.11), empty chat, role unknown — asked owner «Чем будет заниматься Аналитик?», no answer yet. When answered: CLAUDE.md role + memory file + first task; evolve it to Sonnet.
+- In progress 24.11 12:10: Sonnet switch — Evolve sent to Сайтер #5, Дизайнер #5, Креатор #2, Постик #7 (+rule sync, await hash); Менеджер/Маркетолог/СММщик evolving on their own. Verify each «is now» (team.md, tasks, archive old). Report «done» to Менеджер (id from team.md) when all on Sonnet.
+
 ## Открыто
 - Владелец не ответил: удалить 3 выключенные задачи (trig_01LABPq3uqbEGdX1uwxTGahB старый отчёт Боса, trig_013eQidhNZQAXPemVctzKAFE, trig_01FG8Wqc5fTb7i7mVp94iWKw). Без «да» не удалять.
 - Сайтер: автопроверки на ветке sayt/auto-checks (9675445: site-health.yml 09:13, worker /health + cron 10:23 зависшие заявки) ждут слов владельца «выкладывай проверки» в чате Сайтера (владельцу сказано 24.11). После выкладки — отметить в automation.md.
