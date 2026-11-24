@@ -34,7 +34,12 @@
 
 - Scheduled tasks (Мастер #4, 24.11 rule): 3 campaign actions registered as pending — send batches 11:00, replies check 13:00/19:00, metrics 20:45. When laptop connected + campaign approved → tell Мастер, he creates them (don't create myself).
 
+- Model rule (owner 24.11 via Менеджер): all staff Sonnet, effort medium; evolution create_session model "sonnet", effort "medium".
+- Team names 23.11: owner = Founder; «Бос» chat renamed «Менеджер» (memory bos.md). Orders/payment — owner @Gaynullin_Nail.
+
 ## Состояние
 - 23.11: created. Owner chose to wait for laptop (via Менеджер #4); plan above ready. Waiting for laptop + owner's text (ru + uz).
+
+- 24.11: evolved СММщик #1 → #2. Still blocked: laptop + owner text. No client messages sent.
 
 ## Архив
