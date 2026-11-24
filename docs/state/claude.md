@@ -53,3 +53,4 @@
 - 24.11 10:22 Дизайнер #5 session_014Ko8ozbvtUMxSSaV2NZEc2 verified in team.md (no Claude tasks).
 - 24.11 10:23 Креатор #2 session_014Ko8oygTE3n5jDMAzvFPnY verified: team.md OK, digest task trig_01WETm5Vh2HfRtGSjBerRvyp on new chat (old disabled).
 - 24.11 10:30 owner: auto-archive old chats. Archived 16 old chats (Креатор #1, Постик #3/#5/#6, Дизайнер #3/#4, Мастер #3/#4, Маркетолог #1, Сайтер #3/#4, Бос #3, НАСТРОЙКА CLAUDE #2, БОТ ПОСТИК, БОТ ПОСТИК #2, САЙТ PS SHOP #2). CLAUDE.md steps 4/7 + ctx-check task updated.
+- 24.11 10:26 Постик synced archive rule: autopost 56fbe22.
