@@ -41,3 +41,4 @@
 - 24.11 00:16 Сайтер #5 verified: team.md row OK, task trig_01VL9RteYFwqNXGYLd9UyYzx bound+enabled (old disabled). Waiting: Маркетолог #2.
 - 24.11 00:17 Маркетолог #2 verified: team.md row OK, tasks trig_01T9y8fG2KpiTJUSt8JXyYdb + trig_01MV4HuHdbqNWf3HNzvs9K8R bound+enabled (old disabled). Audit: all 7 enabled tasks on current chats. Постик: CLAUDE.md id change not present there (OK).
 - 24.11 02:13 ctx check: none (max Дизайнер #4 285k, Постик #6 264k — near limit). Tasks audit OK.
+- 24.11 08:13 ctx check: none (all ≤300k; Дизайнер #4 285k, Постик #6 264k unchanged since 02:13). Tasks audit OK.
