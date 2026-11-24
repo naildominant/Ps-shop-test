@@ -49,3 +49,4 @@
 - 24.11 10:20 threshold 200k applied: «Evolve now» → Дизайнер #4 (285k), Постик #6 (264k, + rule sync).
 - 24.11 10:21 Постик #7 session_014Ko8oyXcv4fNLARtaRLEwL (rule 2e122cf in autopost); team.md updated. Постик has no Claude tasks (Actions only).
 - 24.11 10:22 Дизайнер #5 session_014Ko8ozbvtUMxSSaV2NZEc2 verified in team.md (no Claude tasks).
+- 24.11 10:23 Креатор #2 session_014Ko8oygTE3n5jDMAzvFPnY verified: team.md OK, digest task trig_01WETm5Vh2HfRtGSjBerRvyp on new chat (old disabled).
