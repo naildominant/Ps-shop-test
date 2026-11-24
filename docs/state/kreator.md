@@ -46,6 +46,7 @@
 - 24.11 Креатор #1 (own, at evolution): receive-only chats with small context (Креатор, maybe СММщик) skip daily calendar evolution; evolve only on Мастер's «Evolve now» length check (trig_013ovFqEvt6KTagVm63pwc9T already exists). Saves ~10–15 tool calls/day per idle chat. Fits evolution package (my evolve-by-need + Мастер evolve.sh + slim CLAUDE.md).
 - 24.11 Дизайнер (evolution idea): owner source photos/screenshots → one fixed folder on main (e.g. reklama/inbox/<topic>/) + 3-line brief.md; Дизайнер regenerates from scripts in 1 call. Fewer tokens, faster OLX turnaround. Fits package C (owner↔team file flow: files in, files out).
 - 24.11 Менеджер #4: every new chat on Sonnet medium; keep chats <~300k context (one oversized coordinator chat cost more than several staff chats). Sonnet part already owner rule 24.11; open part = context cap → overlaps Мастер length check (200k evolve). Package A (token cost).
+- 24.11 СММщик #1: owner-approved client message templates (ru+uz: thank-you, review request, new-game reminder) once in smm.md with {имя} slots → campaigns need only list approval, no new text round via Менеджер. Saves owner time + tokens. Package C (fewer owner rounds).
 
 ## Digest plan (next Sunday)
 Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
