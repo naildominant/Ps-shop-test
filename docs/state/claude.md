@@ -47,3 +47,4 @@
 - 24.11 10:13 ctx check: none (all ≤300k, max Дизайнер #4 285k). Tasks audit OK (7 enabled, all on current chats).
 - 24.11 owner: threshold 300k→200k; trigger prompt + CLAUDE.md updated, sent to Постик.
 - 24.11 10:20 threshold 200k applied: «Evolve now» → Дизайнер #4 (285k), Постик #6 (264k, + rule sync).
+- 24.11 10:21 Постик #7 session_014Ko8oyXcv4fNLARtaRLEwL (rule 2e122cf in autopost); team.md updated. Постик has no Claude tasks (Actions only).
