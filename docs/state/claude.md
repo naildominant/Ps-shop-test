@@ -12,6 +12,8 @@
 
 - Old chats: archive after evolution (owner 24.11). Мастер archives on «is now #N+1» after verify + 2h sweep (team-role titles not in team.md, not working). Unarchive possible (unarchive_session).
 
+- Model (owner 24.11 via Менеджер, «Нужно использовать модель sunnet средний всегда запомни это»): all team chats + helpers = claude-sonnet-5-5, effort medium. Existing chats can only switch via evolution (create_session model+effort).
+
 ## Открыто
 - Владелец не ответил: удалить 3 выключенные задачи (trig_01LABPq3uqbEGdX1uwxTGahB старый отчёт Боса, trig_013eQidhNZQAXPemVctzKAFE, trig_01FG8Wqc5fTb7i7mVp94iWKw). Без «да» не удалять.
 - Сайтер: автопроверки на ветке sayt/auto-checks (9675445: site-health.yml 09:13, worker /health + cron 10:23 зависшие заявки) ждут слов владельца «выкладывай проверки» в чате Сайтера (владельцу сказано 24.11). После выкладки — отметить в automation.md.
@@ -56,3 +58,4 @@
 - 24.11 10:26 Постик synced archive rule: autopost 56fbe22.
 - 24.11 10:35 owner «Архивируй все чаты кроме закрепа»: archived 6 non-team chats (GTA 6 цены обновление, Привет, MacBook закрытая крышка, Оптимизация сайта, Оценка умений, САЙТ PSSHOP). Left: 8 team chats + «Аналитик #1» (session_014Ko8ovwgBcCT1ARmm18GiH, not in team.md) — asked owner. Pinned tag not readable via API.
 - 24.11 10:37 owner: «Аналитик #1» is the 9th employee → added to team.md (protects from auto-archive). Role + memory file not defined yet — asked owner.
+- 24.11 12:06 Sonnet-medium rule: CLAUDE.md step 2 + Постик + helpers updated; «Evolve now (switch to Sonnet)» sent to all team chats; Мастер evolves too.
