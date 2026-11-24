@@ -34,7 +34,7 @@
 **Экономия у меня (совет Мастера 22.11):** состояние чатов — get_session / list_sessions (post_turn_summary), list_events только с kinds и малым limit, большой ответ разбирать скриптом; команды пачкой; bos.md держать коротким (~8 тыс. байт), старое — в Архив.
 
 ## Ежедневный отчёт владельцу
-- Задача trig_013WZ2BgBM8CHVSHsjq9tLmQ, каждый день **18:37 Ташкент**, привязана к «Бос #4» (session_014Ko8ovmxXetwTVooX1LTHV). Старая trig_01LABPq3uqbEGdX1uwxTGahB (Бос #3) выключена 22.11.
+- Задача **trig_01RVgdWbXizEaLWDZRnqWoEW** (с 24.11), каждый день **18:37 Ташкент**, привязана к «Менеджер #5» (session_014Ko8oyrJZ8oSssFiLbjhtw). Старая trig_013WZ2BgBM8CHVSHsjq9tLmQ (#4) — #4 выключает; trig_01Mk89KFzdQYEAn2fZH9TNMC — ошибочная (fresh-session), выключена, не удалена. Старая trig_01LABPq3uqbEGdX1uwxTGahB (Бос #3) выключена 22.11.
 - При переносе «Бос #N» → «#N+1»: новый чат создаёт такую же задачу на себя (create_trigger без persistent_session_id, тот же текст — взять из get_trigger), старую выключает (update_trigger enabled=false; удалять нельзя).
 - Запуск по расписанию — не сообщение владельца, переносить чат по нему не нужно.
 
