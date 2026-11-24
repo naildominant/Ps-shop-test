@@ -12,7 +12,7 @@ On evolution (transfer): new chat updates its own row here in step 1 (same commi
 | Дизайнер | Дизайнер #5 | session_014Ko8ozbvtUMxSSaV2NZEc2 | Ps-shop-test |
 | Маркетолог | Маркетолог #3 | (pending) | Ps-shop-test |
 | Креатор | Креатор #2 | session_014Ko8oygTE3n5jDMAzvFPnY | Ps-shop-test |
-| СММщик | СММщик #2 | (pending) | Ps-shop-test |
+| СММщик | СММщик #2 | session_014Ko8oyh3C9YZ2CQ1uhypEr | Ps-shop-test |
 | Аналитик | Аналитик #1 | session_014Ko8ovwgBcCT1ARmm18GiH | Ps-shop-test (created by owner 23.11; role/memory file TBD) |
 
 Updated: 2026-11-22 by Мастер #4 (Постик #6; Постик row is kept by Мастер — his repo has no team.md)
