@@ -12,6 +12,9 @@
 
 - **23.11 rename (owner):** owner = «Founder» (он же раньше «Бос» в его словах), chat «Бос #N» → «Менеджер #N» (same session id, team.md row «Менеджер»). Orders/payment = owner himself (@Gaynullin_Nail), no separate human manager. Below, old «Бос» = today's «Менеджер». Reports/questions → Менеджер (id from team.md).
 
+- **24.11 owner rule (via Мастер):** all staff use model Sonnet, effort medium. Evolution: create_session model "sonnet", effort "medium".
+- Weekly CRM trigger (Сайтер #5): trig_01VL9RteYFwqNXGYLd9UyYzx.
+
 ## Как всё устроено
 - Сайт psshop.uz — статический, собирается `scripts/build.py` в `dist/`, публикуется GitHub Pages workflow `update-catalog.yml` (каждые 10 мин из воркера, раз в час, при пуше в main). Код сайта: `src/static/app.js`, `styles.css`, `sw.js`.
 - Правки сайта: ветка сессии → PR → merge в main (владелец подтверждает «выкладываю?» / «+») → ветку сбросить на origin/main. Сайт обновляется через ~1 мин.
