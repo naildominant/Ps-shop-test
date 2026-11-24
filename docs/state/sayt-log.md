@@ -31,3 +31,6 @@ _Новые записи сверху._
 - Задача 4, часть А: сервис-воркер `/sw.js` (кэш psshop-v1: static/ из памяти + фоновое обновление, страницы из сети с запасной копией через 3 с, catalog.json из сети). PR #36. Повторный заход ~0,05 с.
 
 - (old) 23.11 T2: worker route GET /orderbot/resend?key=<orderbot:secret>&from=&to= (resends order:n to owner with status kb, sets quiet=1 → no client msgs). KV order:1..14 created from CRM. SENT 1–17 at 19:48Z after owner OK; waiting owner taps; check trigger trig_01N5nXnwXTiZPUwUsb1cc3mD (30 min, re-schedule until all 17 marked), then summary to Бос, then T3 (owner OK before publish).
+
+## 2026-11-24 — Сайтер #5
+- Short chat: took over from #4, created weekly CRM trigger trig_01VL9RteYFwqNXGYLd9UyYzx, recorded Sonnet/medium rule. Evolved to #6 on Мастер's «Evolve now» (Sonnet rule). No site/worker changes. Auto-checks (sayt/auto-checks, 9675445) still wait owner's «выкладывай проверки».
