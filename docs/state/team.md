@@ -6,7 +6,7 @@ On evolution (transfer): new chat updates its own row here in step 1 (same commi
 | Role | Chat | session_id | Repo |
 |---|---|---|---|
 | Менеджер | Менеджер #5 | (pending) | Ps-shop-test |
-| Сайтер | Сайтер #6 | (pending) | Ps-shop-test |
+| Сайтер | Сайтер #6 | session_014Ko8oy4HcFSSpwwCpvfhCG | Ps-shop-test |
 | Постик | Постик #7 | session_014Ko8oyXcv4fNLARtaRLEwL | ps-shop-autopost (can't read this file → list_sessions) |
 | Мастер | Мастер #6 | (pending) | Ps-shop-test |
 | Дизайнер | Дизайнер #5 | session_014Ko8ozbvtUMxSSaV2NZEc2 | Ps-shop-test |
