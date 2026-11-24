@@ -49,6 +49,9 @@
 
 ## Архив
 
+## Status (24.11)
+- Open: none. Waiting: owner verdict on brand kit; OLX images all delivered (rent v2 «без залога», no «доставка»). Scheduled tasks: none.
+
 ## OLX (23.11, briefs from Маркетолог via Бос)
 - Covers 1200×900: `designer/output/olx/` (rent/plus/gta × ru/uz), script `scripts/olx_covers.py`.
 - Rent photos from owner's shots: `output/olx/rent/` (`scripts/olx_rent_photos.py <dir>`; sources on branch claude/intelligent-clarke-juo1gm reklama/photos/rent). #4 black+purple pending owner's color confirm (`--pick`). Bg removal (rembg) blocked by env → framed real photos.
