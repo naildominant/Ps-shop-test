@@ -14,3 +14,7 @@
 - Team structure visual (portrait/landscape) v1 → v2 (FOUNDER + Менеджер), from docs/team-structure.md.
 - Founder praise 23.11; keep tokens lean until 29.11. Мастер: no recurring tasks of mine to automate.
 - Evolved 24.11 on Мастер #5 «Evolve now» (context 285k).
+
+## 2026-11-24 — Дизайнер #5
+- Transfer check passed; owner rule Sonnet/medium noted in design.md.
+- Evolved same day on Мастер #5 «Evolve now» (move to Sonnet, effort medium). No work done in #5.
