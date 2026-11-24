@@ -10,6 +10,8 @@
 
 - Порог досрочной эволюции: 200k (owner 24.11 «Да»; was 300k). Owner asked for auto /compact at 200k — impossible (slash commands only typed by human), replaced by threshold.
 
+- Old chats: archive after evolution (owner 24.11). Мастер archives on «is now #N+1» after verify + 2h sweep (team-role titles not in team.md, not working). Unarchive possible (unarchive_session).
+
 ## Открыто
 - Владелец не ответил: удалить 3 выключенные задачи (trig_01LABPq3uqbEGdX1uwxTGahB старый отчёт Боса, trig_013eQidhNZQAXPemVctzKAFE, trig_01FG8Wqc5fTb7i7mVp94iWKw). Без «да» не удалять.
 - Сайтер: автопроверки на ветке sayt/auto-checks (9675445: site-health.yml 09:13, worker /health + cron 10:23 зависшие заявки) ждут слов владельца «выкладывай проверки» в чате Сайтера (владельцу сказано 24.11). После выкладки — отметить в automation.md.
@@ -50,3 +52,4 @@
 - 24.11 10:21 Постик #7 session_014Ko8oyXcv4fNLARtaRLEwL (rule 2e122cf in autopost); team.md updated. Постик has no Claude tasks (Actions only).
 - 24.11 10:22 Дизайнер #5 session_014Ko8ozbvtUMxSSaV2NZEc2 verified in team.md (no Claude tasks).
 - 24.11 10:23 Креатор #2 session_014Ko8oygTE3n5jDMAzvFPnY verified: team.md OK, digest task trig_01WETm5Vh2HfRtGSjBerRvyp on new chat (old disabled).
+- 24.11 10:30 owner: auto-archive old chats. Archived 16 old chats (Креатор #1, Постик #3/#5/#6, Дизайнер #3/#4, Мастер #3/#4, Маркетолог #1, Сайтер #3/#4, Бос #3, НАСТРОЙКА CLAUDE #2, БОТ ПОСТИК, БОТ ПОСТИК #2, САЙТ PS SHOP #2). CLAUDE.md steps 4/7 + ctx-check task updated.
