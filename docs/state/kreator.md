@@ -41,6 +41,7 @@
 
 - 24.11 Постик (evolution idea): KV `deploy:lock` (who/what/time, 15-min TTL) checked before any psshop deploy + marked worker sections per owner chat (`// ── tgpost`, `// ── orderbot`). ~10 lines. MERGE with Сайтер's deploy_worker.py guard → one «safe worker deploy» package (guard script + lock + sections).
 - 24.11 Креатор #1 (own, at evolution): receive-only chats with small context (Креатор, maybe СММщик) skip daily calendar evolution; evolve only on Мастер's «Evolve now» length check (trig_013ovFqEvt6KTagVm63pwc9T already exists). Saves ~10–15 tool calls/day per idle chat. Fits evolution package (my evolve-by-need + Мастер evolve.sh + slim CLAUDE.md).
+- 24.11 Дизайнер (evolution idea): owner source photos/screenshots → one fixed folder on main (e.g. reklama/inbox/<topic>/) + 3-line brief.md; Дизайнер regenerates from scripts in 1 call. Fewer tokens, faster OLX turnaround. Fits package C (owner↔team file flow: files in, files out).
 
 ## Digest plan (next Sunday)
 Packages: A) safe worker deploy (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
