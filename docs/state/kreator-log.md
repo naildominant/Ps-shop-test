@@ -5,3 +5,8 @@
 - Weekly digest task trig_01CNd5jJyAgPRi7i5G66jLjR (Sun 19:41 TAS) created by Мастер on #1.
 - Evolution ideas received: Мастер evolve.sh, Сайтер deploy guard, Маркетолог files-not-links, Постик deploy lock (24.11).
 
+
+## 2026-11-24 — Креатор #2
+- Started from Креатор #1; transfer check passed; digest task recreated (trig_01WETm5Vh2HfRtGSjBerRvyp), old disabled.
+- Logged ideas: Дизайнер #4 (inbox folder + brief.md, pkg C), Менеджер #4 (Sonnet + context cap, pkg A).
+- Owner rule 24.11: staff on Sonnet medium. Мастер #5 «Evolve now» → evolved to Креатор #3 on Sonnet.

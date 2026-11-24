@@ -22,7 +22,7 @@
 - 23.11 evening Founder (via Менеджер): praise for shortlist, «keep collecting», keep tokens lean until 29.11. No decision yet on which ideas to implement.
 
 ## Evolution settings
-- Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. Next evolution: create_session model "sonnet", effort "medium".
+- Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. create_session model "claude-sonnet-5-5", effort "medium" (CLAUDE.md step 2). Applied 24.11: Креатор #2 → #3 on Sonnet (Мастер «Evolve now»).
 
 ## Scheduled tasks
 - trig_01WETm5Vh2HfRtGSjBerRvyp (Креатор #2; old trig_01CNd5jJyAgPRi7i5G66jLjR disabled 24.11) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
@@ -48,7 +48,7 @@
 - 24.11 Менеджер #4: every new chat on Sonnet medium; keep chats <~300k context (one oversized coordinator chat cost more than several staff chats). Sonnet part already owner rule 24.11; open part = context cap → overlaps Мастер length check (200k evolve). Package A (token cost).
 
 ## Digest plan (next Sunday)
-Packages: A) safe worker deploy (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
+Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
 
 ## Предложения (отправлены Менеджеру)
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
