@@ -10,3 +10,6 @@
 
 ## 2026-11-24 — Менеджер #4
 - 23.11: Сайтер T1–T3, OLX package, office v4, workout page, СММщик/Креатор created, praise sent to all. 24.11 owner: all staff Sonnet medium. Evolved → #5.
+
+## 2026-11-25 — Менеджер #5
+- Created daily trigger on #5; recreated limit push; cost table; woke team; owner rule: ask owner only on request. Evolved to #6 (ctx 201k).
