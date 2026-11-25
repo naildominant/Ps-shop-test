@@ -4,7 +4,7 @@
 
 ## Текущее
 - Ids всех чатов — только `docs/state/team.md`. Строку Постика веду я (у него нет team.md): он пишет «Постик is now #N».
-- Мои задачи по расписанию: trig_013ovFqEvt6KTagVm63pwc9T — каждые 2 ч 08:13–02:13 TAS: длина чатов (через haiku-помощника), >300k → «Evolve now»; аудит задач (привязаны к текущим чатам, все строки «task» из automation.md включены). При моей эволюции: пересоздать на новом чате, старую выключить.
+- My scheduled task: trig_01P66URooe6qvpC4WWcnDN7M (ctx check every 2h 08:13–02:13 TAS, helper sonnet, >200k → «Evolve now», tasks audit, auto-archive). Bound to my current chat; on my evolution: recreate on new chat (get_trigger prompt), disable old. Old trig_013ov… and reminders trig_01BZUJ… are disabled (delete denied by classifier).
 - Недельная проверка лимитов: понедельник (напоминание в отчёте Менеджера 18:37). Следующая 30.11 + вердикт ponytail (Сайтер/Постик, установлен 22.11: Ps-shop-test 0292b78, autopost 0ffd2c1; сравнить стоимость задач с 22–29.11, оставить или убрать).
 - Лимит 7 дней: allowed_warning до 29.11 00:00 TAS — экономить.
 
@@ -14,8 +14,8 @@
 
 - Model (owner 24.11 via Менеджер, «Нужно использовать модель sunnet средний всегда запомни это»): all team chats + helpers = claude-sonnet-5-5, effort medium. Existing chats can only switch via evolution (create_session model+effort).
 
-- Аналитик #1 (session_014Ko8ovwgBcCT1ARmm18GiH): 9th employee (owner 24.11), empty chat, role unknown — asked owner «Чем будет заниматься Аналитик?», no answer yet. When answered: CLAUDE.md role + memory file + first task; evolve it to Sonnet.
-- In progress 24.11 12:10: Sonnet switch — Evolve sent to Сайтер #5, Дизайнер #5, Креатор #2, Постик #7 (+rule sync, await hash); Менеджер/Маркетолог/СММщик evolving on their own. Verify each «is now» (team.md, tasks, archive old). Report «done» to Менеджер (id from team.md) when all on Sonnet.
+- Аналитик #1 (session_014Ko8ovwgBcCT1ARmm18GiH): role set 25.11 via Менеджер (limits/token analysis + audit 4.1, output docs/analytics/, memory file his choice — asked him, no path yet). Add path to team.md/CLAUDE.md when he sends it.
+- Sonnet switch DONE 25.11 (all chats Sonnet medium). EXCEPTION (owner 25.11): Постик = claude-opus-5-5 always (CLAUDE.md updated 399efb9; autopost b6198f8). Постик #7→#8 (session_014Ko8oxJPA8MYLB9rcfLDoe) transfer in progress: when «Постик is now #8» arrives, verify model opus, update team.md row, archive #7. Аналитик #1 is still opus-5-5 (no memory file yet, role: limits/token analysis + context-architecture audit, reports to Менеджер) — told Менеджер; evolve to Sonnet once he has a memory file. Креатор #3 told «Evolve now» 25.11 (238k): verify «is now #4», move trig_011mtW7gqo9YJ47byF3dw7V8, archive #3.
 
 ## Открыто
 - Владелец не ответил: удалить 3 выключенные задачи (trig_01LABPq3uqbEGdX1uwxTGahB старый отчёт Боса, trig_013eQidhNZQAXPemVctzKAFE, trig_01FG8Wqc5fTb7i7mVp94iWKw). Без «да» не удалять.
