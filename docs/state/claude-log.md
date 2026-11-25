@@ -124,3 +124,8 @@ Created Бос (#1→#3→#4). Owner renamed chats: Сайтер/Постик/М
 
 ## 2026-11-25 — Мастер #6
 - Took over from #5; recreated ctx-check on #6 (sonnet helper), archived old chats (Сайтер #5, Маркетолог #2, Менеджер #4/#5, Мастер #5, Дизайнер #5), Аналитик role in CLAUDE.md, Постик=Opus rule (399efb9). Evolving at 208k.
+
+## 2026-11-25/26 — Мастер #7
+- Took over from #6 (transfer check OK). Ctx-check task → trig_01HnCFBgroFf75npa2zx5jci (old trig_01P66… disabled). Verified Креатор #4 (task trig_01WksukBn6dobdDSWshzXBPe), Постик #8 (opus); archived Мастер #6, Креатор #3, Постик #7.
+- Owner (direct, switched me to opus) asked why old chats weren't archived and why chats wrote to old ones → evolution rule v2 in CLAUDE.md (bdc5339): self ctx check on every message >200k, old chat switches team.md right after transfer check, NEW chat archives old; ids only from team.md. Постик applied (autopost 945261b). Ctx-check prompt updated (model check, Постик row sync).
+- Checks 22:13, 00:13, 02:13: nobody >200k. New non-team chat «ФИНАНСИСТ» session_014Ko8owPE5uTSNE6LvrGoSR — owner's, not in team.
