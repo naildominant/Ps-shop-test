@@ -5,7 +5,7 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 
 | Role | What | When (Tashkent) | Type | id / file |
 |---|---|---|---|---|
-| Менеджер | Daily report to owner | daily 18:37 | task | trig_01RVgdWbXizEaLWDZRnqWoEW |
+| Менеджер | Daily report to owner | daily 18:37 | task | trig_01Nt7X4HqkPvcRrTojGZtCUp |
 | Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_01P66URooe6qvpC4WWcnDN7M |
 | Постик | Supplier prices, auto-raise | daily 05:30 | action | autopost morning.yml |
 | Постик | Price report to owner | daily 07:00 | action | worker cron 0 2 * * * |
@@ -20,8 +20,8 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 | Сайтер | Weekly CRM/site summary → Менеджер | Mon 11:07 | task | trig_016gAJVyfbUY1Qcy7ndUvUeq |
 | Маркетолог | OLX stats snapshot → Менеджер | Mon 10:40 | task | trig_01YbnmtgnVi1JsTvDudSUvoi |
 | Маркетолог | Weekly marketing report | Sun 20:40 | task | trig_018xKbkm19e2LMAkvmyxxb8M |
-| Менеджер | Limit-reset push (one-shot) | 29.11 00:01 | task | trig_01EHygv49RBq8bjkcdUquMCY |
-| Мастер | Weekly token review | Mon (reminder in Менеджер's report) | task | via trig_01RVgdWbXizEaLWDZRnqWoEW |
+| Менеджер | Limit-reset push (one-shot) | 29.11 00:01 | task | trig_015wDAfPbC794eBAgGzj7aWL |
+| Мастер | Weekly token review | Mon (reminder in Менеджер's report) | task | via trig_01Nt7X4HqkPvcRrTojGZtCUp |
 | Сайтер | Site + worker health (bindings ai) → owner bot on failure | daily 09:13 | action | TODO Сайтер (asked 24.11) |
 | Сайтер | Stuck orders >24h → owner bot reminder | daily 10:23 | action | TODO Сайтер worker cron (asked 24.11) |
 
