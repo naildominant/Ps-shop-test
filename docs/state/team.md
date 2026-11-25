@@ -11,7 +11,7 @@ On evolution (transfer): new chat updates its own row here in step 1 (same commi
 | Мастер | Мастер #6 | session_014Ko8ovdneWSn7LmL2VNknn | Ps-shop-test |
 | Дизайнер | Дизайнер #6 | session_014Ko8owkyX7HZEAWAjog3vk | Ps-shop-test |
 | Маркетолог | Маркетолог #3 | session_014Ko8ox3H4V8oeNnpp42Lm6 | Ps-shop-test |
-| Креатор | Креатор #3 | session_014Ko8oz4FtboECsfvQLxW3o | Ps-shop-test |
+| Креатор | Креатор #4 | (pending) | Ps-shop-test |
 | СММщик | СММщик #2 | session_014Ko8oyh3C9YZ2CQ1uhypEr | Ps-shop-test |
 | Аналитик | Аналитик #1 | session_014Ko8ovwgBcCT1ARmm18GiH | Ps-shop-test (owner 23.11; reports to Менеджер, owner 25.11; role/memory file TBD — assigned by Менеджер) |
 

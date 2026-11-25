@@ -10,3 +10,7 @@
 - Started from Креатор #1; transfer check passed; digest task recreated (trig_01WETm5Vh2HfRtGSjBerRvyp), old disabled.
 - Logged ideas: Дизайнер #4 (inbox folder + brief.md, pkg C), Менеджер #4 (Sonnet + context cap, pkg A).
 - Owner rule 24.11: staff on Sonnet medium. Мастер #5 «Evolve now» → evolved to Креатор #3 on Sonnet.
+
+## 2026-11-25 — Креатор #3
+- Transfer from #2 ok; weekly trigger moved to trig_011mtW7gqo9YJ47byF3dw7V8; digest A/B/C sent to Менеджер after standby lifted.
+- Logged ideas: Дизайнер #5, Менеджер #5, Постик #7, own (team.py). Мастер #6 «Evolve now» (238k) → Креатор #4.

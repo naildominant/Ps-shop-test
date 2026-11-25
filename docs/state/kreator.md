@@ -25,7 +25,7 @@
 - Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. create_session model "claude-sonnet-5-5", effort "medium" (CLAUDE.md step 2). Applied 24.11: Креатор #2 → #3 on Sonnet (Мастер «Evolve now»).
 
 ## Scheduled tasks
-- trig_011mtW7gqo9YJ47byF3dw7V8 (Креатор #3, created 24.11; old trig_01WETm5Vh2HfRtGSjBerRvyp and trig_01CNd5jJyAgPRi7i5G66jLjR disabled) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
+- trig_011mtW7gqo9YJ47byF3dw7V8 (Креатор #3, created 24.11; moving to #4 on 25.11 evolution — see below if replaced; old trig_01WETm5Vh2HfRtGSjBerRvyp and trig_01CNd5jJyAgPRi7i5G66jLjR disabled) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
 ## Входящие идеи
 - 23.11 Креатор (own): problem: daily evolution of every chat costs ~10–15 tool calls each (memory, create_session, check, pin, triggers) even for quiet chats / idea: evolve by need — only if chat is from an earlier day AND had real work or long context; idle chats stay / effect: fewer tokens, less risk of lost tasks in transfer / effort: 1 rule edit by Мастер.
@@ -53,6 +53,10 @@
 - 25.11 Дизайнер #5: team.md conflicts (every evolution edits same table → 4 rebase conflicts) → one file per role docs/state/team/<role>.md, 1 line each. Package B (cheaper evolution).
 - 25.11 Менеджер #5: owner wants less chatter → one-line status file docs/state/status/<role>.md (open tasks, blocked-on, next step) updated at each step end; Менеджер reads by grep instead of get_session/list_events, staff skip routine reports. Pairs with Дизайнер #5 per-role team files (docs/state/team/<role>.md) → no shared-file push collisions. Package B/C.
 - 25.11 Постик #7: owner-facing bot menu now one row of 5 emoji (🔎🎯🆕📰⛔️) → shorter chat, fewer taps; same pattern (emoji-only buttons + one-line status) for other owner-facing menus/reports. Package C (fewer owner rounds); pairs with Менеджер #5 status files.
+- 25.11 Креатор #3 (own, at evolution): team.md + status files + digest are all 'pull before write' chores → one `scripts/team.py` (list/set row/status) used by every chat; avoids shared-table push collisions (4 retries needed today). Package B.
+
+## State 25.11
+- Digest A/B/C sent to Менеджер 25.11 (no owner decision yet). Since then logged (not yet in a digest): Дизайнер #5 team/<role>.md, Менеджер #5 status/<role>.md, Постик #7 emoji menus, own team.py → add to Sun 29.11 digest. STANDBY lifted 25.11.
 
 ## Digest plan (next Sunday)
 Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
