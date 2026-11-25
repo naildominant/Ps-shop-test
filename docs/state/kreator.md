@@ -68,3 +68,4 @@ Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~
 
 ## Архив
 - 25.11 Мастер #6: add «model audit» line (title | model | ctx) to the 2h ctx check using configured_model from get_session → wrong model (e.g. Аналитик on opus) caught automatically; 0 extra calls. For 29.11 digest.
+- 25.11 Мастер #7: ctx-check subagent ≈110k tokens/run (12 runs/day ≈1.3M) → replace with tiny script/Action, or each chat self-reports used_tokens into team.md on evolution; Мастер's 2h check reads one file + list_sessions. Strong cost saver, for 29.11 digest.
