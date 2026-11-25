@@ -64,3 +64,4 @@
 - 24.11 12:06 Sonnet-medium rule: CLAUDE.md step 2 + Постик + helpers updated; «Evolve now (switch to Sonnet)» sent to all team chats; Мастер evolves too.
 - 25.11 15:15 Мастер #6 (Sonnet) never ran: weekly Sonnet limit hit (resets 28.11 19:00 UTC = 29.11 00:00 TAS). Transfer failed → team.md back to Мастер #5 (Opus). 12 queued ctx checks (24.11 12:13 – 25.11 14:13) skipped as stale. Sonnet chats (Менеджер #5, Сайтер #6, Маркетолог #3, СММщик #2, Креатор #3, Мастер #6) blocked until reset.
 - 25.11 16:13 ctx check: skipped (Sonnet limit until 29.11 00:00 TAS — evolutions impossible; awaiting owner on pausing the check).
+- 25.11 16:20 owner «ты сам должен знать»: paused ctx-check trig_013ovFqEvt6KTagVm63pwc9T until limit reset; send_later 29.11 00:05 TAS re-enables it + redo transfer to Мастер #6.

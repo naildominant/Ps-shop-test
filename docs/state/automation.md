@@ -6,7 +6,7 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 | Role | What | When (Tashkent) | Type | id / file |
 |---|---|---|---|---|
 | Менеджер | Daily report to owner | daily 18:37 | task | trig_013WZ2BgBM8CHVSHsjq9tLmQ |
-| Мастер | Chat-length check (>200k → evolve) + tasks audit | every 2h 08:13–02:13 | task | trig_013ovFqEvt6KTagVm63pwc9T |
+| Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_013ovFqEvt6KTagVm63pwc9T |
 | Постик | Supplier prices, auto-raise | daily 05:30 | action | autopost morning.yml |
 | Постик | Price report to owner | daily 07:00 | action | worker cron 0 2 * * * |
 | Постик | Check 3 old posts | daily 07:05 | action | autopost post-check.yml |
