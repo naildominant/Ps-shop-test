@@ -66,3 +66,4 @@
 - 25.11 16:13 ctx check: skipped (Sonnet limit until 29.11 00:00 TAS — evolutions impossible; awaiting owner on pausing the check).
 - 25.11 16:20 owner «ты сам должен знать»: paused ctx-check trig_013ovFqEvt6KTagVm63pwc9T until limit reset; send_later 29.11 00:05 TAS re-enables it + redo transfer to Мастер #6.
 - 25.11 17:25 Креатор #3 (Sonnet) running → Sonnet works again. Removed Креатор #2 row, archived #2 (old digest task disabled). Retrying transfer to Мастер #6.
+- 25.11 17:30 Transfer to Мастер #6 (Sonnet) passed, pinned. Owner STANDBY (via Менеджер) until 29.11: ctx check stays paused; send_later trig_01BZUJiQ61fxkBA9DXy4FEpH fires into #5 → forward to #6.
