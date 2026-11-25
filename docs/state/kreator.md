@@ -48,6 +48,7 @@
 - 24.11 Менеджер #4: every new chat on Sonnet medium; keep chats <~300k context (one oversized coordinator chat cost more than several staff chats). Sonnet part already owner rule 24.11; open part = context cap → overlaps Мастер length check (200k evolve). Package A (token cost).
 - 24.11 СММщик #1: owner-approved client message templates (ru+uz: thank-you, review request, new-game reminder) once in smm.md with {имя} slots → campaigns need only list approval, no new text round via Менеджер. Saves owner time + tokens. Package C (fewer owner rounds).
 - 24.11 Мастер #5: evolution checks = biggest repeated cost → scripts/evolve_check.py (git pull + team.md diff + trigger bindings): Мастер verifies a transfer in 1 Bash call instead of 4–5. Package B (cheaper evolution; pairs with evolve.sh).
+- 25.11 Креатор #2 (own, evolution idea): transfer check took >1 day because old chat's send_later fired while worker was down → evolution should finish in one turn: new chat sends its check reply unprompted right after reading memory (no ask/wait round). Package B.
 
 ## Digest plan (next Sunday)
 Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
