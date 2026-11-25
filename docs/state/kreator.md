@@ -67,3 +67,4 @@ Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
 ## Архив
+- 25.11 Мастер #6: add «model audit» line (title | model | ctx) to the 2h ctx check using configured_model from get_session → wrong model (e.g. Аналитик on opus) caught automatically; 0 extra calls. For 29.11 digest.
