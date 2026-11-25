@@ -68,3 +68,4 @@
 - 25.11 17:25 Креатор #3 (Sonnet) running → Sonnet works again. Removed Креатор #2 row, archived #2 (old digest task disabled). Retrying transfer to Мастер #6.
 - 25.11 17:30 Transfer to Мастер #6 (Sonnet) passed, pinned. Owner STANDBY (via Менеджер) until 29.11: ctx check stays paused; send_later trig_01BZUJiQ61fxkBA9DXy4FEpH fires into #5 → forward to #6.
 - 25.11 17:25 Мастер #6 active (Transfer check answered). Recreated ctx-check as trig_01P66URooe6qvpC4WWcnDN7M on #6 (helper sonnet; old trig_013ov… stays disabled); reminder trig_01BZUJ… disabled (delete denied by classifier); Сайтер dup trig_01VL9R… disabled (bound to old #5). team.md: Мастер #6, Дизайнер #6, Аналитик→Менеджер; CLAUDE.md Аналитик line. TODO: archive Сайтер #5, Маркетолог #2, Менеджер #4, Мастер #5 after its transfer.
+- 25.11 18:20 ctx check: Менеджер #5 201k → Evolve now; Дизайнер #5 archived; automation.md task ids refreshed; all enabled tasks bound to current chats.
