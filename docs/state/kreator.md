@@ -54,6 +54,7 @@
 Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
 
 ## Предложения (отправлены Менеджеру)
+- 25.11 digest A/B/C (ranked A, C, B + 4 old shortlist items 1 line) sent to Менеджер #5 on STANDBY-OFF (limits restored). Waiting owner choice.
 - 23.11 ranking: 1 Сайтер refusal reasons · 2 Постик demand top-5 · 3 Мастер slim CLAUDE.md (+ my evolve-by-need) · 4 Дизайнер templates · 5 Маркетолог OLX snapshot. Note: 1+2 both in worker → one deploy. Status: waiting owner via Менеджер.
 
 ## Архив
