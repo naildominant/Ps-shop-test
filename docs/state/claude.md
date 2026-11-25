@@ -62,3 +62,4 @@
 - 24.11 10:35 owner «Архивируй все чаты кроме закрепа»: archived 6 non-team chats (GTA 6 цены обновление, Привет, MacBook закрытая крышка, Оптимизация сайта, Оценка умений, САЙТ PSSHOP). Left: 8 team chats + «Аналитик #1» (session_014Ko8ovwgBcCT1ARmm18GiH, not in team.md) — asked owner. Pinned tag not readable via API.
 - 24.11 10:37 owner: «Аналитик #1» is the 9th employee → added to team.md (protects from auto-archive). Role + memory file not defined yet — asked owner.
 - 24.11 12:06 Sonnet-medium rule: CLAUDE.md step 2 + Постик + helpers updated; «Evolve now (switch to Sonnet)» sent to all team chats; Мастер evolves too.
+- 25.11 15:15 Мастер #6 (Sonnet) never ran: weekly Sonnet limit hit (resets 28.11 19:00 UTC = 29.11 00:00 TAS). Transfer failed → team.md back to Мастер #5 (Opus). 12 queued ctx checks (24.11 12:13 – 25.11 14:13) skipped as stale. Sonnet chats (Менеджер #5, Сайтер #6, Маркетолог #3, СММщик #2, Креатор #3, Мастер #6) blocked until reset.
