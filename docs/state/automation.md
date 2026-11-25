@@ -1,12 +1,12 @@
 # Automation registry — all recurring work (owner 24.11: «все автоматически работали»)
 
 Type: **task** = Claude scheduled task (shows in app «Запланированные задачи», costs limits; bound to the role's CURRENT chat, moved on evolution);
-**action** = GitHub Action / Cloudflare worker cron (free, no Claude). Мастер audits this list every 2h (trig_013ovFqEvt6KTagVm63pwc9T).
+**action** = GitHub Action / Cloudflare worker cron (free, no Claude). Мастер audits this list every 2h (trig_01P66URooe6qvpC4WWcnDN7M).
 
 | Role | What | When (Tashkent) | Type | id / file |
 |---|---|---|---|---|
-| Менеджер | Daily report to owner | daily 18:37 | task | trig_013WZ2BgBM8CHVSHsjq9tLmQ |
-| Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_013ovFqEvt6KTagVm63pwc9T |
+| Менеджер | Daily report to owner | daily 18:37 | task | by name «Менеджер: ежедневный отчёт Founder» (id via list_triggers; Менеджер #5) |
+| Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_01P66URooe6qvpC4WWcnDN7M |
 | Постик | Supplier prices, auto-raise | daily 05:30 | action | autopost morning.yml |
 | Постик | Price report to owner | daily 07:00 | action | worker cron 0 2 * * * |
 | Постик | Check 3 old posts | daily 07:05 | action | autopost post-check.yml |
@@ -21,7 +21,7 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 | Маркетолог | OLX stats snapshot → Менеджер | Mon 10:40 | task | trig_01T9y8fG2KpiTJUSt8JXyYdb |
 | Маркетолог | Weekly marketing report | Sun 20:40 | task | trig_01MV4HuHdbqNWf3HNzvs9K8R |
 | Менеджер | Limit-reset push (one-shot) | 29.11 00:01 | task | trig_0181sEwFa1WczSR36kuGoxLc |
-| Мастер | Weekly token review | Mon (reminder in Менеджер's report) | task | via trig_013WZ2BgBM8CHVSHsjq9tLmQ |
+| Мастер | Weekly token review | Mon (reminder in Менеджер's report) | task | via by name «Менеджер: ежедневный отчёт Founder» (id via list_triggers; Менеджер #5) |
 | Сайтер | Site + worker health (bindings ai) → owner bot on failure | daily 09:13 | action | TODO Сайтер (asked 24.11) |
 | Сайтер | Stuck orders >24h → owner bot reminder | daily 10:23 | action | TODO Сайтер worker cron (asked 24.11) |
 
