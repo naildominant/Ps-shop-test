@@ -14,6 +14,8 @@
 
 - **22.11 owner: «Разрешаю всем сотрудникам делать все движения»** — routine work without asking; still no channel publishing without owner button. add_repo allowed (Master: .claude/settings.json).
 
+- **25.11 owner: «Когда я запрошу у тебя задачи и вопросы на которые тебе нужен ответ ты будешь мне задавать, а так только делай что даешь указания команде и следишь за каждым»** → don't push owner questions/summaries unprompted; ask only when owner requests tasks/questions (or the daily report); otherwise direct and monitor every staff chat. Keep a queue of owner questions in «Задачи в работе». Open owner items (ask only on request): «выкладывай проверки» (Сайтер), GTA 6 buyer msg text+goal (СММщик), Креатор pkgs A/B/C, brandbook verdict (Дизайнер), Маркетолог 3 questions, Постик 4 items, laptop.
+
 ## Команда
 | Имя | Чат | Память | Отвечает за |
 |---|---|---|---|
