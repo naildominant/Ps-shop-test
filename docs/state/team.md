@@ -5,7 +5,7 @@ On evolution (transfer): new chat updates its own row here in step 1 (same commi
 
 | Role | Chat | session_id | Repo |
 |---|---|---|---|
-| Менеджер | Менеджер #6 | session_014Ko8ovvsp2qbrA9LNcu9mT | Ps-shop-test |
+| Менеджер | Менеджер #6 | session_014Ko8ovvsp2qbrA9LNcu9mT | Ps-shop-test (daily report trig_01Nt7X4HqkPvcRrTojGZtCUp; limit push 28.11 trig_015wDAfPbC794eBAgGzj7aWL) |
 | Сайтер | Сайтер #6 | session_014Ko8oy4HcFSSpwwCpvfhCG | Ps-shop-test |
 | Постик | Постик #7 | session_014Ko8oyXcv4fNLARtaRLEwL | ps-shop-autopost (can't read this file → list_sessions) |
 | Мастер | Мастер #6 | session_014Ko8ovdneWSn7LmL2VNknn | Ps-shop-test |
