@@ -4,7 +4,7 @@
 
 ## Текущее
 - Ids всех чатов — только `docs/state/team.md`. Строку Постика веду я (у него нет team.md): он пишет «Постик is now #N».
-- My scheduled task: trig_01P66URooe6qvpC4WWcnDN7M (ctx check every 2h 08:13–02:13 TAS, helper sonnet, >200k → «Evolve now», tasks audit, auto-archive). Bound to my current chat; on my evolution: recreate on new chat (get_trigger prompt), disable old. Old trig_013ov… and reminders trig_01BZUJ… are disabled (delete denied by classifier).
+- Мои задачи по расписанию: trig_01HnCFBgroFf75npa2zx5jci (Мастер #7; старые trig_01P66… и trig_013ov… выключены) — каждые 2 ч 08:13–02:13 TAS: длина чатов (через haiku-помощника), >300k → «Evolve now»; аудит задач (привязаны к текущим чатам, все строки «task» из automation.md включены). При моей эволюции: пересоздать на новом чате, старую выключить.
 - Недельная проверка лимитов: понедельник (напоминание в отчёте Менеджера 18:37). Следующая 30.11 + вердикт ponytail (Сайтер/Постик, установлен 22.11: Ps-shop-test 0292b78, autopost 0ffd2c1; сравнить стоимость задач с 22–29.11, оставить или убрать).
 - Лимит 7 дней: allowed_warning до 29.11 00:00 TAS — экономить.
 
@@ -71,3 +71,4 @@
 - 25.11 18:20 ctx check: Менеджер #5 201k → Evolve now; Дизайнер #5 archived; automation.md task ids refreshed; all enabled tasks bound to current chats.
 - 25.11 18:25 Менеджер #6 verified (tasks moved: daily report trig_01Nt7X4HqkPvcRrTojGZtCUp, limit push trig_015wDAfPbC794eBAgGzj7aWL); #5 archived; automation.md ids updated.
 - 25.11 owner: Постик ALWAYS Opus 5.5 (claude-opus-5-5, effort medium); all other chats + Agent helpers Sonnet medium. CLAUDE.md Постик evolution line updated; current Постик #7 (Sonnet) switches at his next evolution (no tool to switch a running session).
+- 25.11 Мастер #7 active. Ctx-check recreated: trig_01HnCFBgroFf75npa2zx5jci (old trig_01P66URooe6qvpC4WWcnDN7M disabled). team.md Мастер #7. Waiting: Постик #8 (verify opus, archive #7), Креатор #3→#4 evolution (team.md already shows #4; verify trig_011mtW7gqo9YJ47byF3dw7V8, archive #3), Аналитик file path.

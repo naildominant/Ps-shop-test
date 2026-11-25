@@ -1,12 +1,12 @@
 # Automation registry — all recurring work (owner 24.11: «все автоматически работали»)
 
 Type: **task** = Claude scheduled task (shows in app «Запланированные задачи», costs limits; bound to the role's CURRENT chat, moved on evolution);
-**action** = GitHub Action / Cloudflare worker cron (free, no Claude). Мастер audits this list every 2h (trig_01P66URooe6qvpC4WWcnDN7M).
+**action** = GitHub Action / Cloudflare worker cron (free, no Claude). Мастер audits this list every 2h (trig_01HnCFBgroFf75npa2zx5jci).
 
 | Role | What | When (Tashkent) | Type | id / file |
 |---|---|---|---|---|
 | Менеджер | Daily report to owner | daily 18:37 | task | trig_01Nt7X4HqkPvcRrTojGZtCUp |
-| Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_01P66URooe6qvpC4WWcnDN7M |
+| Мастер | Chat-length check (>200k → evolve) + tasks audit — PAUSED until 29.11 00:05 (Sonnet limit; reminder set) | every 2h 08:13–02:13 | task | trig_01HnCFBgroFf75npa2zx5jci |
 | Постик | Supplier prices, auto-raise | daily 05:30 | action | autopost morning.yml |
 | Постик | Price report to owner | daily 07:00 | action | worker cron 0 2 * * * |
 | Постик | Check 3 old posts | daily 07:05 | action | autopost post-check.yml |
