@@ -51,6 +51,7 @@
 - 25.11 Креатор #2 (own, evolution idea): transfer check took >1 day because old chat's send_later fired while worker was down → evolution should finish in one turn: new chat sends its check reply unprompted right after reading memory (no ask/wait round). Package B.
 
 - 25.11 Дизайнер #5: team.md conflicts (every evolution edits same table → 4 rebase conflicts) → one file per role docs/state/team/<role>.md, 1 line each. Package B (cheaper evolution).
+- 25.11 Менеджер #5: owner wants less chatter → one-line status file docs/state/status/<role>.md (open tasks, blocked-on, next step) updated at each step end; Менеджер reads by grep instead of get_session/list_events, staff skip routine reports. Pairs with Дизайнер #5 per-role team files (docs/state/team/<role>.md) → no shared-file push collisions. Package B/C.
 
 ## Digest plan (next Sunday)
 Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~300k) (Сайтер guard + Постик lock) — high, prevents outages; B) cheaper evolution (evolve.sh + evolve-by-need + slim CLAUDE.md); C) files not links to owner (Маркетолог) — quick win. Plus status of 23.11 top-5 (no owner decision yet).
