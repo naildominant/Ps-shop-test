@@ -16,7 +16,7 @@ Type: **task** = Claude scheduled task (shows in app «Запланирован�
 | Сайтер | Channel → site catalog | every 10 min | action | worker cron */10 |
 | Сайтер | Full catalog rebuild | hourly :07 | action | update-catalog.yml |
 
-| Креатор | Weekly ideas digest → Менеджер | Sun 19:41 | task | trig_011mtW7gqo9YJ47byF3dw7V8 |
+| Креатор | Weekly ideas digest → Менеджер | Sun 19:41 | task | trig_01WksukBn6dobdDSWshzXBPe |
 | Сайтер | Weekly CRM/site summary → Менеджер | Mon 11:07 | task | trig_016gAJVyfbUY1Qcy7ndUvUeq |
 | Маркетолог | OLX stats snapshot → Менеджер | Mon 10:40 | task | trig_01YbnmtgnVi1JsTvDudSUvoi |
 | Маркетолог | Weekly marketing report | Sun 20:40 | task | trig_018xKbkm19e2LMAkvmyxxb8M |

@@ -14,7 +14,7 @@
 
 - Model (owner 24.11 via Менеджер, «Нужно использовать модель sunnet средний всегда запомни это»): all team chats + helpers = claude-sonnet-5-5, effort medium. Existing chats can only switch via evolution (create_session model+effort).
 
-- Аналитик #1 (session_014Ko8ovwgBcCT1ARmm18GiH): role set 25.11 via Менеджер (limits/token analysis + audit 4.1, output docs/analytics/, memory file his choice — asked him, no path yet). Add path to team.md/CLAUDE.md when he sends it.
+- Аналитик #1: now on Sonnet (ctx check 25.11 22:13). Role set 25.11 via Менеджер (limits/token analysis + audit 4.1, output docs/analytics/, memory file his choice — asked him, no path yet). Add path to team.md/CLAUDE.md when he sends it.
 - Sonnet switch DONE 25.11 (all chats Sonnet medium). EXCEPTION (owner 25.11): Постик = claude-opus-5-5 always (CLAUDE.md updated 399efb9; autopost b6198f8). Постик #7→#8 (session_014Ko8oxJPA8MYLB9rcfLDoe) transfer in progress: when «Постик is now #8» arrives, verify model opus, update team.md row, archive #7. Аналитик #1 is still opus-5-5 (no memory file yet, role: limits/token analysis + context-architecture audit, reports to Менеджер) — told Менеджер; evolve to Sonnet once he has a memory file. Креатор #3 told «Evolve now» 25.11 (238k): verify «is now #4», move trig_011mtW7gqo9YJ47byF3dw7V8, archive #3.
 
 ## Открыто
@@ -75,3 +75,4 @@
 - 25.11 Креатор #4 verified (Sonnet medium; weekly digest moved to trig_01WksukBn6dobdDSWshzXBPe, old disabled). Archived Креатор #3, Мастер #6. Still waiting: Постик #8 «is now», Аналитик memory file.
 - 25.11 owner (direct, Мастер #7): «почему старые не архивировались, почему обращаются к старым». Causes: (1) ctx-check paused 25.11 for limit → no 2h archive sweep; (2) archive depended on Мастер receiving «is now» (often not sent); (3) Постик has no team.md → used ids from his prompt/memory (#8 said «через Менеджер #5»); (4) ids stored in memory files (bos.md etc.). Fix in CLAUDE.md: each chat checks own used_tokens (get_session) on EVERY incoming message, >200k → evolve; old chat updates team.md right after transfer check; new chat archives old (archive_session) — no waiting for Мастер; senders never use ids from memory/parent, on error re-read team.md. Archived Постик #7 (#8 = opus OK). Rule sent to Постик #8.
 - 25.11 Постик #8 applied rule v2: autopost 945261b (bot.md no chat ids).
+- 25.11 22:13 TAS ctx check: none (max Менеджер #6 171k); models OK (Постик opus, rest sonnet); all 7 tasks bound to current chats; no stray chats; automation.md Креатор task id fixed → trig_01WksukBn6dobdDSWshzXBPe.
