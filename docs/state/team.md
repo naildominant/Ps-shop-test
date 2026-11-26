@@ -5,7 +5,7 @@ On evolution: the OLD chat replaces its row here right after the transfer check 
 
 | Role | Chat | session_id | Repo |
 |---|---|---|---|
-| Менеджер | Менеджер #6 | session_014Ko8ovvsp2qbrA9LNcu9mT | Ps-shop-test (daily report trig_01Nt7X4HqkPvcRrTojGZtCUp; limit push 28.11 trig_015wDAfPbC794eBAgGzj7aWL) |
+| Менеджер | Менеджер #7 | session_014Ko8oyGeVpqoEEFJtDU3mt | Ps-shop-test (daily report trig_01BrhcZJRFFTW862Q1W99q5v; limit push 28.11 send_later trig_01ViFfw5pz7X441kzpRd5FNg) |
 | Сайтер | Сайтер #6 | session_014Ko8oy4HcFSSpwwCpvfhCG | Ps-shop-test |
 | Постик | Постик #8 | session_014Ko8oxJPA8MYLB9rcfLDoe | ps-shop-autopost (can't read this file → list_sessions) |
 | Мастер | Мастер #9 | session_014Ko8owCdM9Y5XG1kCzgfA5 | Ps-shop-test |
