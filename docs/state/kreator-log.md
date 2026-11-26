@@ -14,3 +14,6 @@
 ## 2026-11-25 — Креатор #3
 - Transfer from #2 ok; weekly trigger moved to trig_011mtW7gqo9YJ47byF3dw7V8; digest A/B/C sent to Менеджер after standby lifted.
 - Logged ideas: Дизайнер #5, Менеджер #5, Постик #7, own (team.py). Мастер #6 «Evolve now» (238k) → Креатор #4.
+
+## 2026-11-26 — Креатор #4
+Received ideas from Мастер #6, #7, #8 (ctx-check cost/model audit) → kreator.md, for 29.11 digest. Evolved to #5 by first-message-of-day rule.

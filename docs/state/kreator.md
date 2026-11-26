@@ -25,7 +25,7 @@
 - Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. create_session model "claude-sonnet-5-5", effort "medium" (CLAUDE.md step 2). Applied 24.11: Креатор #2 → #3 on Sonnet (Мастер «Evolve now»).
 
 ## Scheduled tasks
-- CURRENT: trig_01WksukBn6dobdDSWshzXBPe (Креатор #4, created 25.11, bound to #4; trig_011mtW7gqo9YJ47byF3dw7V8 disabled). Below is the old description.
+- CURRENT: trig_01WksukBn6dobdDSWshzXBPe (Креатор #5 from 26.11 — bound to #5 after evolution; was #4, created 25.11, bound to #4; trig_011mtW7gqo9YJ47byF3dw7V8 disabled). Below is the old description.
 - trig_011mtW7gqo9YJ47byF3dw7V8 (Креатор #3, created 24.11; moving to #4 on 25.11 evolution — see below if replaced; old trig_01WETm5Vh2HfRtGSjBerRvyp and trig_01CNd5jJyAgPRi7i5G66jLjR disabled) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
 ## Входящие идеи
@@ -69,3 +69,4 @@ Packages: A) safe worker deploy (+ token cost: Менеджер #4 context cap ~
 ## Архив
 - 25.11 Мастер #6: add «model audit» line (title | model | ctx) to the 2h ctx check using configured_model from get_session → wrong model (e.g. Аналитик on opus) caught automatically; 0 extra calls. For 29.11 digest.
 - 25.11 Мастер #7: ctx-check subagent ≈110k tokens/run (12 runs/day ≈1.3M) → replace with tiny script/Action, or each chat self-reports used_tokens into team.md on evolution; Мастер's 2h check reads one file + list_sessions. Strong cost saver, for 29.11 digest.
+- 26.11 Мастер #8: ctx-check message costs ~20k tokens/firing in Мастер chat (subagent report + noise) → Мастер hits 200k in ~10h; make the check a «new session per fire» task writing only to claude.md, or run every 4h. Same theme as Мастер #7 idea → merge in 29.11 digest (package B: cheaper evolution/ctx check).
