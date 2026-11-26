@@ -8,11 +8,11 @@ On evolution: the OLD chat replaces its row here right after the transfer check 
 | Менеджер | Менеджер #6 | session_014Ko8ovvsp2qbrA9LNcu9mT | Ps-shop-test (daily report trig_01Nt7X4HqkPvcRrTojGZtCUp; limit push 28.11 trig_015wDAfPbC794eBAgGzj7aWL) |
 | Сайтер | Сайтер #6 | session_014Ko8oy4HcFSSpwwCpvfhCG | Ps-shop-test |
 | Постик | Постик #8 | session_014Ko8oxJPA8MYLB9rcfLDoe | ps-shop-autopost (can't read this file → list_sessions) |
-| Мастер | Мастер #8 | session_014Ko8oxP3ghoXuuCuzwY7pg | Ps-shop-test |
+| Мастер | Мастер #9 | session_014Ko8owCdM9Y5XG1kCzgfA5 | Ps-shop-test |
 | Дизайнер | Дизайнер #6 | session_014Ko8owkyX7HZEAWAjog3vk | Ps-shop-test |
 | Маркетолог | Маркетолог #3 | session_014Ko8ox3H4V8oeNnpp42Lm6 | Ps-shop-test |
 | Креатор | Креатор #4 | session_014Ko8ovjhc4RWyUrDSwJ2my | Ps-shop-test |
 | СММщик | СММщик #2 | session_014Ko8oyh3C9YZ2CQ1uhypEr | Ps-shop-test |
 | Аналитик | Аналитик #1 | session_014Ko8ovwgBcCT1ARmm18GiH | Ps-shop-test (owner 23.11; reports to Менеджер, owner 25.11; role/memory file TBD — assigned by Менеджер) |
 
-Updated: 2026-11-26 by Мастер #7 (Мастер #8)
+Updated: 2026-11-26 by Мастер #8 (Мастер #9)
