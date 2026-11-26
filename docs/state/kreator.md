@@ -25,7 +25,7 @@
 - Owner rule 24.11 (via Менеджер #4): all staff model Sonnet, effort medium. create_session model "claude-sonnet-5-5", effort "medium" (CLAUDE.md step 2). Applied 24.11: Креатор #2 → #3 on Sonnet (Мастер «Evolve now»).
 
 ## Scheduled tasks
-- CURRENT: trig_01WksukBn6dobdDSWshzXBPe (Креатор #5 from 26.11 — bound to #5 after evolution; was #4, created 25.11, bound to #4; trig_011mtW7gqo9YJ47byF3dw7V8 disabled). Below is the old description.
+- CURRENT: trig_01UqFmocoiFJZUqzh8gHGsyj (created 26.11, bound to Креатор #5; trig_01WksukBn6dobdDSWshzXBPe disabled 26.11). Older: trig_01WksukBn6dobdDSWshzXBPe (was #4, created 25.11, bound to #4; trig_011mtW7gqo9YJ47byF3dw7V8 disabled). Below is the old description.
 - trig_011mtW7gqo9YJ47byF3dw7V8 (Креатор #3, created 24.11; moving to #4 on 25.11 evolution — see below if replaced; old trig_01WETm5Vh2HfRtGSjBerRvyp and trig_01CNd5jJyAgPRi7i5G66jLjR disabled) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
 ## Входящие идеи
