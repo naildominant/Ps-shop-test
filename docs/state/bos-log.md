@@ -13,3 +13,6 @@
 
 ## 2026-11-25 — Менеджер #5
 - Created daily trigger on #5; recreated limit push; cost table; woke team; owner rule: ask owner only on request. Evolved to #6 (ctx 201k).
+
+## 2026-11-26 — Менеджер #6
+- Created schedules, handled Postик Opus rule, daily reports 25.11/26.11, sent workout page to owner. Evolved to #7 at ctx 230k.
