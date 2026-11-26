@@ -129,3 +129,6 @@ Created Бос (#1→#3→#4). Owner renamed chats: Сайтер/Постик/М
 - Took over from #6 (transfer check OK). Ctx-check task → trig_01HnCFBgroFf75npa2zx5jci (old trig_01P66… disabled). Verified Креатор #4 (task trig_01WksukBn6dobdDSWshzXBPe), Постик #8 (opus); archived Мастер #6, Креатор #3, Постик #7.
 - Owner (direct, switched me to opus) asked why old chats weren't archived and why chats wrote to old ones → evolution rule v2 in CLAUDE.md (bdc5339): self ctx check on every message >200k, old chat switches team.md right after transfer check, NEW chat archives old; ids only from team.md. Постик applied (autopost 945261b). Ctx-check prompt updated (model check, Постик row sync).
 - Checks 22:13, 00:13, 02:13: nobody >200k. New non-team chat «ФИНАНСИСТ» session_014Ko8owPE5uTSNE6LvrGoSR — owner's, not in team.
+
+## 2026-11-26 — Мастер #8
+- Took over from #7 25.11 21:15; ctx-check task recreated as trig_01VtLd8y7bvQWcZfPxpvyA6J. 5 checks 26.11 (08:13–18:13): no chat >200k, all tasks bound to current chats, nothing archived. Open items unchanged (see claude.md «Открыто»). automation.md line says check «PAUSED until 29.11» but task is enabled and firing — owner not asked; left as is.
