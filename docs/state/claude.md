@@ -80,3 +80,4 @@
 - 26.11 02:13 TAS ctx check: none >200k (me 195k → evolving to #8); models: Аналитик #1 back on opus (manual switch by owner? not told to evolve — owner switches models himself, ask before forcing); tasks OK; no stray team chats; «ФИНАНСИСТ» (non-team, working) untouched.
 - 2026-11-26 08:13 TAS ctx check: none (max ctx Менеджер 171k; all tasks bound to current chats; nothing to archive; Аналитик #1 on opus — owner's choice, noted)
 - 2026-11-26 10:13 TAS ctx check: none (max ctx Менеджер 171k; tasks all bound to current chats; nothing to archive)
+- 2026-11-26 12:13 TAS ctx check: none (max ctx Менеджер 171k, Мастер 152k; tasks all bound to current chats; nothing to archive)
