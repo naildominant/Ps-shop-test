@@ -86,3 +86,4 @@
 - 2026-11-26 18:13 TAS ctx check: none (max ctx Мастер 193k, Менеджер 171k; tasks all bound to current chats; nothing to archive). Evolving to Мастер #9 now (ctx near 200k).
 - 2026-11-26 15:15 UTC ctx check: Менеджер #6 told to evolve (230k); tasks all bound to current chats; Мастер #8 archive_session denied by classifier (left for owner/manual); team.md ok
 - 2026-11-26 17:15 UTC ctx check: none (all <200k, tasks bound to current chats, team.md ok; Менеджер #6 already archived; Мастер #8 still unarchived — archive_session was denied by classifier earlier, not retried)
+- 2026-11-26 19:15 UTC ctx check: none (all <200k, tasks bound to current chats, team.md ok; Мастер #8 still unarchived — archive_session denied earlier; LEADEX АНАЛИТИК is not a team chat, ignored)
