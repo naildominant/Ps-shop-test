@@ -79,3 +79,4 @@
 - 25.11 00:13 TAS (26.11) ctx check: none (max Менеджер #6 171k; me 184k); models OK; 7 tasks on current chats; no stray team chats. New non-team chat «ФИНАНСИСТ» session_014Ko8owPE5uTSNE6LvrGoSR (BLOCKED) — not touched; if owner makes it an employee: role in CLAUDE.md + team.md + memory file.
 - 26.11 02:13 TAS ctx check: none >200k (me 195k → evolving to #8); models: Аналитик #1 back on opus (manual switch by owner? not told to evolve — owner switches models himself, ask before forcing); tasks OK; no stray team chats; «ФИНАНСИСТ» (non-team, working) untouched.
 - 2026-11-26 08:13 TAS ctx check: none (max ctx Менеджер 171k; all tasks bound to current chats; nothing to archive; Аналитик #1 on opus — owner's choice, noted)
+- 2026-11-26 10:13 TAS ctx check: none (max ctx Менеджер 171k; tasks all bound to current chats; nothing to archive)
