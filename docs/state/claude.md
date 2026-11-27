@@ -95,3 +95,4 @@
 - 2026-11-27 07:13Z ctx check: none (max Постик 135k, me 139k; models OK; 7 tasks bound to current chats; no stray chats; team.md ok)
 - 2026-11-27 09:13Z ctx check: none (max me 151k, Постик 135k; models OK; 7 tasks bound to current chats; no stray chats; team.md ok)
 - 2026-11-27 11:14Z ctx check: none (max me 162k, Постик 135k; models OK; 7 tasks bound to current chats; no stray chats; team.md ok)
+- 2026-11-27 13:05Z Постик #9 verified (opus, team.md updated; #8 already archived). LINEAGE LIMIT: Мастер #10 lineage depth 8/8 → create_session (evolution) will likely fail; Постик depth 7/8. Need a fresh root chat for Мастер (and Постик soon) — asked Менеджер.
