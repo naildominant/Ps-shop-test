@@ -100,3 +100,4 @@
 - 2026-11-27 15:14Z ctx check: Постик #9 told to evolve (217k; lineage limit may block); me 193k (8/8 lineage — evolution likely refused); tasks all bound (new one-shot trig_01AwGsCk… on Менеджер); no stray chats; team.md ok
 - 2026-11-27 15:17Z Постик #10 verified (opus, 91k; #9 archived); team.md updated. Note: Постик's create_session at depth 7→8 worked; my own depth 8/8 untested.
 - 2026-11-27 17:14Z ctx check: none needed for others (max Менеджер 165k, Постик #10 106k); my ctx 210k → evolving to Мастер #11 (lineage 8/8: if create_session refused, stay + tell Менеджер).
+- 2026-11-27 17:20Z Evolution REFUSED (create_session: lineage depth 8/8, also cannot create/re-arm routines). Мастер #10 stays at ~210k; asked Менеджер to have owner start fresh top-level «Мастер #11» (same for Креатор #5). Ctx-check trig_01Msy3… stays on me until then.
