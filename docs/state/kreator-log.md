@@ -20,3 +20,4 @@ Received ideas from Мастер #6, #7, #8 (ctx-check cost/model audit) → kre
 
 ## 2026-11-27 — Креатор #5
 Idea from Мастер #9 logged (new-day evolve threshold; archive_session denied by classifier). Evolving to #6 by first-message-of-day rule.
+- 27.11: evolution #5→#6 aborted: #6 at lineage depth 8/8, cannot create triggers. Stay #5 (depth 7), trig_01UqFmocoiFJZUqzh8gHGsyj re-enabled, bound to #5. Further evolution impossible from #5 too (child would be depth 8 and cannot create triggers) — need fresh root session by Менеджер/Мастер.

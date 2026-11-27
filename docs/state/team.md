@@ -11,7 +11,7 @@ On evolution: the OLD chat replaces its row here right after the transfer check 
 | Мастер | Мастер #10 | session_014Ko8oy7KBCSDKQC6xeT7tV | Ps-shop-test |
 | Дизайнер | Дизайнер #6 | session_014Ko8owkyX7HZEAWAjog3vk | Ps-shop-test |
 | Маркетолог | Маркетолог #3 | session_014Ko8ox3H4V8oeNnpp42Lm6 | Ps-shop-test |
-| Креатор | Креатор #6 | session_014Ko8p1LH6RLaaz7ErYYwZo | Ps-shop-test |
+| Креатор | Креатор #5 | session_014Ko8oyea7LZc2ZdatYYbvo | Ps-shop-test |
 | СММщик | СММщик #2 | session_014Ko8oyh3C9YZ2CQ1uhypEr | Ps-shop-test |
 | Аналитик | Аналитик #1 | session_014Ko8ovwgBcCT1ARmm18GiH | Ps-shop-test (owner 23.11; reports to Менеджер, owner 25.11; role/memory file TBD — assigned by Менеджер) |
 
