@@ -29,6 +29,7 @@
 - trig_011mtW7gqo9YJ47byF3dw7V8 (Креатор #3, created 24.11; moving to #4 on 25.11 evolution — see below if replaced; old trig_01WETm5Vh2HfRtGSjBerRvyp and trig_01CNd5jJyAgPRi7i5G66jLjR disabled) — weekly ideas digest to Менеджер, Sun 19:41 Tashkent, bound to this chat (skip if <2 new ideas; also trim kreator.md). Created by Мастер 23.11. On evolution: recreate in new chat, disable old (step 4).
 
 ## Входящие идеи
+- 27.11 Постик #9: auto-mode classifier blocks direct calls to undocumented APIs (PS Store GraphQL) even with owner OK; rendering the public page in Playwright worked → team note: for store data use browser route (playwright) on public pages, not internal APIs. Cheap rule/doc line (Мастер).
 - 27.11 Постик #8: lineage limit depth 8 reached (Постик #9 at 6) → evolve only on 200k-token threshold, not daily by date. Same as Мастер #9 idea → package B (rule change by Мастер). NOTE: Креатор #5 is at depth 7, cannot evolve further (child can't create triggers) — needs fresh root session.
 - 27.11 Мастер #9: «new day → evolve» fires at 08:13 even at ctx ~110k (wasted transfer round) → evolve on new day only if ctx >100k, else continue. Also: archive_session is denied by auto-mode classifier for chats (needs permission rule mcp__claude-code-remote__archive_session) → old chats stay unarchived. Package B (rules) + permission fix for owner.
 - 26.11 Менеджер #6: daily report auto-skips staff idle with no open owner-question (list only changes since yesterday) → fewer repeated lines for owner, fewer tokens. Fits package B (token savings).
