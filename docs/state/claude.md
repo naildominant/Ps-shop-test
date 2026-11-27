@@ -98,3 +98,4 @@
 - 2026-11-27 13:05Z Постик #9 verified (opus, team.md updated; #8 already archived). LINEAGE LIMIT: Мастер #10 lineage depth 8/8 → create_session (evolution) will likely fail; Постик depth 7/8. Need a fresh root chat for Мастер (and Постик soon) — asked Менеджер.
 - 2026-11-27 13:16Z ctx check: none (me 180k — near limit, lineage 8/8 blocker pending with Менеджер; Менеджер 147k; models OK; 7 tasks bound; no stray chats; team.md ok)
 - 2026-11-27 15:14Z ctx check: Постик #9 told to evolve (217k; lineage limit may block); me 193k (8/8 lineage — evolution likely refused); tasks all bound (new one-shot trig_01AwGsCk… on Менеджер); no stray chats; team.md ok
+- 2026-11-27 15:17Z Постик #10 verified (opus, 91k; #9 archived); team.md updated. Note: Постик's create_session at depth 7→8 worked; my own depth 8/8 untested.
