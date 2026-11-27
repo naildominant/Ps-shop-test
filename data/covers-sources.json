@@ -299,6 +299,12 @@
   "source": "channel",
   "why": "не найдено"
  },
+ "crash-bandicoot-4-it-s-about-time": {
+  "appid": 1378990,
+  "match": "Crash Bandicoot™ 4: It’s About Time",
+  "score": 1.0,
+  "source": "steam"
+ },
  "crash-bandicoot-n-sane-trilogy-ctr-nitro-fueled": {
   "appid": 731490,
   "match": "Crash Bandicoot™ N. Sane Trilogy",
