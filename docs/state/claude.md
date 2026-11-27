@@ -4,7 +4,7 @@
 
 ## Текущее
 - Ids всех чатов — только `docs/state/team.md`. Строку Постика веду я (у него нет team.md): он пишет «Постик is now #N».
-- Мои задачи по расписанию: trig_01Msy3FoywkoUbjh4Xgf6q9v (Мастер #8; trig_01HnCFB… disabled; старые trig_01P66… и trig_013ov… выключены) — каждые 2 ч 08:13–02:13 TAS: длина чатов (через haiku-помощника), >300k → «Evolve now»; аудит задач (привязаны к текущим чатам, все строки «task» из automation.md включены). При моей эволюции: пересоздать на новом чате, старую выключить.
+- Мои задачи по расписанию: trig_01Msy3FoywkoUbjh4Xgf6q9v (Мастер #10; trig_011ZXd61… disabled; trig_01HnCFB… disabled; старые trig_01P66… и trig_013ov… выключены) — каждые 2 ч 08:13–02:13 TAS: длина чатов (через haiku-помощника), >300k → «Evolve now»; аудит задач (привязаны к текущим чатам, все строки «task» из automation.md включены). При моей эволюции: пересоздать на новом чате, старую выключить.
 - Недельная проверка лимитов: понедельник (напоминание в отчёте Менеджера 18:37). Следующая 30.11 + вердикт ponytail (Сайтер/Постик, установлен 22.11: Ps-shop-test 0292b78, autopost 0ffd2c1; сравнить стоимость задач с 22–29.11, оставить или убрать).
 - Лимит 7 дней: allowed_warning до 29.11 00:00 TAS — экономить.
 
@@ -89,3 +89,5 @@
 - 2026-11-26 19:15 UTC ctx check: none (all <200k, tasks bound to current chats, team.md ok; Мастер #8 still unarchived — archive_session denied earlier; LEADEX АНАЛИТИК is not a team chat, ignored)
 - 2026-11-26 21:15 UTC ctx check: none (all <200k; my ctx 157k; tasks bound to current chats; team.md ok; Мастер #8 still unarchived — archive_session denied earlier)
 - 2026-11-27 03:15 UTC ctx check: none (all <200k; Мастер #9 170k; tasks bound ok; team.md ok; Мастер #8 still unarchived — archive_session was denied by classifier). New day + chat created 26.11 → Мастер #9 evolving to #10.
+
+- 27.11 Мастер #10 took over (transfer OK). Ctx-check = trig_01Msy3FoywkoUbjh4Xgf6q9v. Archived Мастер #9 and Мастер #8 (archive_session now allowed, no denial).
