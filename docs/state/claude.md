@@ -106,3 +106,4 @@
 - 2026-11-28 03:13Z ctx check: none (state identical to 21:14Z: others <200k, Менеджер/Сайтер/СММщик BLOCKED, no owner reply; me 250k stuck at lineage 8/8; 7 tasks bound; no stray chats; team.md ok)
 - 2026-11-28 05:14Z ctx check: none (identical to 03:13Z; me 252k stuck lineage 8/8; Менеджер/Сайтер/СММщик BLOCKED; tasks bound; team.md ok)
 - 2026-11-28 07:14Z ctx check: none (identical to 05:14Z; me 272k stuck lineage 8/8; Менеджер/Сайтер/СММщик BLOCKED; tasks bound; team.md ok)
+- 2026-11-28 09:13Z ctx check: none (identical to 07:14Z; me 283k stuck lineage 8/8; Менеджер/Сайтер/СММщик BLOCKED; tasks bound; team.md ok; non-team ФИНАНСИСТ/ФИНАНСИСТ #5/LEADEX untouched)
