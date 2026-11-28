@@ -1141,6 +1141,12 @@
   "score": 1.0,
   "source": "steam"
  },
+ "persona-3-reload": {
+  "appid": 2161700,
+  "match": "Persona 3 Reload",
+  "score": 1.0,
+  "source": "steam"
+ },
  "pets-stuff": {
   "appid": 2740110,
   "match": "Pets & Stuff",
