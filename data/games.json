@@ -2332,7 +2332,7 @@
   "release_post": null,
   "lang": "subs",
   "edition": null,
-  "players": null,
+  "players": "1-2",
   "notes": [],
   "gameplay": "https://youtu.be/IvGmcijy2eE?si=4CBTEpkJhZPnHqFR",
   "id": "mortal-kombat-x"
@@ -2347,8 +2347,8 @@
   "preorder": false,
   "release_post": null,
   "lang": "en",
-  "edition": null,
-  "players": null,
+  "edition": "Standard",
+  "players": "1",
   "notes": [],
   "gameplay": "https://youtu.be/K4nEI_uv6yw?si=YHEd7QgCqGoRBLxC",
   "id": "dead-space-remake"
