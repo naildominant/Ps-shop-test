@@ -111,3 +111,4 @@
 - 2026-11-28 13:13Z ctx check: none (identical to 11:14Z; me 307k stuck lineage 8/8; Менеджер/Сайтер/СММщик BLOCKED; tasks bound; team.md ok)
 - 2026-11-28 15:14Z ctx check: none (Менеджер #7 187k, near 200k and likely also lineage-blocked; me 319k stuck 8/8; rest <200k; tasks bound; team.md ok)
 - 2026-11-28 17:14Z ctx check: none (identical to 15:14Z; me 331k stuck 8/8; Менеджер 187k BLOCKED; rest <200k; tasks bound; team.md ok)
+- 2026-11-28 19:14Z ctx check: none (Менеджер #7 192k, COMPLETED, active again — one-shot limit task fired and is gone; me 343k stuck 8/8; rest <200k; 6 tasks bound; team.md ok)
